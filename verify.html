@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Verify Certificate | QuizConnect</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      padding: 30px 15px;
+      text-align: center;
+    }
+
+    .verification-card {
+      background: white;
+      max-width: 550px;
+      margin: 50px auto;
+      padding: 35px 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #183b68;
+    }
+
+    .valid {
+      color: #16803c;
+      font-weight: bold;
+      font-size: 22px;
+    }
+
+    .invalid {
+      color: #dc2626;
+      font-weight: bold;
+      font-size: 22px;
+    }
+
+    .details {
+      text-align: left;
+      line-height: 2;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="verification-card">
+
+    <h1>QuizConnect</h1>
+    <h2>Certificate Verification</h2>
+
+    <p id="verificationStatus">Verifying certificate...</p>
+
+    <div id="certificateDetails" class="details" hidden></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+
+  <script>
+    async function verifyCertificate() {
+
+      const status = document.getElementById("verificationStatus");
+      const details = document.getElementById("certificateDetails");
+
+      const certificateId =
+        new URLSearchParams(window.location.search).get("id");
+
+      if (!certificateId) {
+        status.textContent = "Invalid certificate link.";
+        status.className = "invalid";
+        return;
+      }
+
+      const { data, error } = await supabaseClient.rpc(
+        "verify_certificate",
+        { p_certificate_id: certificateId }
+      );
+
+      if (error || !data || data.length === 0) {
+        status.textContent = "❌ Certificate not found or invalid.";
+        status.className = "invalid";
+        return;
+      }
+
+      const certificate = data[0];
+
+      status.textContent = "✅ Valid Certificate";
+      status.className = "valid";
+
+      details.hidden = false;
+
+      const fields = [
+        ["Student Name", certificate.student_name],
+        ["Examination", certificate.exam_name],
+        ["Score", certificate.score + " / " + certificate.total_questions],
+        ["Percentage", certificate.percentage + "%"],
+        ["Issued Date", new Date(certificate.issued_at).toLocaleDateString("en-IN")],
+        ["Certificate ID", certificate.certificate_id]
+      ];
+
+      fields.forEach(([label, value]) => {
+        const row = document.createElement("p");
+        const strong = document.createElement("strong");
+
+        strong.textContent = label + ": ";
+        row.appendChild(strong);
+        row.appendChild(document.createTextNode(value));
+
+        details.appendChild(row);
+      });
+    }
+
+    verifyCertificate();
+  </script>
+
+</body>
+</html>

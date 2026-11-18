@@ -9,9 +9,18 @@
 <body>
 
   <header class="topbar">
-    <a class="brand" href="#">Quiz<span>Connect</span></a>
-    <span class="tagline">Learn. Play. Improve.</span>
-  </header>
+
+  <a class="brand" href="#">
+    <img
+      src="quizconnect-logo.png"
+      alt="QuizConnect Logo"
+      class="brand-logo"
+    >
+  </a>
+
+  <span class="tagline">Learn. Play. Improve.</span>
+
+</header>
   <!-- LOGIN AND SIGNUP SECTION -->
 <section class="auth-section" id="authSection">
 
@@ -53,7 +62,20 @@
 </section>
 
   <main class="container">
+<!-- STUDENT PROFILE -->
+<section class="student-profile stat-card" id="profileSection">
+  <h2>👤 My Profile</h2>
+  <p>Welcome to your learning journey!</p>
 
+  <div class="profile-details">
+    <h3 id="profileName">Student Name</h3>
+    <p id="profileEmail">student@email.com</p>
+  </div>
+
+  <button class="secondary-btn" id="logoutBtn">
+    Logout
+  </button>
+</section>
     <section class="welcome">
       <p class="eyebrow">YOUR LEARNING SPACE</p>
       <h1>Learn something new today. ✨</h1>
@@ -61,21 +83,54 @@
     </section>
 
     <section class="stats">
-      <article class="stat-card streak">
-        <span class="stat-icon">🔥</span>
-        <p>StudyStreak</p>
-        <h2>3 days</h2>
-        <small>Keep your daily streak alive!</small>
-      </article>
 
-      <article class="stat-card">
-        <span class="stat-icon">📝</span>
-        <p>Quizzes attended</p>
-        <h2>12</h2>
-        <small>Your learning journey</small>
-      </article>
-    </section>
+  <!-- COMBINED STUDY STREAK + CALENDAR -->
+<article class="stat-card streak">
 
+  <div class="streak-summary">
+
+    <div class="streak-info">
+      <span class="stat-icon">🔥</span>
+      <h3>Study Activity</h3>
+      <h2 id="streakCount">0 days</h2>
+      <small>Keep your daily streak alive!</small>
+    </div>
+
+    <div class="quiz-attempt-stat">
+      <span>📝</span>
+      <div>
+        <p>Quizzes Attempted</p>
+        <h3 id="totalQuizzes">0</h3>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="calendar-header">
+    <button id="prevMonth">❮</button>
+    <h3 id="calendarMonth">Month Year</h3>
+    <button id="nextMonth">❯</button>
+  </div>
+
+  <div id="streakCalendar" class="streak-calendar"></div>
+
+</article>
+  <!-- QUIZ HISTORY -->
+  <article class="stat-card quiz-history-card">
+    <h3>📜 Quiz & Examination History</h3>
+    <p>Track all your quiz attempts and examination results.</p>
+
+    <div id="quizHistory">
+      <p>Loading your history...</p>
+    </div>
+
+    <button class="secondary-btn" id="viewAllHistoryBtn">
+      View All History
+    </button>
+  </article>
+
+
+</section>
     <section class="section">
       <div class="section-heading">
         <div>
@@ -119,18 +174,326 @@
 
       </div>
     </section>
+<!-- STUDENT COMMUNITY -->
+<section class="section" id="communitySection" hidden>
 
-    <section class="section community">
-      <p class="eyebrow">GROW TOGETHER</p>
-      <h2>Study motivation ❤️</h2>
-      <p>Celebrate your progress and get inspired by other learners.</p>
-      <button class="secondary-btn" id="communityBtn">
-        Explore community
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">QUIZCONNECT COMMUNITY</p>
+      <h2>🌟 Our Learning Community</h2>
+      <p>Meet students and celebrate their learning progress!</p>
+    </div>
+  </div>
+
+  <div id="communityMembers" class="community-grid">
+    <p>Loading community members...</p>
+  </div>
+
+  <button class="secondary-btn" id="backHomeBtn">
+    ← Back to Home
+  </button>
+    </section> <!-- End of Student Community -->
+
+  <section class="section community">
+  <p class="eyebrow">GROW TOGETHER</p>
+  <h2>Study motivation ❤️</h2>
+  <p>Celebrate your progress and get inspired by other learners.</p>
+
+  <button class="secondary-btn" id="communityBtn">
+    Explore community
+  </button>
+
+  <button class="secondary-btn" id="achievementsBtn">
+    🏆 My Achievements
+  </button>
+  <button class="secondary-btn" id="myCertificateBtn">
+  🎓 My Certificate
+</button>
+
+  <button class="secondary-btn" id="learningPathsBtn">
+    📚 Explore Learning Paths
+  </button>
+  <button class="primary-btn" id="examinationBtn">
+  📝 Online Examination
+</button>
+
+  <p id="message" class="message"></p>
+</section>
+    <!-- MY ACHIEVEMENTS -->
+
+<section class="section" id="achievementsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">YOUR PROGRESS</p>
+      <h2>🏆 My Achievements</h2>
+      <p>Celebrate every milestone in your learning journey!</p>
+    </div>
+  </div>
+
+  <div id="myBadges" class="community-grid">
+    <p>Loading your achievements...</p>
+  </div>
+
+  <button class="secondary-btn" id="backFromAchievements">
+    ← Back to Home
+  </button>
+
+</section>
+
+
+</section>
+
+<!-- LEARNING PATHS -->
+
+<section class="section" id="learningPathsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">YOUR LEARNING JOURNEY</p>
+      <h2>📚 Explore Learning Paths</h2>
+      <p>Learn step by step and unlock new levels!</p>
+    </div>
+  </div>
+
+  <div class="community-grid" id="learningPathsContainer">
+
+    <article class="community-card">
+      <h3>💛 JavaScript</h3>
+      <p>Master JavaScript from beginner to advanced.</p>
+      <p>10 Levels</p>
+      <button class="primary-btn" data-path="javascript">
+        Start Learning
       </button>
-      <p id="message" class="message"></p>
-    </section>
+    </article>
 
-  </main>
+    <article class="community-card">
+      <h3>🗄️ Database Management</h3>
+      <p>Learn SQL and database management.</p>
+      <p>10 Levels</p>
+      <button class="primary-btn" data-path="database">
+        Start Learning
+      </button>
+    </article>
+
+    <article class="community-card">
+      <h3>🌐 Web Development</h3>
+      <p>Explore HTML, CSS and JavaScript.</p>
+      <p>10 Levels</p>
+      <button class="primary-btn" data-path="web">
+        Start Learning
+      </button>
+    </article>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromLearningPaths">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- JAVASCRIPT LEARNING LEVELS -->
+
+<section class="section" id="javascriptLevelsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+  <p class="eyebrow" id="learningQuizLabel">
+    JAVASCRIPT LEARNING PATH
+  </p>
+  <h2 id="learningQuizTitle">JavaScript Level Quiz</h2>
+</div>
+  </div>
+
+  <div class="community-grid" id="javascriptLevelsContainer">
+
+  </div>
+
+  <button class="secondary-btn" id="backToLearningPaths">
+    ← Back to Learning Paths
+  </button>
+
+</section>
+
+<!-- REUSABLE JAVASCRIPT LEARNING MODULE -->
+
+<section class="section" id="learningModuleSection" hidden>
+
+  <p class="eyebrow" id="learningLevelLabel">JAVASCRIPT • LEVEL 1</p>
+
+  <h2 id="learningLevelTitle">Introduction to JavaScript</h2>
+
+  <div id="learningContent">
+    <p>Welcome to your JavaScript learning journey!</p>
+  </div>
+
+  <button class="primary-btn" id="startLearningQuizBtn">
+    📝 Start Level Quiz
+  </button>
+
+  <br><br>
+
+  <button class="secondary-btn" id="backToJavascriptLevels">
+    ← Back to Levels
+  </button>
+
+</section>
+<!-- JAVASCRIPT LEARNING QUIZ -->
+
+<section class="quiz-section" id="learningQuizSection" hidden>
+
+  <div class="quiz-top">
+    <div>
+      <p class="eyebrow" id="learningPathLabel">JAVASCRIPT LEARNING PATH</p>
+<h2 id="learningPathTitle">💛 JavaScript – 10 Levels</h2>
+    </div>
+
+    <div class="timer-box">
+      <p>Time Remaining</p>
+      <h2 id="learningQuizTimer">10:00</h2>
+    </div>
+  </div>
+
+  <p id="learningQuestionProgress"></p>
+  <h3 id="learningQuestionText"></h3>
+
+  <div id="learningAnswerOptions"></div>
+
+  <div class="quiz-navigation">
+
+    <button class="secondary-btn" id="learningPreviousBtn">
+      ← Previous
+    </button>
+
+    <button class="primary-btn" id="learningNextBtn">
+      Next →
+    </button>
+
+    <button class="submit-btn" id="learningSubmitBtn">
+      Submit Quiz
+    </button>
+
+  </div>
+
+  <div id="learningQuizResult" hidden>
+    <h2>Quiz Completed!</h2>
+    <h3 id="learningScoreText"></h3>
+
+    <button class="secondary-btn" id="learningReviewBtn">
+      📋 Review Answers
+    </button>
+  </div>
+
+  <div class="learning-quiz-back">
+  <button class="secondary-btn" id="learningQuizBackBtn">
+    ← Back to Learning Path
+  </button>
+</div>
+
+</section>
+<!-- ONLINE EXAMINATION -->
+
+<section class="section" id="examinationSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">TEST YOUR KNOWLEDGE</p>
+      <h2>📝 Online Examination</h2>
+      <p>Assess your knowledge and track your performance!</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+
+    <h3>📋 Examination Instructions</h3>
+    <p><strong>Subject:</strong> Java</p>
+
+    <ul>
+      <li>Total Questions: 50</li>
+      <li>Eligibility: Complete at least 10 quizzes with a minimum score of 3/5 in each quiz to attempt the examination.</li>
+      <li>Duration: 60 Minutes</li>
+      <li>Each question carries equal marks.</li>
+      <li>Read every question carefully.</li>
+      <li>Submit your answers before the timer ends.</li>
+      <li>Your result will be displayed after submission.</li>
+      <li>Certificate is awarded only for a score of 45/50 or above (90%).</li>
+<li>Switching tabs 3 times will automatically submit the examination.</li>
+<li>Your progress and remaining time are saved if you refresh or reopen the browser.</li>
+    </ul>
+
+    <button class="primary-btn" id="startExaminationBtn">
+      🚀 Start Examination
+    </button>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromExamination">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- JAVA EXAMINATION SCREEN -->
+
+<section class="quiz-section" id="examinationQuizSection" hidden>
+
+  <div class="quiz-top">
+    <div>
+      <p class="eyebrow">JAVA EXAMINATION</p>
+      <h2>Online Examination</h2>
+    </div>
+
+    <div class="timer-box">
+      <p>Time Remaining</p>
+      <h2 id="examinationTimer">60:00</h2>
+    </div>
+    </div>
+
+  <!-- ALL 50 EXAMINATION QUESTIONS -->
+  <div id="examinationQuestionsContainer"></div>
+
+  <!-- EXAMINATION RESULT -->
+  <div id="examinationResult" hidden></div>
+
+  <button class="secondary-btn" id="exitExaminationBtn">
+    ← Back to Instructions
+  </button>
+
+  <div class="quiz-navigation">
+    <button class="submit-btn" id="examinationSubmitBtn">
+      Submit Examination
+    </button>
+  </div>
+
+</section>
+<!-- PROFESSIONAL CERTIFICATE SECTION -->
+
+<section class="section" id="certificateSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">QUIZCONNECT ACHIEVEMENTS</p>
+      <h2>🏆 My Examination Certificate</h2>
+      <p>Celebrate your examination success!</p>
+    </div>
+  </div>
+
+  <div class="community-card" id="certificateEligibility">
+
+    <p id="certificateMessage">
+      Complete your examination with at least 45 out of 50 marks to earn your certificate.
+    </p>
+
+    <!-- MY CERTIFICATES GALLERY -->
+<div id="certificateList"></div>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromCertificate">
+    ← Back to Home
+  </button>
+
+</section>
+```
 <!-- QUIZ SECTION -->
 <section class="quiz-section" id="quizSection" hidden>
 
@@ -164,9 +527,60 @@
   </div>
 
 </section>
+
+<!-- JAVASCRIPT LEVEL 1 QUIZ -->
+
+<section class="quiz-section" id="level1QuizSection" hidden>
+
+  <p class="eyebrow">JAVASCRIPT • LEVEL 1</p>
+  <h2 id="level1QuizTitle">Introduction to JavaScript Quiz</h2>
+
+  <div class="quiz-timer">
+    Time Left: <span id="level1QuizTimer">10:00</span>
+  </div>
+
+  <p id="level1QuestionProgress">Question 1 of 5</p>
+
+  <h3 id="level1QuestionText"></h3>
+
+  <div id="level1AnswerOptions"></div>
+
+  <div class="quiz-navigation">
+    <button id="level1PreviousBtn" class="secondary-btn">
+      Previous
+    </button>
+
+    <button id="level1NextBtn" class="primary-btn">
+      Next
+    </button>
+  </div>
+
+  <button id="level1SubmitBtn" class="primary-btn">
+    
+    Submit Quiz
+  </button>
+
+  <div id="level1QuizResult" hidden>
+    <h2>Quiz Result</h2>
+    <p id="level1ScoreText"></p>
+
+    <button id="level1ReviewBtn" class="secondary-btn">
+      Review Answers
+    </button>
+
+    <button id="level1BackBtn" class="primary-btn">
+      Back to Learning Path
+    </button>
+  </div>
+
+</section>
+
+<!-- END LEVEL 1 QUIZ -->
   <footer>QuizConnect · Learn at your own pace.</footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

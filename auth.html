@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | QuizConnect</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+```
+<header>
+    <h2>QuizConnect</h2>
+    <p>Learn. Play. Improve.</p>
+</header>
+
+<main>
+    <section class="welcome">
+        <h1>Welcome Back!</h1>
+        <p>Login or create your account to continue learning.</p>
+    </section>
+
+    <section class="card" style="max-width: 450px; margin: auto;">
+
+        <!-- LOGIN FORM -->
+        <h2 style="margin-bottom: 20px;">Student Login</h2>
+
+        <form id="loginForm">
+
+            <label>Email Address</label>
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="Enter your email"
+                required
+            >
+
+            <br><br>
+
+            <label>Password</label>
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Enter your password"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit">Login</button>
+
+        </form>
+
+        <p id="authMessage" style="margin-top: 20px;"></p>
+
+        <p style="margin-top: 20px;">
+            Don't have an account?
+            <a href="#" id="showSignup">Create Account</a>
+        </p>
+
+        <!-- SIGNUP FORM -->
+        <form id="signupForm" hidden>
+
+            <h2 style="margin: 20px 0;">Student Registration</h2>
+
+            <label>Full Name</label>
+            <input
+                type="text"
+                id="signupName"
+                placeholder="Enter your name"
+                required
+            >
+
+            <br><br>
+
+            <label>Email Address</label>
+            <input
+                type="email"
+                id="signupEmail"
+                placeholder="Enter your email"
+                required
+            >
+
+            <br><br>
+
+            <label>Password</label>
+            <input
+                type="password"
+                id="signupPassword"
+                placeholder="Create a password"
+                minlength="8"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit">Register</button>
+
+            <p style="margin-top: 15px;">
+                Already have an account?
+                <a href="#" id="showLogin">Login</a>
+            </p>
+
+        </form>
+
+        <p style="margin-top: 20px;">
+            <a href="index.html">← Back to Home</a>
+        </p>
+
+    </section>
+</main>
+
+<!-- SUPABASE CONNECTION -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<!-- LOGIN AND REGISTRATION LOGIC -->
+<script>
+
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const showSignup = document.getElementById("showSignup");
+    const showLogin = document.getElementById("showLogin");
+    const authMessage = document.getElementById("authMessage");
+
+    // Show registration form
+    showSignup.addEventListener("click", function(event) {
+        event.preventDefault();
+
+        loginForm.hidden = true;
+        signupForm.hidden = false;
+
+        document.querySelector(".welcome h1").textContent =
+            "Create Your Account!";
+    });
+
+    // Return to login form
+    showLogin.addEventListener("click", function(event) {
+        event.preventDefault();
+
+        signupForm.hidden = true;
+        loginForm.hidden = false;
+
+        document.querySelector(".welcome h1").textContent =
+            "Welcome Back!";
+
+        authMessage.textContent = "";
+    });
+
+    // Student Registration
+    signupForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById("signupName").value.trim();
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+
+        authMessage.textContent = "Creating account...";
+
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        full_name: name
+                    }
+                }
+            });
+
+            if (error) {
+                authMessage.textContent = error.message;
+            } else {
+                authMessage.textContent =
+                    "Registration successful! Please check your email for confirmation.";
+
+                signupForm.reset();
+            }
+
+        } catch (error) {
+            authMessage.textContent =
+                "Something went wrong. Please try again.";
+        }
+    });
+
+    // Student Login
+    loginForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        authMessage.textContent = "Logging in...";
+
+        try {
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+            if (error) {
+                authMessage.textContent = error.message;
+            } else {
+                authMessage.textContent = "Login successful!";
+
+                setTimeout(function() {
+                    window.location.href = "index.html";
+                }, 1500);
+            }
+
+        } catch (error) {
+            authMessage.textContent =
+                "Something went wrong. Please try again.";
+        }
+    });
+
+</script>
+```
+
+</body>
+</html>
+
