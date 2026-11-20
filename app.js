@@ -104,6 +104,95 @@ const quizzes = {
       options: ["CSS", "HTML", "JavaScript", "SQL"],
       answer: 2
     }
+   ],
+
+  "Python Programming": [
+    {
+      question: "Which symbol is used for comments in Python?",
+      options: ["//", "#", "/*", "<!--"],
+      answer: 1
+    },
+    {
+      question: "Which function displays output in Python?",
+      options: ["echo()", "display()", "print()", "show()"],
+      answer: 2
+    },
+    {
+      question: "Which data type stores text in Python?",
+      options: ["int", "str", "float", "bool"],
+      answer: 1
+    },
+    {
+      question: "Which keyword is used to define a function?",
+      options: ["function", "define", "fun", "def"],
+      answer: 3
+    },
+    {
+      question: "Which operator is used for exponentiation?",
+      options: ["*", "**", "//", "%"],
+      answer: 1
+    }
+  ],
+
+  "C Programming": [
+    {
+      question: "Who developed the C programming language?",
+      options: [
+        "James Gosling",
+        "Dennis Ritchie",
+        "Guido van Rossum",
+        "Bjarne Stroustrup"
+      ],
+      answer: 1
+    },
+    {
+      question: "Which function is the entry point of a C program?",
+      options: ["start()", "run()", "main()", "begin()"],
+      answer: 2
+    },
+    {
+      question: "Which symbol ends a statement in C?",
+      options: [".", ":", ";", ","],
+      answer: 2
+    },
+    {
+      question: "Which format specifier is used for an integer?",
+      options: ["%f", "%c", "%d", "%s"],
+      answer: 2
+    },
+    {
+      question: "Which header file is commonly used for printf()?",
+      options: ["<math.h>", "<stdio.h>", "<string.h>", "<stdlib.h>"],
+      answer: 1
+    }
+  ],
+
+  "Data Structures": [
+    {
+      question: "Which data structure follows LIFO?",
+      options: ["Queue", "Stack", "Array", "Linked List"],
+      answer: 1
+    },
+    {
+      question: "Which data structure follows FIFO?",
+      options: ["Stack", "Tree", "Queue", "Graph"],
+      answer: 2
+    },
+    {
+      question: "Which data structure stores elements in indexed positions?",
+      options: ["Array", "Tree", "Graph", "Stack"],
+      answer: 0
+    },
+    {
+      question: "Which operation adds an element to a stack?",
+      options: ["Pop", "Delete", "Push", "Search"],
+      answer: 2
+    },
+    {
+      question: "Which data structure consists of nodes connected by links?",
+      options: ["Array", "Linked List", "Queue", "Matrix"],
+      answer: 1
+    }
   ]
 };
 
@@ -1164,13 +1253,14 @@ async function finishExamination() {
   let score = 0;
 
   javaExaminationQuestions.forEach((question, index) => {
+    const totalQuestions = javaExaminationQuestions.length;
 
     if (examinationAnswers[index] === question.answer) {
       score++;
     }
 
   });
-
+const percentage = Math.round((score / totalQuestions) * 100);
   const wrongAnswers = totalQuestions - score;
   // Save Java Examination result in Supabase
 if (user) {

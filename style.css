@@ -843,37 +843,139 @@ footer {
   letter-spacing: 1px;
 }
 
-/* RESPONSIVE DESIGN */
+/* ==================================
+   CERTIFICATE MOBILE RESPONSIVE
+================================== */
 
 @media (max-width: 750px) {
 
   .certificate-paper {
-    padding: 35px 20px;
+    width: 100%;
     min-height: auto;
+    margin: 15px auto;
+    padding: 25px 20px 45px;
+    border-width: 5px;
+    outline-offset: -12px;
+    box-sizing: border-box;
+  }
+
+  .certificate-header {
+    margin-bottom: 15px;
+  }
+
+  .certificate-logo {
+    width: 150px;
+    height: 70px;
+  }
+
+  .certificate-header p {
+    font-size: 9px;
+    letter-spacing: 2px;
   }
 
   .certificate-decoration {
-    font-size: 22px;
+    font-size: 19px;
+    letter-spacing: 1px;
+    margin: 18px 0;
+    padding: 10px 5px;
+  }
+
+  .certificate-intro {
+    font-size: 13px;
+    margin: 15px 0 8px;
   }
 
   #certificateStudentName {
-    font-size: 28px;
-    padding: 8px 15px;
+    font-size: 27px;
+    padding: 5px 10px;
+    margin: 8px 0 12px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  #certificateExamName {
+    font-size: 19px;
+    margin: 10px 0;
   }
 
   .certificate-score {
     gap: 15px;
+    margin: 12px 0;
     flex-wrap: wrap;
   }
 
+  .certificate-score p {
+    font-size: 14px;
+  }
+
+  #certificateDate {
+    font-size: 12px;
+    margin-top: 12px;
+  }
+
+    /* MOBILE CERTIFICATE FOOTER */
+
   .certificate-footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    margin-top: 25px;
     padding: 0;
-    gap: 20px;
+    width: 100%;
   }
 
   .certificate-signature {
-    width: 150px;
+    width: 180px;
+    margin: 0 auto;
+    text-align: center;
   }
+
+  .signature-line {
+    width: 100%;
+    margin: 0 auto 10px;
+    border-top: 2px solid #183b68;
+  }
+
+  .certificate-signature p {
+    text-align: center;
+    font-size: 12px;
+    margin: 5px 0;
+  }
+
+  .certificate-qr {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #certificateQRCode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px auto;
+  }
+
+  .certificate-qr p {
+    text-align: center;
+    width: 100%;
+    font-size: 12px;
+    margin: 8px auto 0;
+  }
+
+ #certificateId {
+  color: #777;
+  font-size: 9px;
+  margin-top: 15px;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+  padding-bottom: 10px;
+}
+
 }
 
 /* ==================================
