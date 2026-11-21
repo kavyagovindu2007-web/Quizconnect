@@ -888,6 +888,128 @@ if (!savedExam) {
 
 });
 // ==========================================
+// START OR RESUME PYTHON EXAMINATION
+// ==========================================
+
+document.getElementById("startPythonExaminationBtn")
+  .addEventListener("click", async () => {
+
+    const { data: { user } } =
+      await supabaseClient.auth.getUser();
+
+    if (!user) {
+      alert("Please log in first.");
+      return;
+    }
+
+    pythonExaminationUserId = user.id;
+    pythonExaminationSubmitted = false;
+
+    const savedExam = loadPythonExaminationProgress(user.id);
+
+    // CHECK EXPIRED EXAMINATION
+
+    if (savedExam && savedExam.endTime <= Date.now()) {
+
+      pythonExaminationAnswers = savedExam.answers || {};
+      pythonExaminationEndTime = savedExam.endTime;
+
+      pythonExaminationTabSwitchCount =
+        savedExam.tabSwitchCount || 0;
+
+      pythonExaminationTimeLeft = 0;
+
+      alert(
+        "⏰ Your Python examination time has expired. Your answers will be submitted automatically."
+      );
+
+      await finishPythonExamination();
+      return;
+    }
+
+    // CHECK ELIGIBILITY FOR NEW EXAMINATION
+
+    if (!savedExam) {
+
+      const { count: eligibleQuizCount, error: eligibilityError } =
+        await supabaseClient
+          .from("quiz_results")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("total_questions", 5)
+          .gte("score", 3)
+          .neq("quiz_name", "Python Programming Examination");
+
+      if (eligibilityError) {
+        console.error(
+          "Python eligibility error:",
+          eligibilityError.message
+        );
+
+        alert("Unable to check eligibility. Please try again.");
+        return;
+      }
+
+      if (eligibleQuizCount < 10) {
+        alert(
+          `You have completed ${eligibleQuizCount} qualifying quizzes out of 10.\n\nYou need at least 10 quizzes with a score of 3/5 or above in each quiz.`
+        );
+        return;
+      }
+    }
+
+    // RESUME OR START EXAMINATION
+
+    if (savedExam) {
+
+      pythonExaminationAnswers = savedExam.answers || {};
+
+      pythonExaminationEndTime = savedExam.endTime;
+
+      pythonExaminationTabSwitchCount =
+        savedExam.tabSwitchCount || 0;
+
+      pythonExaminationTimeLeft = Math.ceil(
+        (pythonExaminationEndTime - Date.now()) / 1000
+      );
+
+      alert("Your previous Python examination has been restored!");
+
+    } else {
+
+      pythonExaminationAnswers = {};
+      pythonExaminationTabSwitchCount = 0;
+
+      pythonExaminationTimeLeft = 60 * 60;
+
+      pythonExaminationEndTime =
+        Date.now() + (60 * 60 * 1000);
+
+      pythonExaminationSubmitted = false;
+
+      savePythonExaminationProgress(user.id);
+    }
+
+    // SHOW PYTHON EXAMINATION SCREEN
+
+    document.getElementById("examinationSection").hidden = true;
+
+    document.getElementById("pythonExaminationQuizSection").hidden = false;
+
+    try {
+      displayAllPythonExaminationQuestions();
+    } catch (error) {
+      alert("Python Examination Error: " + error.message);
+      return;
+    }
+
+    startPythonExaminationTimer();
+
+    document.getElementById("pythonExaminationQuizSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+});
+// ==========================================
 // JAVA EXAMINATION - QUESTION BANK
 // ==========================================
 
@@ -1145,6 +1267,266 @@ const javaExaminationQuestions = [
   }
 
 ];
+// ==========================================
+// PYTHON EXAMINATION - QUESTION BANK
+// ==========================================
+
+const pythonExaminationQuestions = [
+
+  {
+    question: "Who created Python?",
+    options: ["James Gosling", "Guido van Rossum", "Dennis Ritchie", "Bjarne Stroustrup"],
+    answer: 1
+  },
+  {
+    question: "Which symbol is used for comments in Python?",
+    options: ["//", "#", "/*", "--"],
+    answer: 1
+  },
+  {
+    question: "Which function displays output in Python?",
+    options: ["echo()", "display()", "print()", "output()"],
+    answer: 2
+  },
+  {
+    question: "Which keyword defines a function?",
+    options: ["function", "def", "fun", "define"],
+    answer: 1
+  },
+  {
+    question: "Which data type stores True or False?",
+    options: ["int", "str", "bool", "float"],
+    answer: 2
+  },
+  {
+    question: "Which operator performs exponentiation?",
+    options: ["^", "**", "//", "%%"],
+    answer: 1
+  },
+  {
+    question: "Which collection is ordered and mutable?",
+    options: ["Tuple", "Set", "List", "String"],
+    answer: 2
+  },
+  {
+    question: "Which brackets are used to create a list?",
+    options: ["()", "{}", "[]", "<>"],
+    answer: 2
+  },
+  {
+    question: "Which data type stores key-value pairs?",
+    options: ["List", "Tuple", "Dictionary", "Set"],
+    answer: 2
+  },
+  {
+    question: "Which keyword is used for a conditional statement?",
+    options: ["when", "if", "check", "condition"],
+    answer: 1
+  },
+  {
+    question: "Which loop iterates over a sequence?",
+    options: ["repeat", "for", "loop", "iterate"],
+    answer: 1
+  },
+  {
+    question: "Which keyword exits a loop?",
+    options: ["stop", "exit", "break", "skip"],
+    answer: 2
+  },
+  {
+    question: "Which keyword skips the current iteration?",
+    options: ["break", "continue", "pass", "return"],
+    answer: 1
+  },
+  {
+    question: "What does len() return?",
+    options: ["Data type", "Length", "Memory size", "Index"],
+    answer: 1
+  },
+  {
+    question: "Which function converts a value to an integer?",
+    options: ["str()", "float()", "int()", "bool()"],
+    answer: 2
+  },
+  {
+    question: "What is the index of the first element in a Python list?",
+    options: ["1", "-1", "0", "2"],
+    answer: 2
+  },
+  {
+    question: "Which method adds an item to the end of a list?",
+    options: ["add()", "append()", "insertEnd()", "push()"],
+    answer: 1
+  },
+  {
+    question: "Which method removes an item from a list?",
+    options: ["delete()", "remove()", "discard()", "erase()"],
+    answer: 1
+  },
+  {
+    question: "Which collection does not allow duplicate elements?",
+    options: ["List", "Tuple", "Set", "String"],
+    answer: 2
+  },
+  {
+    question: "Which brackets are used to create a tuple?",
+    options: ["[]", "{}", "()", "<>"],
+    answer: 2
+  },
+  {
+    question: "Which operator checks equality?",
+    options: ["=", "==", "!=", "==="],
+    answer: 1
+  },
+  {
+    question: "Which operator represents logical AND?",
+    options: ["&&", "&", "and", "AND"],
+    answer: 2
+  },
+  {
+    question: "Which keyword handles exceptions?",
+    options: ["try", "check", "error", "handle"],
+    answer: 0
+  },
+  {
+    question: "Which block executes whether an exception occurs or not?",
+    options: ["except", "finally", "else", "try"],
+    answer: 1
+  },
+  {
+    question: "Which keyword is used to import a module?",
+    options: ["include", "using", "import", "require"],
+    answer: 2
+  },
+  {
+    question: "Which module provides mathematical functions?",
+    options: ["random", "math", "os", "sys"],
+    answer: 1
+  },
+  {
+    question: "Which function returns the largest value?",
+    options: ["min()", "high()", "max()", "largest()"],
+    answer: 2
+  },
+  {
+    question: "Which function returns the smallest value?",
+    options: ["min()", "low()", "small()", "least()"],
+    answer: 0
+  },
+  {
+    question: "What does range(5) generate?",
+    options: ["1 to 5", "0 to 4", "0 to 5", "1 to 4"],
+    answer: 1
+  },
+  {
+    question: "Which keyword creates an anonymous function?",
+    options: ["def", "lambda", "anonymous", "function"],
+    answer: 1
+  },
+  {
+    question: "Which keyword represents an empty placeholder statement?",
+    options: ["empty", "skip", "pass", "null"],
+    answer: 2
+  },
+  {
+    question: "Which method converts a string to lowercase?",
+    options: ["lower()", "small()", "tolower()", "down()"],
+    answer: 0
+  },
+  {
+    question: "Which method converts a string to uppercase?",
+    options: ["capital()", "upper()", "up()", "uppercase()"],
+    answer: 1
+  },
+  {
+    question: "Which method splits a string into a list?",
+    options: ["divide()", "split()", "separate()", "cut()"],
+    answer: 1
+  },
+  {
+    question: "Which function opens a file?",
+    options: ["file()", "read()", "open()", "load()"],
+    answer: 2
+  },
+  {
+    question: "Which file mode is used for reading?",
+    options: ["w", "a", "r", "x"],
+    answer: 2
+  },
+  {
+    question: "Which file mode is used for writing?",
+    options: ["r", "w", "a", "read"],
+    answer: 1
+  },
+  {
+    question: "Which keyword defines a class?",
+    options: ["object", "class", "struct", "define"],
+    answer: 1
+  },
+  {
+    question: "Which method is commonly used as a constructor?",
+    options: ["__start__()", "__init__()", "constructor()", "__newclass__()"],
+    answer: 1
+  },
+  {
+    question: "What does self represent in a class?",
+    options: ["Parent class", "Current instance", "Module", "Global variable"],
+    answer: 1
+  },
+  {
+    question: "Which concept allows a class to inherit another class?",
+    options: ["Encapsulation", "Inheritance", "Iteration", "Compilation"],
+    answer: 1
+  },
+  {
+    question: "Which function returns the type of an object?",
+    options: ["typeof()", "type()", "datatype()", "checktype()"],
+    answer: 1
+  },
+  {
+    question: "Which keyword is used to return a value from a function?",
+    options: ["send", "print", "return", "yield"],
+    answer: 2
+  },
+  {
+    question: "Which keyword creates a generator?",
+    options: ["return", "yield", "generate", "next"],
+    answer: 1
+  },
+  {
+    question: "Which operator performs floor division?",
+    options: ["/", "//", "%", "**"],
+    answer: 1
+  },
+  {
+    question: "Which operator returns the remainder?",
+    options: ["/", "//", "%", "**"],
+    answer: 2
+  },
+  {
+    question: "Which built-in function gets input from the user?",
+    options: ["scan()", "get()", "input()", "read()"],
+    answer: 2
+  },
+  {
+    question: "Which statement is used to test multiple conditions?",
+    options: ["if-elif-else", "switch-only", "repeat-until", "case-loop"],
+    answer: 0
+  },
+  {
+    question: "Which built-in function returns an absolute value?",
+    options: ["abs()", "absolute()", "positive()", "magnitude()"],
+    answer: 0
+  },
+  {
+    question: "Which keyword is used to create a subclass?",
+    options: ["extends", "inherits", "class", "super"],
+    answer: 2
+  }
+
+];
+
+console.log("Python Examination questions:", pythonExaminationQuestions.length);
 
 // ==========================================
 // JAVA EXAMINATION VARIABLES
@@ -1169,6 +1551,31 @@ function saveExaminationProgress(userId) {
   );
 
 }
+// ==========================================
+// PYTHON EXAMINATION VARIABLES
+// ==========================================
+
+let pythonExaminationAnswers = {};
+let pythonExaminationTimeLeft = 60 * 60;
+let pythonExaminationTimerInterval = null;
+let pythonExaminationSubmitted = false;
+let pythonExaminationEndTime = null;
+let pythonExaminationUserId = null;
+let pythonExaminationTabSwitchCount = 0;
+
+// SAVE PYTHON EXAMINATION PROGRESS
+function savePythonExaminationProgress(userId) {
+
+  localStorage.setItem(
+    `pythonExam_${userId}`,
+    JSON.stringify({
+      answers: pythonExaminationAnswers,
+      endTime: pythonExaminationEndTime,
+      tabSwitchCount: pythonExaminationTabSwitchCount
+    })
+  );
+
+}
 // RESTORE EXAMINATION PROGRESS
 function loadExaminationProgress(userId) {
 
@@ -1186,6 +1593,21 @@ function loadExaminationProgress(userId) {
   // so the student cannot start a fresh attempt.
   return examData;
 
+}
+// RESTORE PYTHON EXAMINATION PROGRESS
+function loadPythonExaminationProgress(userId) {
+
+  const savedData = localStorage.getItem(
+    `pythonExam_${userId}`
+  );
+
+  if (!savedData) {
+    return null;
+  }
+
+  const examData = JSON.parse(savedData);
+
+  return examData;
 }
 // ==========================================
 // JAVA EXAMINATION TIMER
@@ -1232,10 +1654,62 @@ function startExaminationTimer() {
   }
 
 }
-// Connect Submit Examination button
-document.getElementById("examinationSubmitBtn").addEventListener("click", () => {
-  finishExamination();
-});
+// ==========================================
+// PYTHON EXAMINATION TIMER
+// ==========================================
+
+function updatePythonExaminationTimer() {
+
+  const minutes = Math.floor(pythonExaminationTimeLeft / 60);
+  const seconds = pythonExaminationTimeLeft % 60;
+
+  document.getElementById("pythonExaminationTimer").textContent =
+    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+}
+
+function startPythonExaminationTimer() {
+
+  clearInterval(pythonExaminationTimerInterval);
+
+  function updateTimer() {
+
+    pythonExaminationTimeLeft = Math.max(
+      0,
+      Math.ceil((pythonExaminationEndTime - Date.now()) / 1000)
+    );
+
+    updatePythonExaminationTimer();
+
+    if (pythonExaminationUserId) {
+      savePythonExaminationProgress(pythonExaminationUserId);
+    }
+
+    if (pythonExaminationTimeLeft <= 0) {
+      clearInterval(pythonExaminationTimerInterval);
+      finishPythonExamination();
+    }
+
+  }
+
+  updateTimer();
+
+  if (pythonExaminationTimeLeft > 0) {
+    pythonExaminationTimerInterval = setInterval(updateTimer, 1000);
+  }
+
+}
+// Connect Java Submit Examination button
+document.getElementById("examinationSubmitBtn")
+  .addEventListener("click", () => {
+    finishExamination();
+  });
+
+// Connect Python Submit Examination button
+document.getElementById("pythonExaminationSubmitBtn")
+  .addEventListener("click", () => {
+    finishPythonExamination();
+  });
 // ==========================================
 // FINISH JAVA EXAMINATION
 // ==========================================
@@ -1250,18 +1724,18 @@ async function finishExamination() {
 
   clearInterval(examinationTimerInterval);
 
-  let score = 0;
+ const totalQuestions = javaExaminationQuestions.length;
 
-  javaExaminationQuestions.forEach((question, index) => {
-    const totalQuestions = javaExaminationQuestions.length;
+let score = 0;
 
-    if (examinationAnswers[index] === question.answer) {
-      score++;
-    }
+javaExaminationQuestions.forEach((question, index) => {
+  if (examinationAnswers[index] === question.answer) {
+    score++;
+  }
+});
 
-  });
 const percentage = Math.round((score / totalQuestions) * 100);
-  const wrongAnswers = totalQuestions - score;
+const wrongAnswers = totalQuestions - score;
   // Save Java Examination result in Supabase
 if (user) {
   const { error: examSaveError } = await supabaseClient
@@ -1457,6 +1931,363 @@ if (viewCertificateBtn) {
 
   });
 }
+// ==========================================
+// PYTHON EXAMINATION - REVIEW ANSWERS
+// ==========================================
+
+function displayPythonReviewAnswers() {
+
+  const resultContainer = document.getElementById(
+    "pythonExaminationResult"
+  );
+
+  document.getElementById("pythonReviewAnswersContainer")?.remove();
+
+  let correctAnswers = 0;
+  let incorrectAnswers = 0;
+  let unansweredQuestions = 0;
+
+  pythonExaminationQuestions.forEach((question, index) => {
+
+    if (pythonExaminationAnswers[index] === undefined) {
+      unansweredQuestions++;
+    } else if (
+      pythonExaminationAnswers[index] === question.answer
+    ) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+    }
+
+  });
+
+  const performancePercentage = Math.round(
+    (correctAnswers / pythonExaminationQuestions.length) * 100
+  );
+
+  let performanceLevel = "";
+
+  if (performancePercentage >= 90) {
+    performanceLevel = "Excellent 🏆";
+  } else if (performancePercentage >= 75) {
+    performanceLevel = "Very Good 🌟";
+  } else if (performancePercentage >= 50) {
+    performanceLevel = "Good 👍";
+  } else {
+    performanceLevel = "Needs Improvement 📚";
+  }
+
+  const reviewContainer = document.createElement("div");
+  reviewContainer.id = "pythonReviewAnswersContainer";
+
+  reviewContainer.innerHTML = "<h2>📋 Review Your Python Answers</h2>";
+
+  // PERFORMANCE ANALYTICS
+
+  const analyticsCard = document.createElement("div");
+  analyticsCard.className = "result-card";
+
+  analyticsCard.innerHTML = `
+    <h2>📊 Your Performance Analytics</h2>
+
+    <h3>Correct Answers: ${correctAnswers}</h3>
+    <h3>Incorrect Answers: ${incorrectAnswers}</h3>
+    <h3>Unanswered Questions: ${unansweredQuestions}</h3>
+
+    <h3>Performance: ${performancePercentage}%</h3>
+
+    <h2>${performanceLevel}</h2>
+
+    <p>
+      ${
+        performancePercentage >= 90
+          ? "Outstanding performance! Keep up the excellent work."
+          : performancePercentage >= 75
+          ? "Great work! Keep practising to reach excellence."
+          : performancePercentage >= 50
+          ? "Good effort! Revise the topics where you made mistakes."
+          : "Don't give up! Practise regularly and improve step by step."
+      }
+    </p>
+  `;
+
+  reviewContainer.appendChild(analyticsCard);
+
+  // DISPLAY ALL QUESTIONS AND ANSWERS
+
+  pythonExaminationQuestions.forEach((question, qIndex) => {
+
+    const card = document.createElement("div");
+    card.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    card.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const answer = document.createElement("p");
+
+      answer.textContent =
+        `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+
+      if (optionIndex === question.answer) {
+        answer.style.color = "green";
+        answer.textContent += " ✓ Correct Answer";
+      }
+
+      if (
+        pythonExaminationAnswers[qIndex] === optionIndex &&
+        optionIndex !== question.answer
+      ) {
+        answer.style.color = "red";
+        answer.textContent += " ✗ Your Answer";
+      }
+
+      card.appendChild(answer);
+
+    });
+
+    reviewContainer.appendChild(card);
+
+  });
+
+  resultContainer.appendChild(reviewContainer);
+
+}
+// ==========================================
+// FINISH PYTHON EXAMINATION
+// ==========================================
+
+async function finishPythonExamination() {
+
+  if (pythonExaminationSubmitted) return;
+
+  pythonExaminationSubmitted = true;
+
+  clearInterval(pythonExaminationTimerInterval);
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Please log in again.");
+    pythonExaminationSubmitted = false;
+    return;
+  }
+
+  const totalQuestions = pythonExaminationQuestions.length;
+
+  let score = 0;
+
+  pythonExaminationQuestions.forEach((question, index) => {
+
+    if (pythonExaminationAnswers[index] === question.answer) {
+      score++;
+    }
+
+  });
+
+  const wrongAnswers = totalQuestions - score;
+
+  const percentage = Math.round(
+    (score / totalQuestions) * 100
+  );
+
+  // SAVE EXAMINATION RESULT
+
+  const { error: resultError } = await supabaseClient
+    .from("quiz_results")
+    .insert({
+      user_id: user.id,
+      quiz_name: "Python Programming Examination",
+      score: score,
+      total_questions: totalQuestions,
+      percentage: percentage
+    });
+
+  if (resultError) {
+
+    console.error("Python result saving error:", resultError);
+
+    alert("Unable to save your examination result. Please try again.");
+
+    pythonExaminationSubmitted = false;
+    return;
+
+  }
+
+  localStorage.removeItem(`pythonExam_${user.id}`);
+
+  // CERTIFICATE GENERATION
+
+  let certificateAwarded = false;
+
+  if (score >= 45) {
+
+    const studentName =
+      user.user_metadata?.full_name || user.email;
+
+    const { data: existingCertificate, error: certificateFetchError } =
+      await supabaseClient
+        .from("certificates")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("exam_name", "Python Programming Examination")
+        .maybeSingle();
+
+    if (certificateFetchError) {
+
+      console.error("Certificate lookup error:", certificateFetchError);
+
+    } else if (
+      !existingCertificate ||
+      score > existingCertificate.score
+    ) {
+
+      const certificateData = {
+        user_id: user.id,
+        student_name: studentName,
+        exam_name: "Python Programming Examination",
+        score: score,
+        total_questions: totalQuestions,
+        percentage: percentage
+      };
+
+      let certificateError;
+
+      if (existingCertificate) {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .update(certificateData)
+          .eq("certificate_id", existingCertificate.certificate_id);
+
+        certificateError = error;
+
+      } else {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .insert(certificateData);
+
+        certificateError = error;
+
+      }
+
+      if (certificateError) {
+
+        console.error("Certificate creation error:", certificateError);
+
+      } else {
+
+        certificateAwarded = true;
+
+      }
+
+    } else {
+
+      certificateAwarded = true;
+
+    }
+
+  }
+
+  // DISPLAY EXAMINATION RESULT
+
+  const resultContainer = document.getElementById(
+    "pythonExaminationResult"
+  );
+
+  document.getElementById(
+    "pythonExaminationQuestionsContainer"
+  ).hidden = true;
+
+  document.getElementById(
+    "pythonExaminationTimer"
+  ).closest(".timer-box").hidden = true;
+
+  document.getElementById(
+    "pythonExaminationSubmitBtn"
+  ).hidden = true;
+
+  resultContainer.hidden = false;
+
+  resultContainer.innerHTML = `
+
+    <div class="result-card">
+
+      <h2>🎉 Python Examination Completed!</h2>
+
+      <h1>${score} / ${totalQuestions}</h1>
+
+      <h2>${percentage}%</h2>
+
+      <p>Correct Answers: ${score}</p>
+
+      <p>Incorrect / Unanswered: ${wrongAnswers}</p>
+
+      <h3>
+        ${
+          percentage >= 90
+            ? "Excellent Performance! 🏆"
+            : percentage >= 75
+            ? "Very Good! 🌟"
+            : percentage >= 50
+            ? "Good Effort! 👍"
+            : "Keep Practising! 📚"
+        }
+      </h3>
+
+      ${
+        score >= 45
+          ? "<h2>🏆 Congratulations! You qualified for a certificate.</h2>"
+          : "<p>You need at least 45/50 marks to earn a certificate.</p>"
+      }
+
+      ${
+        certificateAwarded
+          ? '<button class="primary-btn" id="pythonViewCertificateBtn">View My Certificate</button>'
+          : ""
+      }
+
+      <button class="secondary-btn" id="pythonReviewAnswersBtn">
+        Review Answers
+      </button>
+
+    </div>
+
+  `;
+
+  // VIEW CERTIFICATE
+
+  document.getElementById("pythonViewCertificateBtn")
+    ?.addEventListener("click", () => {
+
+      document.getElementById(
+        "pythonExaminationQuizSection"
+      ).hidden = true;
+
+      document.getElementById("myCertificateBtn")?.click();
+
+    });
+
+  // REVIEW ANSWERS
+
+  document.getElementById("pythonReviewAnswersBtn")
+    .addEventListener("click", () => {
+
+      displayPythonReviewAnswers();
+
+      document.getElementById(
+        "pythonReviewAnswersBtn"
+      ).hidden = true;
+
+    });
+
+}
 // ==================================
 // SUPABASE SIGNUP AND LOGIN
 // ==================================
@@ -1609,6 +2440,34 @@ async function loadLearningProgress(userId, subject) {
 
   return data;
 }
+// Save learning progress for any subject
+async function saveLearningProgress(subject, currentLevel, unlockedLevel) {
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    console.error("Unable to identify student.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("learning_progress")
+    .upsert({
+      user_id: user.id,
+      subject: subject,
+      completed_levels: Math.max(currentLevel, unlockedLevel - 1),
+      unlocked_level: unlockedLevel,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: "user_id,subject"
+    });
+
+  if (error) { 
+    console.error("Progress saving error:", error.message);
+  } else {
+    console.log(`${subject} progress saved!`);
+  }
+}
 
 // Keep existing JavaScript progress restoration working
 async function loadJavaScriptProgress(userId) {
@@ -1666,7 +2525,29 @@ async function checkLoginSession() {
         document.querySelector("main").hidden = false;
 
         const user = session.user;
-        await loadJavaScriptProgress(user.id);
+
+        // Restore learning progress for all subjects
+        const subjects = [
+            "JavaScript",
+            "Database",
+            "Python",
+            "C Programming",
+            "Data Structures",
+            "Web Development"
+        ];
+
+       for (const subject of subjects) {
+    const progress = await loadLearningProgress(user.id, subject);
+
+    if (progress) {
+    unlockedLevels[subject] = progress.unlocked_level;
+}
+
+console.log(
+    `${subject} unlocked level:`,
+    unlockedLevels[subject]
+);
+}
 
         profileName.textContent =
             user.user_metadata.full_name || "Student";
@@ -2465,6 +3346,231 @@ function increase() {
   }
 ];
 // ==========================================
+// QUIZCONNECT - PYTHON LEARNING SYSTEM
+// PART 1: ALL 10 LEARNING LEVELS
+// ==========================================
+
+const pythonLevels = [
+  {
+    title: "Introduction to Python",
+    difficulty: "Beginner",
+    content: `
+      <h3>What is Python?</h3>
+      <p>Python is a high-level, interpreted programming language known for its simple syntax.</p>
+
+      <h3>Where is Python Used?</h3>
+      <ul>
+        <li>Web development</li>
+        <li>Artificial Intelligence</li>
+        <li>Data Science</li>
+        <li>Automation</li>
+      </ul>
+
+      <h3>First Python Program</h3>
+      <pre><code>print("Hello, World!")</code></pre>
+    `
+  },
+
+  {
+    title: "Variables and Data Types",
+    difficulty: "Beginner",
+    content: `
+      <h3>What are Variables?</h3>
+      <p>Variables store data values in a program.</p>
+
+      <h3>Example</h3>
+      <pre><code>name = "Kavya"
+age = 20
+marks = 85.5
+passed = True</code></pre>
+
+      <h3>Common Data Types</h3>
+      <ul>
+        <li>int - Integer</li>
+        <li>float - Decimal number</li>
+        <li>str - Text</li>
+        <li>bool - True or False</li>
+        <li>list - Collection of values</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "Operators and Expressions",
+    difficulty: "Beginner",
+    content: `
+      <h3>Python Operators</h3>
+      <ul>
+        <li>Arithmetic: +, -, *, /, %, **, //</li>
+        <li>Comparison: ==, !=, >, <</li>
+        <li>Logical: and, or, not</li>
+        <li>Assignment: =, +=, -=</li>
+      </ul>
+
+      <h3>Example</h3>
+      <pre><code>a = 10
+b = 5
+print(a + b)
+print(a * b)</code></pre>
+    `
+  },
+
+  {
+    title: "Conditional Statements",
+    difficulty: "Beginner",
+    content: `
+      <h3>Making Decisions</h3>
+      <p>Conditional statements execute code based on conditions.</p>
+
+      <h3>if-else Example</h3>
+      <pre><code>age = 18
+
+if age >= 18:
+    print("Eligible")
+else:
+    print("Not Eligible")</code></pre>
+
+      <h3>Types</h3>
+      <ul>
+        <li>if</li>
+        <li>if-else</li>
+        <li>if-elif-else</li>
+        <li>Nested if</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "Loops",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What are Loops?</h3>
+      <p>Loops execute statements repeatedly.</p>
+
+      <h3>for Loop</h3>
+      <pre><code>for i in range(1, 6):
+    print(i)</code></pre>
+
+      <h3>while Loop</h3>
+      <pre><code>i = 1
+while i <= 5:
+    print(i)
+    i += 1</code></pre>
+
+      <p>break stops a loop and continue skips an iteration.</p>
+    `
+  },
+
+  {
+    title: "Functions",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What are Functions?</h3>
+      <p>Functions are reusable blocks of code.</p>
+
+      <h3>Defining a Function</h3>
+      <pre><code>def greet():
+    print("Welcome!")
+
+greet()</code></pre>
+
+      <h3>Parameters and Return</h3>
+      <pre><code>def add(a, b):
+    return a + b
+
+print(add(10, 20))</code></pre>
+    `
+  },
+
+  {
+    title: "Lists, Tuples and Sets",
+    difficulty: "Intermediate",
+    content: `
+      <h3>Lists</h3>
+      <p>Lists are ordered and mutable collections.</p>
+      <pre><code>fruits = ["Apple", "Mango", "Orange"]
+fruits.append("Banana")</code></pre>
+
+      <h3>Tuples</h3>
+      <p>Tuples are ordered and immutable.</p>
+      <pre><code>numbers = (10, 20, 30)</code></pre>
+
+      <h3>Sets</h3>
+      <p>Sets store unique elements.</p>
+      <pre><code>values = {1, 2, 3}</code></pre>
+    `
+  },
+
+  {
+    title: "Dictionaries and Strings",
+    difficulty: "Advanced",
+    content: `
+      <h3>Dictionaries</h3>
+      <p>Dictionaries store information as key-value pairs.</p>
+
+      <pre><code>student = {
+    "name": "Kavya",
+    "age": 20
+}
+
+print(student["name"])</code></pre>
+
+      <h3>String Operations</h3>
+      <pre><code>text = "Python Programming"
+print(text.upper())
+print(text.lower())
+print(len(text))</code></pre>
+    `
+  },
+
+  {
+    title: "Object-Oriented Programming",
+    difficulty: "Advanced",
+    content: `
+      <h3>What is OOP?</h3>
+      <p>Object-Oriented Programming organizes code using classes and objects.</p>
+
+      <h3>Class and Object</h3>
+      <pre><code>class Student:
+    def greet(self):
+        print("Hello Student")
+
+s1 = Student()
+s1.greet()</code></pre>
+
+      <h3>Main Concepts</h3>
+      <ul>
+        <li>Class and Object</li>
+        <li>Inheritance</li>
+        <li>Encapsulation</li>
+        <li>Polymorphism</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "File Handling and Mini Project",
+    difficulty: "Expert",
+    content: `
+      <h3>File Handling</h3>
+      <p>Python can create, read and write files.</p>
+
+      <h3>Writing to a File</h3>
+      <pre><code>with open("demo.txt", "w") as file:
+    file.write("Hello Python")</code></pre>
+
+      <h3>Reading a File</h3>
+      <pre><code>with open("demo.txt", "r") as file:
+    print(file.read())</code></pre>
+
+      <h3>Mini Project: Student Marks</h3>
+      <pre><code>marks = [80, 90, 85]
+average = sum(marks) / len(marks)
+print("Average:", average)</code></pre>
+    `
+  }
+];
+// ==========================================
 // DATABASE MANAGEMENT SYSTEM (DBMS)
 // PART 1: ALL 10 LEARNING LEVELS
 // ==========================================
@@ -2759,14 +3865,25 @@ ON Student.dept_id = Department.dept_id;</code></pre>
   }
 
 ];
+
 // Current learning progress
 let unlockedJavaScriptLevel = 1;
 let currentJavaScriptLevel = 1;
 
 let currentLearningSubject = "JavaScript";
 let currentLearningLevel = 1;
-let unlockedLearningLevel = 1;
 
+// Separate unlocked progress for every subject
+const unlockedLevels = {
+  "JavaScript": 1,
+  "Database": 1,
+  "Python": 1,
+  "C Programming": 1,
+  "Data Structures": 1,
+  "Web Development": 1
+};
+
+let unlockedLearningLevel = 1;
 const levelsContainer =
   document.getElementById("javascriptLevelsContainer");
 
@@ -3492,6 +4609,306 @@ const databaseLevelQuestions = [
 console.log("DBMS question bank:", databaseLevelQuestions.length);
 console.log("DBMS Level 1 questions:", databaseLevelQuestions[0].length);
 // ==========================================
+// PYTHON - 50 LEARNING QUIZ QUESTIONS
+// ==========================================
+
+const pythonLevelQuestions = [
+
+  // LEVEL 1 - INTRODUCTION TO PYTHON
+  [
+    {
+      question: "Who created Python?",
+      options: ["James Gosling", "Guido van Rossum", "Dennis Ritchie", "Bjarne Stroustrup"],
+      answer: 1
+    },
+    {
+      question: "Which type of programming language is Python?",
+      options: ["High-level", "Machine-level", "Assembly-only", "Hardware language"],
+      answer: 0
+    },
+    {
+      question: "Which function displays output in Python?",
+      options: ["echo()", "display()", "print()", "show()"],
+      answer: 2
+    },
+    {
+      question: "Which file extension is used for Python files?",
+      options: [".java", ".html", ".cpp", ".py"],
+      answer: 3
+    },
+    {
+      question: "Python is known for its:",
+      options: ["Complex syntax", "Readable syntax", "Hardware dependency", "Lack of libraries"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 2 - VARIABLES AND DATA TYPES
+  [
+    {
+      question: "How do you assign the value 10 to a variable?",
+      options: ["x == 10", "int x = 10", "x = 10", "let x = 10"],
+      answer: 2
+    },
+    {
+      question: "Which data type stores text?",
+      options: ["int", "str", "float", "bool"],
+      answer: 1
+    },
+    {
+      question: "What is the data type of 12.5?",
+      options: ["int", "str", "bool", "float"],
+      answer: 3
+    },
+    {
+      question: "Which value represents Boolean true in Python?",
+      options: ["TRUE", "true", "True", "1True"],
+      answer: 2
+    },
+    {
+      question: "Which function checks a variable's data type?",
+      options: ["type()", "check()", "datatype()", "typeof()"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 3 - OPERATORS
+  [
+    {
+      question: "What is the result of 10 + 5?",
+      options: ["15", "105", "5", "50"],
+      answer: 0
+    },
+    {
+      question: "Which operator is used for exponentiation?",
+      options: ["^", "**", "//", "%"],
+      answer: 1
+    },
+    {
+      question: "What is the result of 10 % 3?",
+      options: ["3", "0", "1", "10"],
+      answer: 2
+    },
+    {
+      question: "Which operator checks equality?",
+      options: ["=", "!=", ">", "=="],
+      answer: 3
+    },
+    {
+      question: "What is the result of 10 // 3?",
+      options: ["3", "3.33", "1", "0"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 4 - CONDITIONAL STATEMENTS
+  [
+    {
+      question: "Which keyword starts a conditional statement?",
+      options: ["for", "if", "while", "def"],
+      answer: 1
+    },
+    {
+      question: "Which keyword checks another condition?",
+      options: ["else", "then", "elif", "switch"],
+      answer: 2
+    },
+    {
+      question: "Which symbol is used after an if condition?",
+      options: [";", ".", "!", ":"],
+      answer: 3
+    },
+    {
+      question: "What is printed if x = 10 and x > 5?",
+      options: ["False", "True", "None", "Error"],
+      answer: 1
+    },
+    {
+      question: "Which block executes when all previous conditions are false?",
+      options: ["if", "elif", "for", "else"],
+      answer: 3
+    }
+  ],
+
+  // LEVEL 5 - LOOPS
+  [
+    {
+      question: "Which loop iterates over a sequence?",
+      options: ["for", "if", "switch", "try"],
+      answer: 0
+    },
+    {
+      question: "Which loop continues while a condition is true?",
+      options: ["for", "while", "if", "def"],
+      answer: 1
+    },
+    {
+      question: "What does range(5) generate?",
+      options: ["1 to 5", "1 to 4", "0 to 4", "0 to 5"],
+      answer: 2
+    },
+    {
+      question: "Which keyword stops a loop?",
+      options: ["skip", "pass", "continue", "break"],
+      answer: 3
+    },
+    {
+      question: "Which keyword skips the current iteration?",
+      options: ["continue", "break", "stop", "exit"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 6 - FUNCTIONS
+  [
+    {
+      question: "Which keyword defines a function?",
+      options: ["function", "def", "define", "fun"],
+      answer: 1
+    },
+    {
+      question: "Which keyword returns a value from a function?",
+      options: ["print", "break", "return", "yield"],
+      answer: 2
+    },
+    {
+      question: "What is a parameter?",
+      options: ["A loop", "An output", "A data type", "A variable in a function definition"],
+      answer: 3
+    },
+    {
+      question: "Which statement calls a function named greet?",
+      options: ["greet()", "call greet", "function greet", "run greet"],
+      answer: 0
+    },
+    {
+      question: "What does a function without a return statement return by default?",
+      options: ["0", "None", "False", "Empty string"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 7 - LISTS AND TUPLES
+  [
+    {
+      question: "Which brackets create a Python list?",
+      options: ["{}", "()", "[]", "<>"],
+      answer: 2
+    },
+    {
+      question: "Which collection is immutable?",
+      options: ["List", "Dictionary", "Set", "Tuple"],
+      answer: 3
+    },
+    {
+      question: "Which method adds an item to a list?",
+      options: ["append()", "addEnd()", "insertEnd()", "push()"],
+      answer: 0
+    },
+    {
+      question: "What is the index of the first list element?",
+      options: ["1", "0", "-1", "2"],
+      answer: 1
+    },
+    {
+      question: "Which method removes the last list item by default?",
+      options: ["delete()", "remove()", "pop()", "clear()"],
+      answer: 2
+    }
+  ],
+
+  // LEVEL 8 - DICTIONARIES AND SETS
+  [
+    {
+      question: "Which brackets create a dictionary?",
+      options: ["[]", "()", "{}", "<>"],
+      answer: 2
+    },
+    {
+      question: "A dictionary stores data as:",
+      options: ["Key-value pairs", "Only numbers", "Only strings", "Indexed rows"],
+      answer: 0
+    },
+    {
+      question: "Which collection stores unique elements?",
+      options: ["List", "Tuple", "String", "Set"],
+      answer: 3
+    },
+    {
+      question: "Which method returns dictionary keys?",
+      options: ["values()", "keys()", "itemsOnly()", "getKeys()"],
+      answer: 1
+    },
+    {
+      question: "Which method retrieves a dictionary value using a key?",
+      options: ["fetch()", "find()", "get()", "value()"],
+      answer: 2
+    }
+  ],
+
+  // LEVEL 9 - FILE HANDLING AND EXCEPTIONS
+  [
+    {
+      question: "Which function opens a file?",
+      options: ["open()", "file()", "readFile()", "load()"],
+      answer: 0
+    },
+    {
+      question: "Which mode opens a file for reading?",
+      options: ["w", "r", "a", "x"],
+      answer: 1
+    },
+    {
+      question: "Which keyword handles exceptions?",
+      options: ["check", "error", "try", "catch"],
+      answer: 2
+    },
+    {
+      question: "Which block handles an exception?",
+      options: ["finally", "else", "try", "except"],
+      answer: 3
+    },
+    {
+      question: "Which keyword executes code whether an exception occurs or not?",
+      options: ["finally", "except", "break", "raise"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 10 - OOP AND ADVANCED PYTHON
+  [
+    {
+      question: "Which keyword defines a class?",
+      options: ["object", "class", "struct", "define"],
+      answer: 1
+    },
+    {
+      question: "What is an object?",
+      options: ["A loop", "A function only", "An instance of a class", "A module"],
+      answer: 2
+    },
+    {
+      question: "Which method is commonly used as a constructor?",
+      options: ["start()", "create()", "main()", "__init__()"],
+      answer: 3
+    },
+    {
+      question: "What does inheritance allow?",
+      options: ["A class to reuse another class's features", "Deleting objects", "Stopping a program", "Changing file extensions"],
+      answer: 0
+    },
+    {
+      question: "Which keyword is used to import a module?",
+      options: ["include", "import", "using", "require"],
+      answer: 1
+    }
+  ]
+
+];
+
+console.log("Python question bank:", pythonLevelQuestions.length);
+console.log("Python Level 1 questions:", pythonLevelQuestions[0].length);
+// ==========================================
 // PART 3: JAVASCRIPT LEARNING LEVEL NAVIGATION
 // ==========================================
 
@@ -3500,17 +4917,23 @@ function displayJavaScriptLevels() {
 
   levelsContainer.innerHTML = "";
 
-  // Select the correct subject content
-  const selectedLevels =
-    currentLearningSubject === "JavaScript"
-      ? javascriptLevels
-      : databaseLevels;
+  // Select learning content for each subject
+  const subjectLevels = {
+    "JavaScript": javascriptLevels,
+    "Database": databaseLevels,
+    "Python": pythonLevels
+  };
 
-  // Select the correct unlocked level
+  const selectedLevels = subjectLevels[currentLearningSubject];
+
+  // Get unlocked level for selected subject
   const unlockedLevel =
-    currentLearningSubject === "JavaScript"
-      ? unlockedJavaScriptLevel
-      : unlockedLearningLevel;
+    unlockedLevels[currentLearningSubject] || 1;
+
+  if (!selectedLevels) {
+    console.error("Learning content not found:", currentLearningSubject);
+    return;
+  }
 
   selectedLevels.forEach((level, index) => {
 
@@ -3596,6 +5019,43 @@ currentLearningLevel = 1;
     document.getElementById("javascriptLevelsSection")
       .scrollIntoView({ behavior: "smooth" });
 });
+// Open Python Learning Path
+document.querySelector('[data-path="python"]')
+  .addEventListener("click", async () => {
+
+    currentLearningSubject = "Python";
+    currentLearningLevel = 1;
+
+    document.getElementById("learningPathLabel").textContent =
+      "PYTHON LEARNING PATH";
+
+    document.getElementById("learningPathTitle").textContent =
+      "🐍 Python Programming – 10 Levels";
+
+    // Restore saved Python progress
+    const { data: { user } } =
+      await supabaseClient.auth.getUser();
+
+    if (user) {
+      const savedProgress =
+        await loadLearningProgress(user.id, "Python");
+
+      unlockedLevels["Python"] = savedProgress
+        ? savedProgress.unlocked_level
+        : 1;
+    } else {
+      unlockedLevels["Python"] = 1;
+    }
+
+    document.getElementById("learningPathsSection").hidden = true;
+
+    document.getElementById("javascriptLevelsSection").hidden = false;
+
+    displayJavaScriptLevels();
+
+    document.getElementById("javascriptLevelsSection")
+      .scrollIntoView({ behavior: "smooth" });
+});
 
 // Open a selected learning level
 levelsContainer.addEventListener("click", (event) => {
@@ -3617,6 +5077,10 @@ levelsContainer.addEventListener("click", (event) => {
   } else if (currentLearningSubject === "Database") {
     currentLearningLevel = levelNumber;
     level = databaseLevels[levelNumber - 1];
+  }
+    else if (currentLearningSubject === "Python") {
+    currentLearningLevel = levelNumber;
+    level = pythonLevels[levelNumber - 1];
   }
 
   if (!level) return;
@@ -3695,11 +5159,13 @@ document.getElementById("startLearningQuizBtn")
     document.getElementById("learningQuizLabel").textContent =
       `${currentLearningSubject.toUpperCase()} • LEVEL ${levelNumber}`;
 
-    const selectedLevels =
-  currentLearningSubject === "JavaScript"
-    ? javascriptLevels
-    : databaseLevels;
+   const subjectLevels = {
+  "JavaScript": javascriptLevels,
+  "Database": databaseLevels,
+  "Python": pythonLevels
+};
 
+const selectedLevels = subjectLevels[currentLearningSubject];
 document.getElementById("learningQuizTitle").textContent =
   selectedLevels[levelNumber - 1].title + " Quiz";
 
@@ -3783,7 +5249,82 @@ console.log("Selected questions:", questions);
   document.getElementById("learningSubmitBtn").hidden =
     currentQuestionIndex !== questions.length - 1;
 }
+// Display a question for the selected subject
+function displayLearningQuestion() {
 
+  let questions;
+
+  if (currentLearningSubject === "JavaScript") {
+
+    questions =
+      javascriptLevelQuestions[currentJavaScriptLevel - 1];
+
+  } else if (currentLearningSubject === "Database") {
+
+    questions =
+      databaseLevelQuestions[currentLearningLevel - 1];
+
+  } else if (currentLearningSubject === "Python") {
+
+    questions =
+      pythonLevelQuestions[currentLearningLevel - 1];
+
+  }
+
+  if (!questions) {
+    console.error("Questions not found for:", currentLearningSubject);
+    return;
+  }
+
+  console.log("Current subject:", currentLearningSubject);
+  console.log("Current level:", currentLearningLevel);
+  console.log("Question index:", currentQuestionIndex);
+  console.log("Selected questions:", questions);
+
+  const question = questions[currentQuestionIndex];
+
+  document.getElementById("learningQuestionProgress").textContent =
+    `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+
+  document.getElementById("learningQuestionText").textContent =
+    question.question;
+
+  const optionsContainer =
+    document.getElementById("learningAnswerOptions");
+
+  optionsContainer.innerHTML = "";
+
+  question.options.forEach((option, index) => {
+
+    const button = document.createElement("button");
+
+    button.className = "answer-option";
+    button.textContent = option;
+
+    if (learningSelectedAnswers[currentQuestionIndex] === index) {
+      button.classList.add("selected");
+    }
+
+    button.addEventListener("click", () => {
+
+      learningSelectedAnswers[currentQuestionIndex] = index;
+
+      displayLearningQuestion();
+
+    });
+
+    optionsContainer.appendChild(button);
+  });
+
+  document.getElementById("learningPreviousBtn").disabled =
+    currentQuestionIndex === 0;
+
+  document.getElementById("learningNextBtn").hidden =
+    currentQuestionIndex === questions.length - 1;
+
+  document.getElementById("learningSubmitBtn").hidden =
+    currentQuestionIndex !== questions.length - 1;
+}
 // Next question
 document.getElementById("learningNextBtn")
   .addEventListener("click", () => {
@@ -3859,118 +5400,135 @@ async function finishLearningQuiz() {
 
   if (learningQuizFinished) return;
 
-  learningQuizFinished = true;
-
-  clearInterval(learningTimerInterval);
-
   let questions;
 
+  // Select question bank
   if (currentLearningSubject === "JavaScript") {
 
-  questions =
-    javascriptLevelQuestions[currentJavaScriptLevel - 1];
+    questions = javascriptLevelQuestions[currentJavaScriptLevel - 1];
 
-} else if (currentLearningSubject === "Database") {
+  } else if (currentLearningSubject === "Database") {
 
-  questions =
-    databaseLevelQuestions[currentLearningLevel - 1];
+    questions = databaseLevelQuestions[currentLearningLevel - 1];
 
-}else if (currentLearningSubject === "Database") {
+  } else if (currentLearningSubject === "Python") {
 
-  questions =
-    databaseLevelQuestions[currentLearningLevel - 1];
-
-} else if (currentLearningSubject === "Database") {
-    questions =
-      databaseLevelQuestions[currentLearningLevel - 1];
+    questions = pythonLevelQuestions[currentLearningLevel - 1];
   }
+
+  if (!questions) {
+    console.error("Questions not found:", currentLearningSubject);
+    return;
+  }
+
+  learningQuizFinished = true;
+  clearInterval(learningTimerInterval);
 
   const currentLevel =
     currentLearningSubject === "JavaScript"
       ? currentJavaScriptLevel
       : currentLearningLevel;
 
- let score = 0;
+  // Calculate score
+  let score = 0;
 
-// Calculate the actual score
-questions.forEach((question, index) => {
-  if (learningSelectedAnswers[index] === question.answer) {
-    score++;
+  questions.forEach((question, index) => {
+    if (learningSelectedAnswers[index] === question.answer) {
+      score++;
+    }
+  });
+
+  const percentage = Math.round(
+    (score / questions.length) * 100
+  );
+
+  // Save quiz result
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (user && !userError) {
+
+    const { error: resultSaveError } =
+      await supabaseClient
+        .from("quiz_results")
+        .insert([{
+          user_id: user.id,
+          quiz_name: `${currentLearningSubject} Learning Path - Level ${currentLevel}`,
+          score: score,
+          total_questions: questions.length,
+          percentage: percentage
+        }]);
+
+    if (resultSaveError) {
+      console.error("Learning quiz result saving error:", resultSaveError.message);
+    }
+        else {
+      console.log("Learning quiz result saved successfully!");
+    }
   }
-});
 
-// Save Learning Path quiz result for examination eligibility
-const { data: { user }, error: userError } =
-  await supabaseClient.auth.getUser();
+  // Check passing score
+  const passed = score >= 3;
 
-if (user && !userError) {
-
-  const { error: resultSaveError } =
-    await supabaseClient
-      .from("quiz_results")
-      .insert([
-       {
-  user_id: user.id,
-  quiz_name: `${currentLearningSubject} Learning Path - Level ${currentLevel}`,
-  score: score,
-  total_questions: questions.length,
-  percentage: Math.round((score / questions.length) * 100)
-}
-      ]);
-
-  if (resultSaveError) {
-    console.error(
-      "Learning quiz result saving error:",
-      resultSaveError.message
-    );
-  } else {
-    console.log("Learning quiz result saved successfully!");
-  }
-}
-
-const passed = score >= 3;
-
+  // Unlock next level
   if (passed && currentLevel < 10) {
 
     if (currentLearningSubject === "JavaScript") {
+
       unlockedJavaScriptLevel = Math.max(
         unlockedJavaScriptLevel,
         currentLevel + 1
       );
+
+      unlockedLevels["JavaScript"] = Math.max(
+        unlockedLevels["JavaScript"] || 1,
+        currentLevel + 1
+      );
+
     } else {
-      unlockedLearningLevel = Math.max(
-        unlockedLearningLevel,
+
+      unlockedLevels[currentLearningSubject] = Math.max(
+        unlockedLevels[currentLearningSubject] || 1,
         currentLevel + 1
       );
     }
   }
 
+  // Save progress
   if (passed) {
+
     if (currentLearningSubject === "JavaScript") {
       await saveJavaScriptProgress();
     } else {
       await saveLearningProgress(
         currentLearningSubject,
-        currentLearningLevel,
-        unlockedLearningLevel
+        currentLevel,
+        unlockedLevels[currentLearningSubject]
       );
     }
   }
 
+  // Hide questions
   document.getElementById("learningQuestionProgress").hidden = true;
   document.getElementById("learningQuestionText").hidden = true;
   document.getElementById("learningAnswerOptions").hidden = true;
-
   document.getElementById("learningPreviousBtn").hidden = true;
   document.getElementById("learningNextBtn").hidden = true;
   document.getElementById("learningSubmitBtn").hidden = true;
 
-  document.getElementById("learningQuizResult").hidden = false;
+  // Display result
+  const resultSection =
+    document.getElementById("learningQuizResult");
+
+  resultSection.hidden = false;
+
+  const oldMessage =
+    resultSection.querySelector(".learning-pass-message");
+
+  if (oldMessage) oldMessage.remove();
 
   document.getElementById("learningScoreText").textContent =
-    `You scored ${score} out of ${questions.length} (${Math.round(
-  (score / questions.length) * 100
-)}%).`;
+    `You scored ${score} out of ${questions.length} (${percentage}%).`;
 
   const resultMessage = document.createElement("p");
   resultMessage.className = "learning-pass-message";
@@ -3981,14 +5539,12 @@ const passed = score >= 3;
       : "🎉 Excellent! You unlocked the next level!"
     : "Keep practising! You need at least 3 correct answers to unlock the next level.";
 
-  document.getElementById("learningQuizResult")
-    .insertBefore(
-      resultMessage,
-      document.getElementById("learningReviewBtn")
-    );
+  resultSection.insertBefore(
+    resultMessage,
+    document.getElementById("learningReviewBtn")
+  );
 
-  document.getElementById("learningQuizResult")
-    .scrollIntoView({ behavior: "smooth" });
+  resultSection.scrollIntoView({ behavior: "smooth" });
 }
 // ==========================================
 // PART 5: REVIEW LEARNING QUIZ ANSWERS
@@ -4014,6 +5570,10 @@ document.getElementById("learningReviewBtn")
       questions =
         databaseLevelQuestions[currentLearningLevel - 1];
     }
+    else if (currentLearningSubject === "Python") {
+  questions =
+    pythonLevelQuestions[currentLearningLevel - 1];
+}
 
     questions.forEach((question, index) => {
 
@@ -4066,16 +5626,12 @@ document.getElementById("learningQuizBackBtn")
 
     document.getElementById("learningQuizSection").hidden = true;
 
-    if (currentLearningSubject === "JavaScript") {
+    document.getElementById("javascriptLevelsSection").hidden = false;
 
-      document.getElementById("javascriptLevelsSection").hidden = false;
+    displayJavaScriptLevels();
 
-      displayJavaScriptLevels();
-
-      document.getElementById("javascriptLevelsSection")
-        .scrollIntoView({ behavior: "smooth" });
-
-    }
+    document.getElementById("javascriptLevelsSection")
+      .scrollIntoView({ behavior: "smooth" });
 
   });
   // ==========================================
@@ -4167,7 +5723,73 @@ function displayAllExaminationQuestions() {
   });
 
 }
+// ==========================================
+// PYTHON EXAMINATION - DISPLAY ALL QUESTIONS
+// ==========================================
 
+function displayAllPythonExaminationQuestions() {
+
+  const container = document.getElementById(
+    "pythonExaminationQuestionsContainer"
+  );
+
+  container.innerHTML = "";
+
+  pythonExaminationQuestions.forEach((question, qIndex) => {
+
+    const questionCard = document.createElement("div");
+    questionCard.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    questionCard.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const label = document.createElement("label");
+
+      label.style.display = "block";
+      label.style.margin = "12px 0";
+      label.style.padding = "10px";
+      label.style.cursor = "pointer";
+
+      const radio = document.createElement("input");
+
+      radio.type = "radio";
+      radio.name = `pythonExaminationQuestion${qIndex}`;
+      radio.value = optionIndex;
+
+      radio.checked =
+        pythonExaminationAnswers[qIndex] === optionIndex;
+
+      radio.addEventListener("change", () => {
+
+        pythonExaminationAnswers[qIndex] = optionIndex;
+
+        savePythonExaminationProgress(
+          pythonExaminationUserId
+        );
+
+      });
+
+      label.appendChild(radio);
+
+      label.append(
+        ` ${String.fromCharCode(65 + optionIndex)}. ${option}`
+      );
+
+      questionCard.appendChild(label);
+
+    });
+
+    container.appendChild(questionCard);
+
+  });
+
+}
 // ==========================================
 // REVIEW EXAMINATION ANSWERS
 // ==========================================
@@ -4302,6 +5924,7 @@ document.getElementById("backFromCertificate")
   });
 
 
+
 // ==========================================
 // EXAMINATION TAB SWITCH SECURITY
 // ==========================================
@@ -4310,28 +5933,71 @@ let examinationTabSwitchCount = 0;
 
 document.addEventListener("visibilitychange", function () {
 
-  const examSection = document.getElementById("examinationQuizSection");
+  if (!document.hidden) return;
+
+  // PYTHON EXAMINATION SECURITY
+
+  const pythonExamSection = document.getElementById(
+    "pythonExaminationQuizSection"
+  );
 
   if (
-    document.hidden &&
+    pythonExamSection &&
+    !pythonExamSection.hidden &&
+    !pythonExaminationSubmitted
+  ) {
+
+    pythonExaminationTabSwitchCount++;
+
+    savePythonExaminationProgress(pythonExaminationUserId);
+
+    if (pythonExaminationTabSwitchCount >= 3) {
+
+      alert(
+        "🚫 Maximum tab-switch limit reached! Your Python examination will be submitted automatically."
+      );
+
+      finishPythonExamination();
+
+    } else {
+
+      alert(
+        `⚠️ Python Examination Warning ${pythonExaminationTabSwitchCount}/3!`
+      );
+
+    }
+
+    return;
+  }
+
+  // JAVA EXAMINATION SECURITY
+
+  const examSection = document.getElementById(
+    "examinationQuizSection"
+  );
+
+  if (
     examSection &&
     !examSection.hidden &&
     !examinationSubmitted
   ) {
 
     examinationTabSwitchCount++;
+
     saveExaminationProgress(examinationUserId);
 
     if (examinationTabSwitchCount >= 3) {
 
-      alert("🚫 Maximum tab-switch limit reached! Your examination will be submitted automatically.");
+      alert(
+        "🚫 Maximum tab-switch limit reached! Your examination will be submitted automatically."
+      );
 
       finishExamination();
 
     } else {
 
       alert(
-        `⚠️ Warning ${examinationTabSwitchCount}/3! Switching tabs is not allowed.`
+        `⚠️ Java Examination Warning ${examinationTabSwitchCount}/3!`
       );
 
     }
@@ -4345,13 +6011,25 @@ document.addEventListener("visibilitychange", function () {
 
 window.addEventListener("beforeunload", function (event) {
 
-  const examSection = document.getElementById("examinationQuizSection");
+  const javaExamSection = document.getElementById(
+    "examinationQuizSection"
+  );
 
-  if (
-    examSection &&
-    !examSection.hidden &&
-    !examinationSubmitted
-  ) {
+  const pythonExamSection = document.getElementById(
+    "pythonExaminationQuizSection"
+  );
+
+  const javaExamActive =
+    javaExamSection &&
+    !javaExamSection.hidden &&
+    !examinationSubmitted;
+
+  const pythonExamActive =
+    pythonExamSection &&
+    !pythonExamSection.hidden &&
+    !pythonExaminationSubmitted;
+
+  if (javaExamActive || pythonExamActive) {
     event.preventDefault();
     event.returnValue = "";
   }

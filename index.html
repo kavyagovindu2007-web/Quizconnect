@@ -308,6 +308,14 @@
         Start Learning
       </button>
     </article>
+    <article class="community-card">
+  <h3>🐍 Python Programming</h3>
+  <p>Learn Python from beginner to advanced.</p>
+  <p>10 Levels</p>
+  <button class="primary-btn" data-path="python">
+    Start Learning
+  </button>
+</article>
 
     <article class="community-card">
       <h3>🌐 Web Development</h3>
@@ -436,26 +444,48 @@
     </div>
   </div>
 
+  <!-- JAVA EXAMINATION -->
+
   <div class="community-card">
 
-    <h3>📋 Examination Instructions</h3>
+    <h3>☕ Java Examination</h3>
     <p><strong>Subject:</strong> Java</p>
 
     <ul>
       <li>Total Questions: 50</li>
-      <li>Eligibility: Complete at least 10 quizzes with a minimum score of 3/5 in each quiz to attempt the examination.</li>
       <li>Duration: 60 Minutes</li>
+      <li>Eligibility: Complete at least 10 qualifying quizzes with 3/5 or above in each.</li>
       <li>Each question carries equal marks.</li>
-      <li>Read every question carefully.</li>
-      <li>Submit your answers before the timer ends.</li>
-      <li>Your result will be displayed after submission.</li>
-      <li>Certificate is awarded only for a score of 45/50 or above (90%).</li>
-<li>Switching tabs 3 times will automatically submit the examination.</li>
-<li>Your progress and remaining time are saved if you refresh or reopen the browser.</li>
+      <li>Certificate for 45/50 or above.</li>
+      <li>Three tab switches automatically submit the examination.</li>
+      <li>Progress and remaining time are saved.</li>
     </ul>
 
     <button class="primary-btn" id="startExaminationBtn">
-      🚀 Start Examination
+      🚀 Start Java Examination
+    </button>
+
+  </div>
+
+  <!-- PYTHON EXAMINATION -->
+
+  <div class="community-card">
+
+    <h3>🐍 Python Programming Examination</h3>
+    <p><strong>Subject:</strong> Python</p>
+
+    <ul>
+      <li>Total Questions: 50</li>
+      <li>Duration: 60 Minutes</li>
+      <li>Eligibility: Complete at least 10 qualifying quizzes with 3/5 or above in each.</li>
+      <li>Each question carries equal marks.</li>
+      <li>Certificate for 45/50 or above.</li>
+      <li>Three tab switches automatically submit the examination.</li>
+      <li>Progress and remaining time are saved.</li>
+    </ul>
+
+    <button class="primary-btn" id="startPythonExaminationBtn">
+      🚀 Start Python Examination
     </button>
 
   </div>
@@ -494,6 +524,39 @@
   <div class="quiz-navigation">
     <button class="submit-btn" id="examinationSubmitBtn">
       Submit Examination
+    </button>
+  </div>
+
+</section>
+<!-- PYTHON EXAMINATION SCREEN -->
+
+<section class="quiz-section" id="pythonExaminationQuizSection" hidden>
+
+  <div class="quiz-top">
+    <div>
+      <p class="eyebrow">PYTHON EXAMINATION</p>
+      <h2>Python Online Examination</h2>
+    </div>
+
+    <div class="timer-box">
+      <p>Time Remaining</p>
+      <h2 id="pythonExaminationTimer">60:00</h2>
+    </div>
+  </div>
+
+  <!-- ALL 50 PYTHON EXAMINATION QUESTIONS -->
+  <div id="pythonExaminationQuestionsContainer"></div>
+
+  <!-- PYTHON EXAMINATION RESULT -->
+  <div id="pythonExaminationResult" hidden></div>
+
+  <button class="secondary-btn" id="pythonExitExaminationBtn">
+    ← Back to Instructions
+  </button>
+
+  <div class="quiz-navigation">
+    <button class="submit-btn" id="pythonExaminationSubmitBtn">
+      Submit Python Examination
     </button>
   </div>
 
