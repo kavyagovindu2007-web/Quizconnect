@@ -1527,6 +1527,268 @@ const pythonExaminationQuestions = [
 ];
 
 console.log("Python Examination questions:", pythonExaminationQuestions.length);
+// ==========================================
+// C PROGRAMMING EXAMINATION - QUESTION BANK
+// ==========================================
+
+const cExaminationQuestions = [
+
+  {
+    question: "Who developed the C programming language?",
+    options: ["James Gosling", "Dennis Ritchie", "Bjarne Stroustrup", "Guido van Rossum"],
+    answer: 1
+  },
+  {
+    question: "Where was C language developed?",
+    options: ["Microsoft", "Bell Laboratories", "Google", "IBM"],
+    answer: 1
+  },
+  {
+    question: "Which extension is commonly used for C source files?",
+    options: [".cpp", ".java", ".c", ".py"],
+    answer: 2
+  },
+  {
+    question: "Which function is the entry point of a C program?",
+    options: ["start()", "main()", "begin()", "run()"],
+    answer: 1
+  },
+  {
+    question: "Which header file is required for printf()?",
+    options: ["<conio.h>", "<string.h>", "<stdio.h>", "<math.h>"],
+    answer: 2
+  },
+  {
+    question: "Which symbol terminates a C statement?",
+    options: [":", ".", ";", ","],
+    answer: 2
+  },
+  {
+    question: "Which format specifier is used for an integer?",
+    options: ["%f", "%c", "%d", "%s"],
+    answer: 2
+  },
+  {
+    question: "Which data type stores a single character?",
+    options: ["int", "char", "float", "double"],
+    answer: 1
+  },
+  {
+    question: "Which keyword declares a constant variable?",
+    options: ["fixed", "constant", "const", "static"],
+    answer: 2
+  },
+  {
+    question: "Which operator is used to obtain the address of a variable?",
+    options: ["*", "&", "%", "#"],
+    answer: 1
+  },
+  {
+    question: "Which operator performs modulus operation?",
+    options: ["/", "*", "%", "+"],
+    answer: 2
+  },
+  {
+    question: "What is the result of 10 / 3 in integer division?",
+    options: ["3.33", "3", "4", "1"],
+    answer: 1
+  },
+  {
+    question: "Which operator represents logical AND in C?",
+    options: ["&", "&&", "||", "!"],
+    answer: 1
+  },
+  {
+    question: "Which operator represents logical OR?",
+    options: ["&&", "!", "||", "&"],
+    answer: 2
+  },
+  {
+    question: "Which statement is used for decision-making?",
+    options: ["for", "if", "break", "continue"],
+    answer: 1
+  },
+  {
+    question: "Which statement selects one option from multiple cases?",
+    options: ["if", "switch", "while", "goto"],
+    answer: 1
+  },
+  {
+    question: "Which keyword exits a loop immediately?",
+    options: ["continue", "return", "break", "skip"],
+    answer: 2
+  },
+  {
+    question: "Which loop executes at least once?",
+    options: ["for", "while", "do-while", "nested for"],
+    answer: 2
+  },
+  {
+    question: "Which loop is commonly used when the number of iterations is known?",
+    options: ["for", "do-while", "while", "goto"],
+    answer: 0
+  },
+  {
+    question: "What is the index of the first element in an array?",
+    options: ["1", "-1", "0", "2"],
+    answer: 2
+  },
+  {
+    question: "How are array elements stored in C?",
+    options: ["Random locations", "Contiguous memory locations", "Only registers", "Separate files"],
+    answer: 1
+  },
+  {
+    question: "Which character terminates a string in C?",
+    options: ["\\n", "\\t", "\\0", "\\r"],
+    answer: 2
+  },
+  {
+    question: "Which function reads formatted input?",
+    options: ["printf()", "scanf()", "puts()", "getchar()"],
+    answer: 1
+  },
+  {
+    question: "Which function calculates the length of a string?",
+    options: ["strsize()", "strlen()", "strcount()", "length()"],
+    answer: 1
+  },
+  {
+    question: "Which header file declares string functions?",
+    options: ["<stdio.h>", "<stdlib.h>", "<string.h>", "<math.h>"],
+    answer: 2
+  },
+  {
+    question: "Which function allocates memory dynamically?",
+    options: ["free()", "malloc()", "sizeof()", "printf()"],
+    answer: 1
+  },
+  {
+    question: "Which function releases dynamically allocated memory?",
+    options: ["delete()", "remove()", "free()", "clear()"],
+    answer: 2
+  },
+  {
+    question: "Which operator accesses the value stored at a pointer address?",
+    options: ["&", "*", "%", "#"],
+    answer: 1
+  },
+  {
+    question: "What does a NULL pointer represent?",
+    options: ["Address zero or no valid object address", "A character", "An integer variable", "A function"],
+    answer: 0
+  },
+  {
+    question: "Which keyword is used to define a structure?",
+    options: ["union", "record", "struct", "class"],
+    answer: 2
+  },
+  {
+    question: "Which operator accesses a structure member using a structure variable?",
+    options: ["->", ".", "::", "*"],
+    answer: 1
+  },
+  {
+    question: "Which operator accesses a structure member through a pointer?",
+    options: [".", "->", "&", "%"],
+    answer: 1
+  },
+  {
+    question: "Which feature allows different members to share the same memory?",
+    options: ["Structure", "Array", "Union", "Function"],
+    answer: 2
+  },
+  {
+    question: "Which keyword defines a user-defined type alias?",
+    options: ["define", "typedef", "type", "alias"],
+    answer: 1
+  },
+  {
+    question: "Which storage class preserves a local variable's value between function calls?",
+    options: ["auto", "register", "static", "extern"],
+    answer: 2
+  },
+  {
+    question: "Which function opens a file in C?",
+    options: ["open()", "fopen()", "fileopen()", "readfile()"],
+    answer: 1
+  },
+  {
+    question: "Which function closes an opened file?",
+    options: ["close()", "fclose()", "endfile()", "stop()"],
+    answer: 1
+  },
+  {
+    question: "Which file mode opens a file for reading?",
+    options: ["w", "a", "r", "x"],
+    answer: 2
+  },
+  {
+    question: "Which file mode opens a file for appending?",
+    options: ["r", "w", "a", "x"],
+    answer: 2
+  },
+  {
+    question: "Which function writes formatted data to a file?",
+    options: ["fscanf()", "fprintf()", "fread()", "fopen()"],
+    answer: 1
+  },
+  {
+    question: "Which function reads formatted data from a file?",
+    options: ["fprintf()", "fwrite()", "fscanf()", "fclose()"],
+    answer: 2
+  },
+  {
+    question: "Which function moves the file position indicator?",
+    options: ["fseek()", "fopen()", "fclose()", "fgets()"],
+    answer: 0
+  },
+  {
+    question: "Which preprocessor directive includes a header file?",
+    options: ["#define", "#include", "#ifdef", "#pragma"],
+    answer: 1
+  },
+  {
+    question: "Which directive is used to define a macro?",
+    options: ["#include", "#define", "#endif", "#error"],
+    answer: 1
+  },
+  {
+    question: "Which function returns the absolute value of an integer?",
+    options: ["sqrt()", "abs()", "pow()", "ceil()"],
+    answer: 1
+  },
+  {
+    question: "Which function is commonly used to compare two strings?",
+    options: ["strcpy()", "strcat()", "strcmp()", "strlen()"],
+    answer: 2
+  },
+  {
+    question: "Which function copies one string into another?",
+    options: ["strcmp()", "strcpy()", "strcat()", "strlen()"],
+    answer: 1
+  },
+  {
+    question: "What is recursion in C?",
+    options: ["A loop inside another loop", "A function calling itself", "A pointer operation", "A file operation"],
+    answer: 1
+  },
+  {
+    question: "Which function terminates a program normally?",
+    options: ["stop()", "break()", "exit()", "end()"],
+    answer: 2
+  },
+  {
+    question: "What is the return type of the standard main function when it returns a status code?",
+    options: ["void", "char", "int", "float"],
+    answer: 2
+  }
+
+];
+
+console.log("C Examination questions:", cExaminationQuestions.length);
+
+
 
 // ==========================================
 // JAVA EXAMINATION VARIABLES
