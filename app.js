@@ -5624,6 +5624,10 @@ levelsContainer.addEventListener("click", (event) => {
     currentLearningLevel = levelNumber;
     level = pythonLevels[levelNumber - 1];
   }
+  else if (currentLearningSubject === "C") {
+  currentLearningLevel = levelNumber;
+  level = cLevels[levelNumber - 1];
+}
 
   if (!level) return;
 
@@ -5701,12 +5705,12 @@ document.getElementById("startLearningQuizBtn")
     document.getElementById("learningQuizLabel").textContent =
       `${currentLearningSubject.toUpperCase()} • LEVEL ${levelNumber}`;
 
-   const subjectLevels = {
+  const subjectLevels = {
   "JavaScript": javascriptLevels,
   "Database": databaseLevels,
-  "Python": pythonLevels
+  "Python": pythonLevels,
+  "C": cLevels
 };
-
 const selectedLevels = subjectLevels[currentLearningSubject];
 document.getElementById("learningQuizTitle").textContent =
   selectedLevels[levelNumber - 1].title + " Quiz";
@@ -5727,20 +5731,26 @@ document.getElementById("learningQuizTitle").textContent =
     document.getElementById("learningQuizSection")
       .scrollIntoView({ behavior: "smooth" });
   });
-// Display a question for the selected subject
-function displayLearningQuestion() {
-
-  let questions;
-
-  if (currentLearningSubject === "JavaScript") {
+// Select questions for the current subject and level
+if (currentLearningSubject === "JavaScript") {
 
   questions =
-    javascriptLevelQuestions[currentJavaScriptLevel - 1];
+    javascriptLevelQuestions[currentLearningLevel - 1];
 
 } else if (currentLearningSubject === "Database") {
 
   questions =
     databaseLevelQuestions[currentLearningLevel - 1];
+
+} else if (currentLearningSubject === "Python") {
+
+  questions =
+    pythonLevelQuestions[currentLearningLevel - 1];
+
+} else if (currentLearningSubject === "C") {
+
+  questions =
+    cLevelQuestions[currentLearningLevel - 1];
 
 }
 console.log("Current subject:", currentLearningSubject);
@@ -5790,7 +5800,7 @@ console.log("Selected questions:", questions);
 
   document.getElementById("learningSubmitBtn").hidden =
     currentQuestionIndex !== questions.length - 1;
-}
+
 // Display a question for the selected subject
 function displayLearningQuestion() {
 
@@ -5799,7 +5809,7 @@ function displayLearningQuestion() {
   if (currentLearningSubject === "JavaScript") {
 
     questions =
-      javascriptLevelQuestions[currentJavaScriptLevel - 1];
+      javascriptLevelQuestions[currentLearningLevel - 1];
 
   } else if (currentLearningSubject === "Database") {
 
@@ -5811,11 +5821,12 @@ function displayLearningQuestion() {
     questions =
       pythonLevelQuestions[currentLearningLevel - 1];
 
+  } else if (currentLearningSubject === "C") {
+
+    questions =
+      cLevelQuestions[currentLearningLevel - 1];
+
   }
-  else if (currentLearningSubject === "C") {
-    currentLearningLevel = levelNumber;
-    level = cLevels[levelNumber - 1];
-}
 
   if (!questions) {
     console.error("Questions not found for:", currentLearningSubject);
@@ -5959,9 +5970,13 @@ async function finishLearningQuiz() {
 
   } else if (currentLearningSubject === "Python") {
 
-    questions = pythonLevelQuestions[currentLearningLevel - 1];
-  }
+  questions = pythonLevelQuestions[currentLearningLevel - 1];
 
+} else if (currentLearningSubject === "C") {
+
+  questions = cLevelQuestions[currentLearningLevel - 1];
+
+}
   if (!questions) {
     console.error("Questions not found:", currentLearningSubject);
     return;
@@ -6119,6 +6134,12 @@ document.getElementById("learningReviewBtn")
     else if (currentLearningSubject === "Python") {
   questions =
     pythonLevelQuestions[currentLearningLevel - 1];
+}
+else if (currentLearningSubject === "C") {
+
+  questions =
+    cLevelQuestions[currentLearningLevel - 1];
+
 }
 
     questions.forEach((question, index) => {
