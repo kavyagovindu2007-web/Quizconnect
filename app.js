@@ -2478,44 +2478,6 @@ async function loadJavaScriptProgress(userId) {
     ? data.unlocked_level
     : 1;
 }
-// Save learning progress for any subject
-async function saveLearningProgress(subject, currentLevel, unlockedLevel) {
-
-  const { data: { user }, error: userError } =
-    await supabaseClient.auth.getUser();
-
-  if (userError || !user) {
-    console.error("Unable to identify student.");
-    return;
-  }
-
-  const { error } = await supabaseClient
-    .from("learning_progress")
-    .upsert({
-      user_id: user.id,
-      subject: subject,
-      completed_levels: Math.max(currentLevel, unlockedLevel - 1),
-      unlocked_level: unlockedLevel,
-      updated_at: new Date().toISOString()
-    }, {
-      onConflict: "user_id,subject"
-    });
-
-  if (error) {
-    console.error("Progress saving error:", error.message);
-  } else {
-    console.log(`${subject} progress saved!`);
-  }
-}
-
-// Keep existing JavaScript saving calls working
-async function saveJavaScriptProgress() {
-  await saveLearningProgress(
-    "JavaScript",
-    currentJavaScriptLevel,
-    unlockedJavaScriptLevel
-  );
-}
 // Check whether the user is already logged in
 async function checkLoginSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2531,7 +2493,7 @@ async function checkLoginSession() {
             "JavaScript",
             "Database",
             "Python",
-            "C Programming",
+            "C",
             "Data Structures",
             "Web Development"
         ];
@@ -3570,6 +3532,249 @@ print("Average:", average)</code></pre>
     `
   }
 ];
+// ==========================================
+// QUIZCONNECT - C PROGRAMMING LEARNING SYSTEM
+// ALL 10 LEARNING LEVELS
+// ==========================================
+
+const cLevels = [
+  {
+    title: "Introduction to C Programming",
+    difficulty: "Beginner",
+    content: `
+      <h3>What is C?</h3>
+      <p>C is a general-purpose, procedural programming language developed by Dennis Ritchie.</p>
+      <h3>Features of C</h3>
+      <ul>
+        <li>Simple and efficient</li>
+        <li>Structured programming</li>
+        <li>Portable</li>
+        <li>Fast execution</li>
+      </ul>
+      <h3>First C Program</h3>
+      <pre><code>#include &lt;stdio.h&gt;
+
+int main() {
+    printf("Hello, World!");
+    return 0;
+}</code></pre>
+    `
+  },
+  {
+    title: "Variables and Data Types",
+    difficulty: "Beginner",
+    content: `
+      <h3>What are Variables?</h3>
+      <p>Variables are named memory locations used to store data.</p>
+      <h3>Common Data Types</h3>
+      <ul>
+        <li>int - Integer</li>
+        <li>float - Decimal number</li>
+        <li>char - Character</li>
+        <li>double - Double precision number</li>
+      </ul>
+      <h3>Example</h3>
+      <pre><code>int age = 20;
+float marks = 85.5;
+char grade = 'A';
+double salary = 25000.50;</code></pre>
+    `
+  },
+  {
+    title: "Operators and Expressions",
+    difficulty: "Beginner",
+    content: `
+      <h3>Types of Operators</h3>
+      <ul>
+        <li>Arithmetic: +, -, *, /, %</li>
+        <li>Relational: ==, !=, &gt;, &lt;, &gt;=, &lt;=</li>
+        <li>Logical: &amp;&amp;, ||, !</li>
+        <li>Assignment: =, +=, -=</li>
+        <li>Increment and decrement: ++, --</li>
+      </ul>
+      <h3>Example</h3>
+      <pre><code>int a = 10, b = 5;
+printf("%d", a + b);
+printf("%d", a * b);</code></pre>
+    `
+  },
+  {
+    title: "Conditional Statements",
+    difficulty: "Beginner",
+    content: `
+      <h3>Decision Making</h3>
+      <p>Conditional statements execute code based on conditions.</p>
+      <h3>if-else Example</h3>
+      <pre><code>int age = 18;
+
+if (age >= 18) {
+    printf("Eligible");
+} else {
+    printf("Not Eligible");
+}</code></pre>
+      <h3>Types</h3>
+      <ul>
+        <li>if</li>
+        <li>if-else</li>
+        <li>else-if ladder</li>
+        <li>Nested if</li>
+        <li>switch</li>
+      </ul>
+    `
+  },
+  {
+    title: "Loops",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What are Loops?</h3>
+      <p>Loops execute a block of statements repeatedly.</p>
+      <h3>for Loop</h3>
+      <pre><code>for (int i = 1; i <= 5; i++) {
+    printf("%d\\n", i);
+}</code></pre>
+      <h3>while Loop</h3>
+      <pre><code>int i = 1;
+while (i <= 5) {
+    printf("%d\\n", i);
+    i++;
+}</code></pre>
+      <h3>do-while Loop</h3>
+      <pre><code>int j = 1;
+do {
+    printf("%d\\n", j);
+    j++;
+} while (j <= 5);</code></pre>
+    `
+  },
+  {
+    title: "Functions",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What are Functions?</h3>
+      <p>Functions are reusable blocks of code that perform specific tasks.</p>
+      <h3>Function Example</h3>
+      <pre><code>int add(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    printf("%d", add(10, 20));
+    return 0;
+}</code></pre>
+      <h3>Function Concepts</h3>
+      <ul>
+        <li>Function declaration</li>
+        <li>Function definition</li>
+        <li>Function calling</li>
+        <li>Arguments and return values</li>
+        <li>Recursion</li>
+      </ul>
+    `
+  },
+  {
+    title: "Arrays and Strings",
+    difficulty: "Intermediate",
+    content: `
+      <h3>Arrays</h3>
+      <p>Arrays store multiple values of the same data type.</p>
+      <pre><code>int numbers[5] = {10, 20, 30, 40, 50};
+
+printf("%d", numbers[0]);</code></pre>
+      <h3>Strings</h3>
+      <p>Strings are character arrays ending with the null character \\0.</p>
+      <pre><code>char name[] = "QuizConnect";
+printf("%s", name);</code></pre>
+      <h3>String Functions</h3>
+      <ul>
+        <li>strlen()</li>
+        <li>strcpy()</li>
+        <li>strcat()</li>
+        <li>strcmp()</li>
+      </ul>
+    `
+  },
+  {
+    title: "Pointers",
+    difficulty: "Advanced",
+    content: `
+      <h3>What are Pointers?</h3>
+      <p>Pointers are variables that store the memory addresses of other variables.</p>
+      <h3>Pointer Example</h3>
+      <pre><code>int number = 10;
+int *ptr = &number;
+
+printf("%d", *ptr);
+printf("%p", (void*)ptr);</code></pre>
+      <h3>Pointer Concepts</h3>
+      <ul>
+        <li>Address operator (&amp;)</li>
+        <li>Dereference operator (*)</li>
+        <li>Pointer arithmetic</li>
+        <li>Pointer and arrays</li>
+        <li>Null pointers</li>
+      </ul>
+    `
+  },
+  {
+    title: "Structures and Unions",
+    difficulty: "Advanced",
+    content: `
+      <h3>Structures</h3>
+      <p>Structures group variables of different data types under one name.</p>
+      <pre><code>struct Student {
+    int id;
+    char grade;
+    float marks;
+};
+
+int main() {
+    struct Student s1 = {1, 'A', 90.5};
+    printf("%d", s1.id);
+    return 0;
+}</code></pre>
+      <h3>Unions</h3>
+      <p>Unions allow different members to share the same memory location.</p>
+      <pre><code>union Data {
+    int number;
+    float value;
+};</code></pre>
+    `
+  },
+  {
+    title: "File Handling and Mini Project",
+    difficulty: "Expert",
+    content: `
+      <h3>File Handling</h3>
+      <p>C supports creating, reading and writing files.</p>
+      <h3>Writing to a File</h3>
+      <pre><code>FILE *fp = fopen("demo.txt", "w");
+
+if (fp != NULL) {
+    fprintf(fp, "Hello C Programming");
+    fclose(fp);
+}</code></pre>
+      <h3>Reading a File</h3>
+      <pre><code>FILE *fp = fopen("demo.txt", "r");
+
+if (fp != NULL) {
+    char text[100];
+    fgets(text, sizeof(text), fp);
+    printf("%s", text);
+    fclose(fp);
+}</code></pre>
+      <h3>Mini Project: Student Marks Calculator</h3>
+      <pre><code>int marks[] = {80, 90, 85};
+int total = 0;
+
+for (int i = 0; i < 3; i++) {
+    total += marks[i];
+}
+
+printf("Average = %.2f", total / 3.0);</code></pre>
+    `
+  }
+];
+
 // ==========================================
 // DATABASE MANAGEMENT SYSTEM (DBMS)
 // PART 1: ALL 10 LEARNING LEVELS
@@ -4908,6 +5113,307 @@ const pythonLevelQuestions = [
 
 console.log("Python question bank:", pythonLevelQuestions.length);
 console.log("Python Level 1 questions:", pythonLevelQuestions[0].length);
+
+// ==========================================
+// C PROGRAMMING - 50 LEARNING QUIZ QUESTIONS
+// ==========================================
+
+const cLevelQuestions = [
+
+  // LEVEL 1 - INTRODUCTION TO C
+  [
+    {
+      question: "Who developed the C programming language?",
+      options: ["James Gosling", "Dennis Ritchie", "Guido van Rossum", "Bjarne Stroustrup"],
+      answer: 1
+    },
+    {
+      question: "In which year was C developed?",
+      options: ["1972", "1980", "1990", "1965"],
+      answer: 0
+    },
+    {
+      question: "C is primarily a:",
+      options: ["Markup language", "Database language", "Procedural programming language", "Scripting-only language"],
+      answer: 2
+    },
+    {
+      question: "Which extension is used for C source files?",
+      options: [".java", ".py", ".html", ".c"],
+      answer: 3
+    },
+    {
+      question: "Which function is the starting point of a C program?",
+      options: ["start()", "main()", "begin()", "run()"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 2 - VARIABLES AND DATA TYPES
+  [
+    {
+      question: "Which data type is used to store integers in C?",
+      options: ["int", "float", "char", "double"],
+      answer: 0
+    },
+    {
+      question: "Which data type stores a single character?",
+      options: ["int", "char", "float", "double"],
+      answer: 1
+    },
+    {
+      question: "Which format specifier is used for an integer?",
+      options: ["%f", "%c", "%d", "%s"],
+      answer: 2
+    },
+    {
+      question: "Which keyword declares a constant in C?",
+      options: ["var", "constant", "static", "const"],
+      answer: 3
+    },
+    {
+      question: "Which of the following is a valid variable name?",
+      options: ["2value", "student_age", "float", "my-name"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 3 - OPERATORS AND EXPRESSIONS
+  [
+    {
+      question: "Which operator is used for addition?",
+      options: ["+", "-", "*", "/"],
+      answer: 0
+    },
+    {
+      question: "What is the result of 10 % 3?",
+      options: ["3", "1", "0", "10"],
+      answer: 1
+    },
+    {
+      question: "Which operator checks equality?",
+      options: ["=", "!=", "==", ">"],
+      answer: 2
+    },
+    {
+      question: "What is the result of 5 * 4?",
+      options: ["9", "15", "25", "20"],
+      answer: 3
+    },
+    {
+      question: "Which operator represents logical AND?",
+      options: ["&&", "||", "!", "&"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 4 - CONDITIONAL STATEMENTS
+  [
+    {
+      question: "Which keyword is used for decision-making?",
+      options: ["for", "if", "while", "break"],
+      answer: 1
+    },
+    {
+      question: "Which statement provides an alternative condition?",
+      options: ["switch", "case", "else if", "continue"],
+      answer: 2
+    },
+    {
+      question: "Which statement selects one option from multiple cases?",
+      options: ["if", "while", "for", "switch"],
+      answer: 3
+    },
+    {
+      question: "Which keyword terminates a switch case?",
+      options: ["break", "continue", "return", "exit"],
+      answer: 0
+    },
+    {
+      question: "What is the output of if(5 > 2)?",
+      options: ["False", "True", "Error", "None"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 5 - LOOPS
+  [
+    {
+      question: "Which loop executes at least once?",
+      options: ["for", "while", "do-while", "nested for"],
+      answer: 2
+    },
+    {
+      question: "Which loop is commonly used when the number of iterations is known?",
+      options: ["while", "do-while", "if", "for"],
+      answer: 3
+    },
+    {
+      question: "Which keyword exits a loop immediately?",
+      options: ["break", "continue", "skip", "pass"],
+      answer: 0
+    },
+    {
+      question: "Which keyword skips the current iteration?",
+      options: ["break", "continue", "return", "stop"],
+      answer: 1
+    },
+    {
+      question: "How many times does for(int i=0; i<5; i++) execute?",
+      options: ["4", "6", "5", "Infinite"],
+      answer: 2
+    }
+  ],
+
+  // LEVEL 6 - FUNCTIONS
+  [
+    {
+      question: "Which keyword is used to return a value from a function?",
+      options: ["break", "continue", "void", "return"],
+      answer: 3
+    },
+    {
+      question: "What is a function prototype?",
+      options: ["A function declaration", "A loop", "A variable", "A header file"],
+      answer: 0
+    },
+    {
+      question: "Which return type indicates that a function returns no value?",
+      options: ["int", "void", "char", "float"],
+      answer: 1
+    },
+    {
+      question: "What is recursion?",
+      options: ["A loop only", "A variable declaration", "A function calling itself", "A header file"],
+      answer: 2
+    },
+    {
+      question: "What is passed to a function during a function call?",
+      options: ["Only keywords", "Only data types", "Only operators", "Arguments"],
+      answer: 3
+    }
+  ],
+
+  // LEVEL 7 - ARRAYS AND STRINGS
+  [
+    {
+      question: "What is the index of the first element in a C array?",
+      options: ["0", "1", "-1", "2"],
+      answer: 0
+    },
+    {
+      question: "Which declaration creates an integer array of 5 elements?",
+      options: ["int a;", "int a[5];", "array int a;", "int[5] a;"],
+      answer: 1
+    },
+    {
+      question: "Which header file contains common string functions?",
+      options: ["stdio.h", "stdlib.h", "string.h", "math.h"],
+      answer: 2
+    },
+    {
+      question: "Which character marks the end of a C string?",
+      options: ["\\n", "\\t", " ", "\\0"],
+      answer: 3
+    },
+    {
+      question: "Which function finds the length of a string?",
+      options: ["strlen()", "strcpy()", "strcmp()", "strcat()"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 8 - POINTERS
+  [
+    {
+      question: "What is a pointer?",
+      options: ["A loop", "A variable that stores an address", "A data type only", "A function"],
+      answer: 1
+    },
+    {
+      question: "Which operator is used to get the address of a variable?",
+      options: ["*", "%", "&", "#"],
+      answer: 2
+    },
+    {
+      question: "Which operator accesses the value stored at an address?",
+      options: ["&", "%", "->", "*"],
+      answer: 3
+    },
+    {
+      question: "What is a NULL pointer?",
+      options: ["A pointer that points to no valid object", "An integer pointer", "A character variable", "A function pointer only"],
+      answer: 0
+    },
+    {
+      question: "Which declaration creates a pointer to an integer?",
+      options: ["int p;", "int *p;", "pointer int p;", "int &p;"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 9 - STRUCTURES AND UNIONS
+  [
+    {
+      question: "Which keyword is used to define a structure?",
+      options: ["union", "class", "struct", "record"],
+      answer: 2
+    },
+    {
+      question: "Which operator accesses a structure member using a structure variable?",
+      options: ["->", "::", "&", "."],
+      answer: 3
+    },
+    {
+      question: "Which keyword defines a union?",
+      options: ["union", "struct", "enum", "typedef"],
+      answer: 0
+    },
+    {
+      question: "In a union, members generally share:",
+      options: ["Separate memory locations", "The same memory location", "Different functions", "Different files"],
+      answer: 1
+    },
+    {
+      question: "Which operator accesses a structure member through a pointer?",
+      options: [".", "&", "->", "*"],
+      answer: 2
+    }
+  ],
+
+  // LEVEL 10 - FILE HANDLING AND MINI PROJECT
+  [
+    {
+      question: "Which function opens a file in C?",
+      options: ["open()", "read()", "create()", "fopen()"],
+      answer: 3
+    },
+    {
+      question: "Which mode opens a file for reading?",
+      options: ["r", "w", "a", "x"],
+      answer: 0
+    },
+    {
+      question: "Which function closes an opened file?",
+      options: ["fopen()", "fclose()", "closefile()", "end()"],
+      answer: 1
+    },
+    {
+      question: "Which function writes formatted output to a file?",
+      options: ["scanf()", "fopen()", "fprintf()", "fclose()"],
+      answer: 2
+    },
+    {
+      question: "Which function reads formatted input from a file?",
+      options: ["printf()", "fprintf()", "fwrite()", "fscanf()"],
+      answer: 3
+    }
+  ]
+
+];
+
+console.log("C question bank:", cLevelQuestions.length);
+console.log("C Level 1 questions:", cLevelQuestions[0].length);
 // ==========================================
 // PART 3: JAVASCRIPT LEARNING LEVEL NAVIGATION
 // ==========================================
@@ -4918,11 +5424,12 @@ function displayJavaScriptLevels() {
   levelsContainer.innerHTML = "";
 
   // Select learning content for each subject
-  const subjectLevels = {
-    "JavaScript": javascriptLevels,
-    "Database": databaseLevels,
-    "Python": pythonLevels
-  };
+const subjectLevels = {
+  "JavaScript": javascriptLevels,
+  "Database": databaseLevels,
+  "Python": pythonLevels,
+  "C": cLevels
+};
 
   const selectedLevels = subjectLevels[currentLearningSubject];
 
@@ -4986,15 +5493,13 @@ document.querySelector('[data-path="database"]')
 
     currentLearningSubject = "Database";
     currentLearningLevel = 1;
-currentLearningSubject = "Database";
 
-document.getElementById("learningPathLabel").textContent =
-  "DATABASE LEARNING PATH";
+    document.getElementById("learningPathLabel").textContent =
+      "DATABASE LEARNING PATH";
 
-document.getElementById("learningPathTitle").textContent =
-  "🗄️ Database Management – 10 Levels";
+    document.getElementById("learningPathTitle").textContent =
+      "🗄️ Database Management – 10 Levels";
 
-currentLearningLevel = 1;
     // Restore saved DBMS progress
     const { data: { user } } =
       await supabaseClient.auth.getUser();
@@ -5003,11 +5508,11 @@ currentLearningLevel = 1;
       const savedProgress =
         await loadLearningProgress(user.id, "Database");
 
-      unlockedLearningLevel = savedProgress
+      unlockedLevels["Database"] = savedProgress
         ? savedProgress.unlocked_level
         : 1;
     } else {
-      unlockedLearningLevel = 1;
+      unlockedLevels["Database"] = 1;
     }
 
     document.getElementById("learningPathsSection").hidden = true;
@@ -5019,6 +5524,7 @@ currentLearningLevel = 1;
     document.getElementById("javascriptLevelsSection")
       .scrollIntoView({ behavior: "smooth" });
 });
+
 // Open Python Learning Path
 document.querySelector('[data-path="python"]')
   .addEventListener("click", async () => {
@@ -5056,7 +5562,43 @@ document.querySelector('[data-path="python"]')
     document.getElementById("javascriptLevelsSection")
       .scrollIntoView({ behavior: "smooth" });
 });
+// Open C Programming Learning Path
+document.querySelector('[data-path="c"]')
+  .addEventListener("click", async () => {
 
+    currentLearningSubject = "C";
+    currentLearningLevel = 1;
+
+    document.getElementById("learningPathLabel").textContent =
+      "C PROGRAMMING LEARNING PATH";
+
+    document.getElementById("learningPathTitle").textContent =
+      "💻 C Programming – 10 Levels";
+
+    // Restore saved C progress
+    const { data: { user } } =
+      await supabaseClient.auth.getUser();
+
+    if (user) {
+      const savedProgress =
+        await loadLearningProgress(user.id, "C");
+
+      unlockedLevels["C"] = savedProgress
+        ? savedProgress.unlocked_level
+        : 1;
+    } else {
+      unlockedLevels["C"] = 1;
+    }
+
+    document.getElementById("learningPathsSection").hidden = true;
+
+    document.getElementById("javascriptLevelsSection").hidden = false;
+
+    displayJavaScriptLevels();
+
+    document.getElementById("javascriptLevelsSection")
+      .scrollIntoView({ behavior: "smooth" });
+});
 // Open a selected learning level
 levelsContainer.addEventListener("click", (event) => {
 
@@ -5270,6 +5812,10 @@ function displayLearningQuestion() {
       pythonLevelQuestions[currentLearningLevel - 1];
 
   }
+  else if (currentLearningSubject === "C") {
+    currentLearningLevel = levelNumber;
+    level = cLevels[levelNumber - 1];
+}
 
   if (!questions) {
     console.error("Questions not found for:", currentLearningSubject);
