@@ -1010,6 +1010,128 @@ document.getElementById("startPythonExaminationBtn")
 
 });
 // ==========================================
+// START OR RESUME C PROGRAMMING EXAMINATION
+// ==========================================
+
+document.getElementById("startCExaminationBtn")
+  .addEventListener("click", async () => {
+
+    const { data: { user } } =
+      await supabaseClient.auth.getUser();
+
+    if (!user) {
+      alert("Please log in first.");
+      return;
+    }
+
+    cExaminationUserId = user.id;
+    cExaminationSubmitted = false;
+
+    const savedExam = loadCExaminationProgress(user.id);
+
+    // CHECK EXPIRED EXAMINATION
+
+    if (savedExam && savedExam.endTime <= Date.now()) {
+
+      cExaminationAnswers = savedExam.answers || {};
+      cExaminationEndTime = savedExam.endTime;
+
+      cExaminationTabSwitchCount =
+        savedExam.tabSwitchCount || 0;
+
+      cExaminationTimeLeft = 0;
+
+      alert(
+        "⏰ Your C Programming examination time has expired. Your answers will be submitted automatically."
+      );
+
+      await finishCExamination();
+      return;
+    }
+
+    // CHECK ELIGIBILITY FOR NEW EXAMINATION
+
+    if (!savedExam) {
+
+      const { count: eligibleQuizCount, error: eligibilityError } =
+        await supabaseClient
+          .from("quiz_results")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("total_questions", 5)
+          .gte("score", 3)
+          .neq("quiz_name", "C Programming Examination");
+
+      if (eligibilityError) {
+        console.error(
+          "C eligibility error:",
+          eligibilityError.message
+        );
+
+        alert("Unable to check eligibility. Please try again.");
+        return;
+      }
+
+      if (eligibleQuizCount < 10) {
+        alert(
+          `You have completed ${eligibleQuizCount} qualifying quizzes out of 10.\n\nYou need at least 10 quizzes with a score of 3/5 or above in each quiz.`
+        );
+        return;
+      }
+    }
+
+    // RESUME OR START EXAMINATION
+
+    if (savedExam) {
+
+      cExaminationAnswers = savedExam.answers || {};
+
+      cExaminationEndTime = savedExam.endTime;
+
+      cExaminationTabSwitchCount =
+        savedExam.tabSwitchCount || 0;
+
+      cExaminationTimeLeft = Math.ceil(
+        (cExaminationEndTime - Date.now()) / 1000
+      );
+
+      alert("Your previous C Programming examination has been restored!");
+
+    } else {
+
+      cExaminationAnswers = {};
+      cExaminationTabSwitchCount = 0;
+
+      cExaminationTimeLeft = 60 * 60;
+
+      cExaminationEndTime =
+        Date.now() + (60 * 60 * 1000);
+
+      cExaminationSubmitted = false;
+
+      saveCExaminationProgress(user.id);
+    }
+
+    // SHOW C EXAMINATION SCREEN
+
+    document.getElementById("examinationSection").hidden = true;
+
+    document.getElementById("cExaminationQuizSection").hidden = false;
+
+    try {
+      displayAllCExaminationQuestions();
+    } catch (error) {
+      alert("C Examination Error: " + error.message);
+      return;
+    }
+
+    startCExaminationTimer();
+
+    document.getElementById("cExaminationQuizSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+});
+// ==========================================
 // JAVA EXAMINATION - QUESTION BANK
 // ==========================================
 
@@ -1838,6 +1960,31 @@ function savePythonExaminationProgress(userId) {
   );
 
 }
+// ==========================================
+// C PROGRAMMING EXAMINATION VARIABLES
+// ==========================================
+
+let cExaminationAnswers = {};
+let cExaminationTimeLeft = 60 * 60;
+let cExaminationTimerInterval = null;
+let cExaminationSubmitted = false;
+let cExaminationEndTime = null;
+let cExaminationUserId = null;
+let cExaminationTabSwitchCount = 0;
+
+// SAVE C EXAMINATION PROGRESS
+function saveCExaminationProgress(userId) {
+
+  localStorage.setItem(
+    `cExam_${userId}`,
+    JSON.stringify({
+      answers: cExaminationAnswers,
+      endTime: cExaminationEndTime,
+      tabSwitchCount: cExaminationTabSwitchCount
+    })
+  );
+
+}
 // RESTORE EXAMINATION PROGRESS
 function loadExaminationProgress(userId) {
 
@@ -1861,6 +2008,21 @@ function loadPythonExaminationProgress(userId) {
 
   const savedData = localStorage.getItem(
     `pythonExam_${userId}`
+  );
+
+  if (!savedData) {
+    return null;
+  }
+
+  const examData = JSON.parse(savedData);
+
+  return examData;
+}
+// RESTORE C EXAMINATION PROGRESS
+function loadCExaminationProgress(userId) {
+
+  const savedData = localStorage.getItem(
+    `cExam_${userId}`
   );
 
   if (!savedData) {
@@ -1961,6 +2123,51 @@ function startPythonExaminationTimer() {
   }
 
 }
+// ==========================================
+// C PROGRAMMING EXAMINATION TIMER
+// ==========================================
+
+function updateCExaminationTimer() {
+
+  const minutes = Math.floor(cExaminationTimeLeft / 60);
+  const seconds = cExaminationTimeLeft % 60;
+
+  document.getElementById("cExaminationTimer").textContent =
+    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+}
+
+function startCExaminationTimer() {
+
+  clearInterval(cExaminationTimerInterval);
+
+  function updateTimer() {
+
+    cExaminationTimeLeft = Math.max(
+      0,
+      Math.ceil((cExaminationEndTime - Date.now()) / 1000)
+    );
+
+    updateCExaminationTimer();
+
+    if (cExaminationUserId) {
+      saveCExaminationProgress(cExaminationUserId);
+    }
+
+    if (cExaminationTimeLeft <= 0) {
+      clearInterval(cExaminationTimerInterval);
+      finishCExamination();
+    }
+
+  }
+
+  updateTimer();
+
+  if (cExaminationTimeLeft > 0) {
+    cExaminationTimerInterval = setInterval(updateTimer, 1000);
+  }
+
+}
 // Connect Java Submit Examination button
 document.getElementById("examinationSubmitBtn")
   .addEventListener("click", () => {
@@ -1971,6 +2178,11 @@ document.getElementById("examinationSubmitBtn")
 document.getElementById("pythonExaminationSubmitBtn")
   .addEventListener("click", () => {
     finishPythonExamination();
+  });
+  // Connect C Submit Examination button
+document.getElementById("cExaminationSubmitBtn")
+  .addEventListener("click", () => {
+    finishCExamination();
   });
 // ==========================================
 // FINISH JAVA EXAMINATION
@@ -2550,6 +2762,364 @@ async function finishPythonExamination() {
     });
 
 }
+// ==========================================
+// C EXAMINATION - REVIEW ANSWERS
+// ==========================================
+
+function displayCReviewAnswers() {
+
+  const resultContainer = document.getElementById(
+    "cExaminationResult"
+  );
+
+  document.getElementById("cReviewAnswersContainer")?.remove();
+
+  let correctAnswers = 0;
+  let incorrectAnswers = 0;
+  let unansweredQuestions = 0;
+
+  cExaminationQuestions.forEach((question, index) => {
+
+    if (cExaminationAnswers[index] === undefined) {
+      unansweredQuestions++;
+    } else if (
+      cExaminationAnswers[index] === question.answer
+    ) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+    }
+
+  });
+
+  const performancePercentage = Math.round(
+    (correctAnswers / cExaminationQuestions.length) * 100
+  );
+
+  let performanceLevel = "";
+
+  if (performancePercentage >= 90) {
+    performanceLevel = "Excellent 🏆";
+  } else if (performancePercentage >= 75) {
+    performanceLevel = "Very Good 🌟";
+  } else if (performancePercentage >= 50) {
+    performanceLevel = "Good 👍";
+  } else {
+    performanceLevel = "Needs Improvement 📚";
+  }
+
+  const reviewContainer = document.createElement("div");
+  reviewContainer.id = "cReviewAnswersContainer";
+
+  reviewContainer.innerHTML =
+    "<h2>📋 Review Your C Programming Answers</h2>";
+
+  // PERFORMANCE ANALYTICS
+
+  const analyticsCard = document.createElement("div");
+  analyticsCard.className = "result-card";
+
+  analyticsCard.innerHTML = `
+    <h2>📊 Your Performance Analytics</h2>
+
+    <h3>Correct Answers: ${correctAnswers}</h3>
+    <h3>Incorrect Answers: ${incorrectAnswers}</h3>
+    <h3>Unanswered Questions: ${unansweredQuestions}</h3>
+
+    <h3>Performance: ${performancePercentage}%</h3>
+
+    <h2>${performanceLevel}</h2>
+
+    <p>
+      ${
+        performancePercentage >= 90
+          ? "Outstanding performance! Keep up the excellent work."
+          : performancePercentage >= 75
+          ? "Great work! Keep practising to reach excellence."
+          : performancePercentage >= 50
+          ? "Good effort! Revise the topics where you made mistakes."
+          : "Don't give up! Practise regularly and improve step by step."
+      }
+    </p>
+  `;
+
+  reviewContainer.appendChild(analyticsCard);
+
+  // DISPLAY ALL QUESTIONS AND ANSWERS
+
+  cExaminationQuestions.forEach((question, qIndex) => {
+
+    const card = document.createElement("div");
+    card.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    card.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const answer = document.createElement("p");
+
+      answer.textContent =
+        `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+
+      if (optionIndex === question.answer) {
+        answer.style.color = "green";
+        answer.textContent += " ✓ Correct Answer";
+      }
+
+      if (
+        cExaminationAnswers[qIndex] === optionIndex &&
+        optionIndex !== question.answer
+      ) {
+        answer.style.color = "red";
+        answer.textContent += " ✗ Your Answer";
+      }
+
+      card.appendChild(answer);
+
+    });
+
+    reviewContainer.appendChild(card);
+
+  });
+
+  resultContainer.appendChild(reviewContainer);
+
+}
+// ==========================================
+// FINISH C PROGRAMMING EXAMINATION
+// ==========================================
+
+async function finishCExamination() {
+
+  if (cExaminationSubmitted) return;
+
+  cExaminationSubmitted = true;
+
+  clearInterval(cExaminationTimerInterval);
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Please log in again.");
+    cExaminationSubmitted = false;
+    return;
+  }
+
+  const totalQuestions = cExaminationQuestions.length;
+
+  let score = 0;
+
+  cExaminationQuestions.forEach((question, index) => {
+
+    if (cExaminationAnswers[index] === question.answer) {
+      score++;
+    }
+
+  });
+
+  const wrongAnswers = totalQuestions - score;
+
+  const percentage = Math.round(
+    (score / totalQuestions) * 100
+  );
+
+  // SAVE EXAMINATION RESULT
+
+  const { error: resultError } = await supabaseClient
+    .from("quiz_results")
+    .insert({
+      user_id: user.id,
+      quiz_name: "C Programming Examination",
+      score: score,
+      total_questions: totalQuestions,
+      percentage: percentage
+    });
+
+  if (resultError) {
+
+    console.error("C result saving error:", resultError);
+
+    alert("Unable to save your examination result. Please try again.");
+
+    cExaminationSubmitted = false;
+    return;
+
+  }
+
+  localStorage.removeItem(`cExam_${user.id}`);
+
+  // CERTIFICATE GENERATION
+
+  let certificateAwarded = false;
+
+  if (score >= 45) {
+
+    const studentName =
+      user.user_metadata?.full_name || user.email;
+
+    const { data: existingCertificate, error: certificateFetchError } =
+      await supabaseClient
+        .from("certificates")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("exam_name", "C Programming Examination")
+        .maybeSingle();
+
+    if (certificateFetchError) {
+
+      console.error("Certificate lookup error:", certificateFetchError);
+
+    } else if (
+      !existingCertificate ||
+      score > existingCertificate.score
+    ) {
+
+      const certificateData = {
+        user_id: user.id,
+        student_name: studentName,
+        exam_name: "C Programming Examination",
+        score: score,
+        total_questions: totalQuestions,
+        percentage: percentage
+      };
+
+      let certificateError;
+
+      if (existingCertificate) {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .update(certificateData)
+          .eq("certificate_id", existingCertificate.certificate_id);
+
+        certificateError = error;
+
+      } else {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .insert(certificateData);
+
+        certificateError = error;
+
+      }
+
+      if (certificateError) {
+
+        console.error("C certificate creation error:", certificateError);
+
+      } else {
+
+        certificateAwarded = true;
+
+      }
+
+    } else {
+
+      certificateAwarded = true;
+
+    }
+
+  }
+
+  // DISPLAY EXAMINATION RESULT
+
+  const resultContainer = document.getElementById(
+    "cExaminationResult"
+  );
+
+  document.getElementById(
+    "cExaminationQuestionsContainer"
+  ).hidden = true;
+
+  document.getElementById(
+    "cExaminationTimer"
+  ).closest(".timer-box").hidden = true;
+
+  document.getElementById(
+    "cExaminationSubmitBtn"
+  ).hidden = true;
+
+  resultContainer.hidden = false;
+
+  resultContainer.innerHTML = `
+
+    <div class="result-card">
+
+      <h2>🎉 C Programming Examination Completed!</h2>
+
+      <h1>${score} / ${totalQuestions}</h1>
+
+      <h2>${percentage}%</h2>
+
+      <p>Correct Answers: ${score}</p>
+
+      <p>Incorrect / Unanswered: ${wrongAnswers}</p>
+
+      <h3>
+        ${
+          percentage >= 90
+            ? "Excellent Performance! 🏆"
+            : percentage >= 75
+            ? "Very Good! 🌟"
+            : percentage >= 50
+            ? "Good Effort! 👍"
+            : "Keep Practising! 📚"
+        }
+      </h3>
+
+      ${
+        score >= 45
+          ? "<h2>🏆 Congratulations! You qualified for a certificate.</h2>"
+          : "<p>You need at least 45/50 marks to earn a certificate.</p>"
+      }
+
+      ${
+        certificateAwarded
+          ? '<button class="primary-btn" id="cViewCertificateBtn">View My Certificate</button>'
+          : ""
+      }
+
+      <button class="secondary-btn" id="cReviewAnswersBtn">
+        Review Answers
+      </button>
+
+    </div>
+
+  `;
+
+  // VIEW CERTIFICATE
+
+  document.getElementById("cViewCertificateBtn")
+    ?.addEventListener("click", () => {
+
+      document.getElementById(
+        "cExaminationQuizSection"
+      ).hidden = true;
+
+      document.getElementById("myCertificateBtn")?.click();
+
+    });
+
+  // REVIEW ANSWERS
+
+  document.getElementById("cReviewAnswersBtn")
+    .addEventListener("click", () => {
+
+      displayCReviewAnswers();
+
+      document.getElementById(
+        "cReviewAnswersBtn"
+      ).hidden = true;
+
+    });
+
+}
 // ==================================
 // SUPABASE SIGNUP AND LOGIN
 // ==================================
@@ -2638,7 +3208,17 @@ document.getElementById("exitExaminationBtn").addEventListener("click", () => {
   });
 
 });
+// Exit C Programming Examination
+document.getElementById("cExitExaminationBtn").addEventListener("click", () => {
 
+  document.getElementById("cExaminationQuizSection").hidden = true;
+  document.getElementById("examinationSection").hidden = false;
+
+  document.getElementById("examinationSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
 
 // Back to Home from Examination
 document.getElementById("backFromExamination").addEventListener("click", () => {
@@ -6620,6 +7200,73 @@ function displayAllPythonExaminationQuestions() {
 
 }
 // ==========================================
+// C PROGRAMMING EXAMINATION - DISPLAY ALL QUESTIONS
+// ==========================================
+
+function displayAllCExaminationQuestions() {
+
+  const container = document.getElementById(
+    "cExaminationQuestionsContainer"
+  );
+
+  container.innerHTML = "";
+
+  cExaminationQuestions.forEach((question, qIndex) => {
+
+    const questionCard = document.createElement("div");
+    questionCard.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    questionCard.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const label = document.createElement("label");
+
+      label.style.display = "block";
+      label.style.margin = "12px 0";
+      label.style.padding = "10px";
+      label.style.cursor = "pointer";
+
+      const radio = document.createElement("input");
+
+      radio.type = "radio";
+      radio.name = `cExaminationQuestion${qIndex}`;
+      radio.value = optionIndex;
+
+      radio.checked =
+        cExaminationAnswers[qIndex] === optionIndex;
+
+      radio.addEventListener("change", () => {
+
+        cExaminationAnswers[qIndex] = optionIndex;
+
+        saveCExaminationProgress(
+          cExaminationUserId
+        );
+
+      });
+
+      label.appendChild(radio);
+
+      label.append(
+        ` ${String.fromCharCode(65 + optionIndex)}. ${option}`
+      );
+
+      questionCard.appendChild(label);
+
+    });
+
+    container.appendChild(questionCard);
+
+  });
+
+}
+// ==========================================
 // REVIEW EXAMINATION ANSWERS
 // ==========================================
 
@@ -6782,17 +7429,44 @@ document.addEventListener("visibilitychange", function () {
 
     if (pythonExaminationTabSwitchCount >= 3) {
 
-      alert(
-        "🚫 Maximum tab-switch limit reached! Your Python examination will be submitted automatically."
-      );
+      alert("🚫 Maximum tab-switch limit reached! Your Python examination will be submitted automatically.");
 
       finishPythonExamination();
 
     } else {
 
-      alert(
-        `⚠️ Python Examination Warning ${pythonExaminationTabSwitchCount}/3!`
-      );
+      alert(`⚠️ Python Examination Warning ${pythonExaminationTabSwitchCount}/3!`);
+
+    }
+
+    return;
+  }
+
+  // C PROGRAMMING EXAMINATION SECURITY
+
+  const cExamSection = document.getElementById(
+    "cExaminationQuizSection"
+  );
+
+  if (
+    cExamSection &&
+    !cExamSection.hidden &&
+    !cExaminationSubmitted
+  ) {
+
+    cExaminationTabSwitchCount++;
+
+    saveCExaminationProgress(cExaminationUserId);
+
+    if (cExaminationTabSwitchCount >= 3) {
+
+      alert("🚫 Maximum tab-switch limit reached! Your C Programming examination will be submitted automatically.");
+
+      finishCExamination();
+
+    } else {
+
+      alert(`⚠️ C Programming Examination Warning ${cExaminationTabSwitchCount}/3!`);
 
     }
 
@@ -6817,17 +7491,13 @@ document.addEventListener("visibilitychange", function () {
 
     if (examinationTabSwitchCount >= 3) {
 
-      alert(
-        "🚫 Maximum tab-switch limit reached! Your examination will be submitted automatically."
-      );
+      alert("🚫 Maximum tab-switch limit reached! Your examination will be submitted automatically.");
 
       finishExamination();
 
     } else {
 
-      alert(
-        `⚠️ Java Examination Warning ${examinationTabSwitchCount}/3!`
-      );
+      alert(`⚠️ Java Examination Warning ${examinationTabSwitchCount}/3!`);
 
     }
 
@@ -6848,6 +7518,10 @@ window.addEventListener("beforeunload", function (event) {
     "pythonExaminationQuizSection"
   );
 
+  const cExamSection = document.getElementById(
+    "cExaminationQuizSection"
+  );
+
   const javaExamActive =
     javaExamSection &&
     !javaExamSection.hidden &&
@@ -6858,9 +7532,16 @@ window.addEventListener("beforeunload", function (event) {
     !pythonExamSection.hidden &&
     !pythonExaminationSubmitted;
 
-  if (javaExamActive || pythonExamActive) {
+  const cExamActive =
+    cExamSection &&
+    !cExamSection.hidden &&
+    !cExaminationSubmitted;
+
+  if (javaExamActive || pythonExamActive || cExamActive) {
+
     event.preventDefault();
     event.returnValue = "";
+
   }
 
 });
