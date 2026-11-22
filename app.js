@@ -7364,6 +7364,7 @@ const unlockedLevels = {
   "JavaScript": 1,
   "Database": 1,
   "Python": 1,
+  "C": 1,
   "C Programming": 1,
   "Data Structures": 1,
   "Web Development": 1
@@ -11108,32 +11109,46 @@ document.getElementById("backFromProgramming").addEventListener("click", () => {
   });
 
 });
-// ==================================
-// C PROGRAMMING SECTION NAVIGATION
-// ==================================
+// ==========================================
+// C PROGRAMMING - STUDENT DEVELOPMENT JOURNEY
+// ==========================================
 
-document.getElementById("startCLearningBtn").addEventListener("click", () => {
+document.getElementById("startCLearningBtn").addEventListener("click", async () => {
 
+  // Select C Programming
+  currentLearningSubject = "C";
+  currentLearningLevel = 1;
+
+  // Update headings
+  document.getElementById("learningPathLabel").textContent =
+    "C PROGRAMMING LEARNING PATH";
+
+  document.getElementById("learningPathTitle").textContent =
+    "💻 C Programming – 10 Levels";
+
+  // Restore saved C progress
+  const { data: { user } } =
+    await supabaseClient.auth.getUser();
+
+  if (user) {
+    const savedProgress =
+      await loadLearningProgress(user.id, "C");
+
+    unlockedLevels["C"] = savedProgress
+      ? savedProgress.unlocked_level
+      : 1;
+  } else {
+    unlockedLevels["C"] = 1;
+  }
+
+  // Open existing 10-level learning system
   document.getElementById("programmingSection").hidden = true;
 
-  document.getElementById("cLearningSection").hidden = false;
+  document.getElementById("javascriptLevelsSection").hidden = false;
 
-  document.getElementById("cLearningSection").scrollIntoView({
-    behavior: "smooth"
-  });
+  displayJavaScriptLevels();
 
-});
-
-// Back to Programming Languages
-
-document.getElementById("backFromCLearning").addEventListener("click", () => {
-
-  document.getElementById("cLearningSection").hidden = true;
-
-  document.getElementById("programmingSection").hidden = false;
-
-  document.getElementById("programmingSection").scrollIntoView({
-    behavior: "smooth"
-  });
+  document.getElementById("javascriptLevelsSection")
+    .scrollIntoView({ behavior: "smooth" });
 
 });
