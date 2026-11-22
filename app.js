@@ -2445,18 +2445,8 @@ const webDevelopmentExaminationQuestions = [
     question: "What is the purpose of GitHub?",
     options: ["Hosting and collaborating on code repositories", "Editing videos", "Creating database queries only", "Designing animations"],
     answer: 0
-  },
-  {
-    question: "What is the main purpose of website testing?",
-    options: ["To increase image size", "To identify errors and verify functionality", "To remove all HTML", "To change domain names"],
-    answer: 1
-  },
-  {
-    question: "Which practice helps protect a website from unauthorized access?",
-    options: ["Using weak passwords", "Sharing credentials publicly", "Implementing authentication and authorization", "Disabling security checks"],
-    answer: 2
   }
-
+  
 ];
 
 console.log(
