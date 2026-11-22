@@ -773,6 +773,40 @@ document.getElementById("learningPathsBtn").addEventListener("click", () => {
   });
 
 });
+// Open Student Development Journey
+document.getElementById("studentJourneyBtn").addEventListener("click", () => {
+
+  welcomeSection.hidden = true;
+  statsSection.hidden = true;
+  homeQuizSection.hidden = true;
+
+  document.getElementById("communitySection").hidden = true;
+  document.getElementById("achievementsSection").hidden = true;
+  document.getElementById("learningPathsSection").hidden = true;
+  document.getElementById("placementHubSection").hidden = true;
+
+  document.getElementById("studentJourneySection").hidden = false;
+
+  document.getElementById("studentJourneySection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Back to Home from Student Development Journey
+document.getElementById("backFromStudentJourney").addEventListener("click", () => {
+
+  document.getElementById("studentJourneySection").hidden = true;
+
+  welcomeSection.hidden = false;
+  statsSection.hidden = false;
+  homeQuizSection.hidden = false;
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+});
 // Open Startup & Placement Hub
 document.getElementById("placementHubBtn").addEventListener("click", () => {
 
