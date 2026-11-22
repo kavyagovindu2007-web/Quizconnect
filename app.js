@@ -11079,3 +11079,32 @@ document.getElementById("backFromLearnNewSkills").addEventListener("click", () =
   });
 
 });
+// ==================================
+// PROGRAMMING SECTION NAVIGATION
+// ==================================
+
+document.getElementById("programmingExploreBtn").addEventListener("click", () => {
+
+  document.getElementById("learnNewSkillsSection").hidden = true;
+
+  document.getElementById("programmingSection").hidden = false;
+
+  document.getElementById("programmingSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Back to Learn New Skills
+
+document.getElementById("backFromProgramming").addEventListener("click", () => {
+
+  document.getElementById("programmingSection").hidden = true;
+
+  document.getElementById("learnNewSkillsSection").hidden = false;
+
+  document.getElementById("learnNewSkillsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
