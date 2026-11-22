@@ -5211,6 +5211,8 @@ console.log(
     unlockedLevels[subject]
 );
 }
+// Restore C Job-Ready progress
+await restoreCJobProgress();
 
         profileName.textContent =
             user.user_metadata.full_name || "Student";
@@ -11757,7 +11759,7 @@ function startCJobAssessment(levelNumber) {
   area.innerHTML = html;
 
   document.getElementById("cJobAssessmentForm")
-    .addEventListener("submit", event => {
+    .addEventListener("submit", async event => {
 
       event.preventDefault();
 
@@ -11815,9 +11817,15 @@ function startCJobAssessment(levelNumber) {
           );
         }
 
-        saveCJobProgress();
-        updateCJobLevelButtons();
+       saveCJobProgress();
 
+await saveLearningProgress(
+  "C Programming Job Ready",
+  levelNumber,
+  cJobProgress.unlockedLevel
+);
+
+updateCJobLevelButtons();
       }
 
       area.innerHTML = `
@@ -11919,7 +11927,48 @@ function returnToCJobLevels() {
 document.getElementById("backToCJobLevels")
   .addEventListener("click", returnToCJobLevels);
 
-// Initial level status
-updateCJobLevelButtons();
+// Restore C Job-Ready progress from Supabase
+async function restoreCJobProgress() {
 
-console.log("C Job-Ready Course: 10 levels loaded.");
+  const { data: { user } } =
+    await supabaseClient.auth.getUser();
+
+  if (!user) return;
+
+  const data = await loadLearningProgress(
+    user.id,
+    "C Programming Job Ready"
+  );
+
+  if (data) {
+
+    const cloudCompleted = data.completed_levels || 0;
+
+    const localCompleted =
+      cJobProgress.completedLevels.length
+        ? Math.max(...cJobProgress.completedLevels)
+        : 0;
+
+    const completed = Math.max(
+      cloudCompleted,
+      localCompleted
+    );
+
+    cJobProgress.completedLevels =
+      Array.from({ length: completed }, (_, i) => i + 1);
+
+    cJobProgress.unlockedLevel = Math.max(
+      data.unlocked_level || 1,
+      completed < 10 ? completed + 1 : 10
+    );
+
+    saveCJobProgress();
+  }
+
+  updateCJobLevelButtons();
+
+  console.log("C Job-Ready progress restored:", cJobProgress);
+}
+
+restoreCJobProgress();
+console.log("Restore function type:", typeof restoreCJobProgress);
