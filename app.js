@@ -4659,15 +4659,18 @@ if (score >= 45) {
 
       console.log("Existing Web Development certificate:", existingCertificate);
 
-const { error } = await supabaseClient
+const { data: updatedCertificate, error } = await supabaseClient
   .from("certificates")
   .update(certificateData)
-  .eq("certificate_id", existingCertificate.certificate_id);
+  .eq("certificate_id", existingCertificate.certificate_id)
+  .select();
 
-console.log("Web Development certificate update response:", error);
+console.log("Existing certificate:", existingCertificate);
 console.log("New certificate data:", certificateData);
+console.log("Updated certificate rows:", updatedCertificate);
+console.log("Certificate update error:", error);
 
-      certificateError = error;
+certificateError = error;
 
     } else {
 
