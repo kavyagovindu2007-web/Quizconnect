@@ -1188,9 +1188,8 @@
 
   <!-- TECHNICAL COURSES -->
 
-  <h3>💻 Technical Job-Ready Courses</h3>
-
-  <div class="community-grid">
+  <h3 id="technicalCoursesHeading">💻 Technical Job-Ready Courses</h3>
+<div class="community-grid" id="technicalCoursesGrid">
 
     <article class="community-card">
       <h3>💻 C Programming</h3>
@@ -1201,88 +1200,113 @@
     <article class="community-card">
       <h3>⚡ C++ Programming</h3>
       <p>OOP, STL, algorithms and problem-solving.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="cpp">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>☕ Java Programming</h3>
       <p>Core Java, OOP, collections and application development.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="java">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🐍 Python Programming</h3>
       <p>Python fundamentals, automation and practical projects.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="python">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🌐 HTML</h3>
       <p>Build professional web page structures.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="html">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🎨 CSS</h3>
       <p>Responsive layouts, styling and modern web design.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="css">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>✨ JavaScript</h3>
       <p>Interactive websites and dynamic programming.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="javascript">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🌍 Full Stack Web Development</h3>
       <p>Frontend, backend, databases and deployment.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="fullstack">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🗄️ SQL & Database Management</h3>
       <p>SQL queries, database design and management.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="sql">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🧠 Data Structures & Algorithms</h3>
       <p>Problem-solving and technical interview preparation.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="dsa">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🤖 AI & Machine Learning</h3>
-      <p>Artificial intelligence concepts and practical applications.</p>
+      <button class="secondary-btn" data-job-course="aiml">
+  Explore Course →
+</button>
       <button class="secondary-btn">Explore Course →</button>
     </article>
 
     <article class="community-card">
       <h3>☁️ Cloud Computing</h3>
       <p>Cloud platforms, deployment and infrastructure basics.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="cloud">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🔐 Cybersecurity</h3>
       <p>Network security, ethical practices and protection fundamentals.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="cybersecurity">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🔧 Git & GitHub</h3>
       <p>Version control, collaboration and project management.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="git">
+  Explore Course →
+</button>
     </article>
 
   </div>
 
   <!-- NON-TECHNICAL COURSES -->
 
-  <h3>🌟 Non-Technical Job-Ready Courses</h3>
-
-  <div class="community-grid">
+  <h3 id="nonTechnicalCoursesHeading">🌟 Non-Technical Job-Ready Courses</h3>
+<div class="community-grid" id="nonTechnicalCoursesGrid">
 
     <article class="community-card">
       <h3>💰 Accounting & Finance</h3>
@@ -1343,6 +1367,32 @@
   <button class="secondary-btn" id="backFromCJobReady">
     ← Back
   </button>
+  <!-- COMMON JOB-READY COURSE LEARNING AREA -->
+<div id="jobReadyCourseView" hidden>
+
+  <h2 id="jobReadyCourseTitle"></h2>
+
+  <p id="jobReadyCourseDescription"></p>
+
+  <h3>📚 Professional Learning Path – 10 Levels</h3>
+
+  <div id="jobReadyLevelsGrid" class="community-grid"></div>
+
+  <div id="jobReadyLevelContent" hidden>
+    <h3 id="jobReadyLevelTitle"></h3>
+    <div id="jobReadyLessons"></div>
+    <div id="jobReadyAssessment"></div>
+  </div>
+
+  <button class="secondary-btn" id="backToJobReadyLevels" hidden>
+    ← Back to Levels
+  </button>
+
+  <button class="secondary-btn" id="backToJobReadyCourses">
+    ← Back to All Courses
+  </button>
+
+</div>
 
 </section>
 <!-- C PROGRAMMING - JOB READY COURSE -->

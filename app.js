@@ -11158,6 +11158,136 @@ document.getElementById("backFromCJobReady").addEventListener("click", () => {
 
 });
 // ==========================================
+// COMMON JOB-READY COURSE NAVIGATION
+// ==========================================
+
+const jobReadyCourseCatalog = {
+  cpp: {
+    title: "C++ Programming",
+    description: "Learn OOP, STL, algorithms and problem-solving."
+  },
+  java: {
+    title: "Java Programming",
+    description: "Learn Core Java, OOP, collections and application development."
+  },
+  python: {
+    title: "Python Programming",
+    description: "Learn Python fundamentals, automation and practical projects."
+  },
+  html: {
+    title: "HTML",
+    description: "Learn to build professional web page structures."
+  },
+  css: {
+    title: "CSS",
+    description: "Learn responsive layouts and modern web design."
+  },
+  javascript: {
+    title: "JavaScript",
+    description: "Learn interactive websites and dynamic programming."
+  },
+  fullstack: {
+    title: "Full Stack Web Development",
+    description: "Learn frontend, backend, databases and deployment."
+  },
+  sql: {
+    title: "SQL & Database Management",
+    description: "Learn SQL queries, database design and management."
+  },
+  dsa: {
+    title: "Data Structures & Algorithms",
+    description: "Develop problem-solving and interview skills."
+  },
+  aiml: {
+    title: "AI & Machine Learning",
+    description: "Explore artificial intelligence and machine learning."
+  },
+  cloud: {
+    title: "Cloud Computing",
+    description: "Learn cloud platforms, deployment and infrastructure."
+  },
+  cybersecurity: {
+    title: "Cybersecurity",
+    description: "Learn network security and protection fundamentals."
+  },
+  git: {
+    title: "Git & GitHub",
+    description: "Learn version control and collaborative development."
+  }
+};
+
+// Open selected technical course
+document.querySelectorAll("[data-job-course]").forEach(button => {
+
+  button.addEventListener("click", () => {
+
+    const courseKey = button.dataset.jobCourse;
+    const course = jobReadyCourseCatalog[courseKey];
+
+    if (!course) return;
+
+    document.getElementById("technicalCoursesHeading").hidden = true;
+    document.getElementById("technicalCoursesGrid").hidden = true;
+
+    document.getElementById("nonTechnicalCoursesHeading").hidden = true;
+    document.getElementById("nonTechnicalCoursesGrid").hidden = true;
+
+    document.getElementById("backFromCJobReady").hidden = true;
+
+    document.getElementById("jobReadyCourseTitle").textContent =
+      course.title;
+
+    document.getElementById("jobReadyCourseDescription").textContent =
+      course.description;
+
+    document.getElementById("jobReadyCourseView").hidden = false;
+
+    document.getElementById("jobReadyLevelContent").hidden = true;
+
+    document.getElementById("jobReadyLevelsGrid").innerHTML = "";
+
+    for (let level = 1; level <= 10; level++) {
+
+      document.getElementById("jobReadyLevelsGrid").innerHTML += `
+        <article class="community-card">
+          <h3>Level ${level}</h3>
+          <p>${course.title} – Professional Learning</p>
+          <button class="primary-btn" disabled>
+            Course Content Coming Soon
+          </button>
+        </article>
+      `;
+
+    }
+
+    document.getElementById("jobReadyCourseView").scrollIntoView({
+      behavior: "smooth"
+    });
+
+  });
+
+});
+
+// Back to all courses
+document.getElementById("backToJobReadyCourses")
+  .addEventListener("click", () => {
+
+    document.getElementById("jobReadyCourseView").hidden = true;
+
+    document.getElementById("technicalCoursesHeading").hidden = false;
+    document.getElementById("technicalCoursesGrid").hidden = false;
+
+    document.getElementById("nonTechnicalCoursesHeading").hidden = false;
+    document.getElementById("nonTechnicalCoursesGrid").hidden = false;
+
+    document.getElementById("backFromCJobReady").hidden = false;
+
+    document.getElementById("cJobReadySection").scrollIntoView({
+      behavior: "smooth"
+    });
+
+  });
+// ==========================================
 // C PROGRAMMING - STUDENT DEVELOPMENT JOURNEY
 // ==========================================
 
@@ -11970,5 +12100,3 @@ async function restoreCJobProgress() {
   console.log("C Job-Ready progress restored:", cJobProgress);
 }
 
-restoreCJobProgress();
-console.log("Restore function type:", typeof restoreCJobProgress);
