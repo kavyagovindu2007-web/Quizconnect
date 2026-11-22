@@ -11055,7 +11055,7 @@ document.getElementById("studentProfileForm").addEventListener("submit", async (
 // LEARN NEW SKILLS - NAVIGATION
 // ==================================
 
-document.getElementById("learnNewSkillsBtn").addEventListener("click", () => {
+document.getElementById("learnNewSkillsBtn")?.addEventListener("click", () => {
 
   document.getElementById("studentJourneySection").hidden = true;
 
@@ -11069,7 +11069,7 @@ document.getElementById("learnNewSkillsBtn").addEventListener("click", () => {
 
 // Back to Student Development Journey
 
-document.getElementById("backFromLearnNewSkills").addEventListener("click", () => {
+document.getElementById("backFromLearnNewSkills")?.addEventListener("click", () => {
 
   document.getElementById("learnNewSkillsSection").hidden = true;
 
@@ -11105,6 +11105,52 @@ document.getElementById("backFromProgramming").addEventListener("click", () => {
   document.getElementById("learnNewSkillsSection").hidden = false;
 
   document.getElementById("learnNewSkillsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// ==========================================
+// JOB-READY COURSE NAVIGATION
+// ==========================================
+
+let jobReadyPreviousSection = "programmingSection";
+
+// Open Job-Ready Course from Programming Languages
+document.getElementById("startCJobReadyBtn")?.addEventListener("click", () => {
+
+  jobReadyPreviousSection = "programmingSection";
+
+  document.getElementById("programmingSection").hidden = true;
+  document.getElementById("cJobReadySection").hidden = false;
+
+  document.getElementById("cJobReadySection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Open Job-Ready Course from Student Development Journey
+document.getElementById("startJobReadyHubBtn").addEventListener("click", () => {
+
+  jobReadyPreviousSection = "studentJourneySection";
+
+  document.getElementById("studentJourneySection").hidden = true;
+  document.getElementById("cJobReadySection").hidden = false;
+
+  document.getElementById("cJobReadySection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Back to previous section
+document.getElementById("backFromCJobReady").addEventListener("click", () => {
+
+  document.getElementById("cJobReadySection").hidden = true;
+
+  document.getElementById(jobReadyPreviousSection).hidden = false;
+
+  document.getElementById(jobReadyPreviousSection).scrollIntoView({
     behavior: "smooth"
   });
 
@@ -11152,3 +11198,728 @@ document.getElementById("startCLearningBtn").addEventListener("click", async () 
     .scrollIntoView({ behavior: "smooth" });
 
 });
+// ==========================================
+// C PROGRAMMING COURSE NAVIGATION
+// ==========================================
+
+// Open C Programming from Job-Ready Hub
+document.getElementById("openCJobCourseBtn").addEventListener("click", () => {
+
+  document.getElementById("cJobReadySection").hidden = true;
+
+  document.getElementById("cJobCourseSection").hidden = false;
+
+  document.getElementById("cJobCourseSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Back to Job-Ready Hub
+document.getElementById("backFromCJobCourse").addEventListener("click", () => {
+
+  document.getElementById("cJobCourseSection").hidden = true;
+
+  document.getElementById("cJobReadySection").hidden = false;
+
+  document.getElementById("cJobReadySection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// ======================================================
+// QUIZCONNECT - C PROGRAMMING JOB-READY COURSE
+// COMPLETE 10 LEVEL LEARNING SYSTEM
+// ======================================================
+
+const cJobCourseSection = document.getElementById("cJobCourseSection");
+const cJobLevelContent = document.getElementById("cJobLevelContent");
+const cJobLevelTitle = document.getElementById("cJobLevelTitle");
+const cJobLevelLessons = document.getElementById("cJobLevelLessons");
+
+const cJobLevelsGrid = document.querySelector(
+  "#cJobCourseSection .community-grid"
+);
+
+const cJobProgressKey = "quizconnect_c_job_ready_progress_v1";
+
+let cJobProgress = {
+  unlockedLevel: 1,
+  completedLevels: [],
+  scores: {}
+};
+
+// Restore saved progress
+try {
+  const saved = JSON.parse(localStorage.getItem(cJobProgressKey));
+
+  if (saved) {
+    cJobProgress = {
+      unlockedLevel: Math.min(10, Math.max(1, saved.unlockedLevel || 1)),
+      completedLevels: Array.isArray(saved.completedLevels)
+        ? saved.completedLevels
+        : [],
+      scores: saved.scores || {}
+    };
+  }
+} catch (error) {
+  console.warn("Could not restore C Job-Ready progress.", error);
+}
+
+function saveCJobProgress() {
+  localStorage.setItem(
+    cJobProgressKey,
+    JSON.stringify(cJobProgress)
+  );
+}
+
+// ======================================================
+// COURSE CONTENT - ALL 10 LEVELS
+// ======================================================
+
+const cJobCourseData = [
+
+{
+  title: "C Fundamentals & Environment Setup",
+
+  lessons: [
+    {
+      title: "Introduction to C",
+      text: "C is a general-purpose, procedural programming language. It is widely used in operating systems, embedded systems, compilers and performance-oriented software. It gives programmers control over memory and system resources."
+    },
+    {
+      title: "Setting Up the Environment",
+      text: "A C development environment contains a text editor or IDE and a compiler. GCC is a popular compiler. Save source files with the .c extension, compile them and execute the generated program."
+    },
+    {
+      title: "Your First C Program",
+      text: "Understand the header file, main function, printf statement, braces and return statement.",
+      code: '#include <stdio.h>\n\nint main() {\n    printf("Hello, World!");\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Write a program to display your name, college and branch.",
+
+  assignment: "Create a personal introduction program that displays your name, college, branch and career goal.",
+
+  questions: [
+    ["Who developed the C programming language?", ["James Gosling", "Dennis Ritchie", "Bjarne Stroustrup", "Guido van Rossum"], 1, "Dennis Ritchie developed C at Bell Labs."],
+    ["Which header file is used for printf()?", ["stdlib.h", "string.h", "stdio.h", "math.h"], 2, "stdio.h provides standard input and output functions."],
+    ["Where does execution of a C program begin?", ["printf()", "main()", "return()", "include()"], 1, "Execution begins in the main function."],
+    ["Which extension is normally used for C source files?", [".java", ".py", ".html", ".c"], 3, "C source files normally use the .c extension."],
+    ["What does printf() do?", ["Reads a file", "Displays output", "Declares variables", "Stops execution"], 1, "printf() displays formatted output."]
+  ]
+},
+
+{
+  title: "Variables, Data Types & Memory",
+
+  lessons: [
+    {
+      title: "Variables and Constants",
+      text: "A variable is a named memory location used to store a value. Variables must be declared with a data type. Constants represent values that should not be changed during program execution."
+    },
+    {
+      title: "Data Types",
+      text: "C provides int for integers, char for characters, float for decimal values and double for higher-precision floating-point values."
+    },
+    {
+      title: "Memory and sizeof",
+      text: "Variables occupy memory according to their data types and implementation. The sizeof operator returns the size of a type or object in bytes.",
+      code: '#include <stdio.h>\n\nint main() {\n    int age = 20;\n    float marks = 85.5;\n\n    printf("%d\\n", age);\n    printf("%.1f\\n", marks);\n    printf("%zu", sizeof(age));\n\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Declare variables to store your age, percentage, name initial and college name.",
+
+  assignment: "Create a student information program using appropriate C data types.",
+
+  questions: [
+    ["Which data type stores whole numbers?", ["float", "int", "char", "double"], 1, "int stores integer values."],
+    ["Which data type stores a single character?", ["int", "float", "char", "double"], 2, "char stores character values."],
+    ["Which keyword makes a variable read-only after initialization?", ["static", "const", "extern", "register"], 1, "const prevents modification through that identifier."],
+    ["Which operator returns the size of a variable?", ["length", "size", "sizeof", "memory"], 2, "sizeof returns size in bytes."],
+    ["Which format specifier is commonly used for int?", ["%f", "%c", "%d", "%s"], 2, "%d is commonly used to print an int."]
+  ]
+},
+
+{
+  title: "Operators & Problem-Solving",
+
+  lessons: [
+    {
+      title: "Arithmetic Operators",
+      text: "Arithmetic operators include +, -, *, / and %. They perform addition, subtraction, multiplication, division and remainder operations."
+    },
+    {
+      title: "Relational and Logical Operators",
+      text: "Relational operators compare values. Logical operators &&, || and ! combine or reverse logical conditions."
+    },
+    {
+      title: "Assignment and Increment Operators",
+      text: "Assignment operators store values. Increment and decrement operators increase or decrease a variable by one.",
+      code: '#include <stdio.h>\n\nint main() {\n    int a = 10, b = 3;\n    printf("%d\\n", a + b);\n    printf("%d\\n", a % b);\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Write a program to calculate the sum, difference, product and remainder of two integers.",
+
+  assignment: "Build a simple calculator using arithmetic operators.",
+
+  questions: [
+    ["Which operator calculates the remainder?", [" / ", "%", "*", "+"], 1, "% is the modulus operator."],
+    ["Which operator means logical AND?", ["||", "!", "&&", "&"], 2, "&& represents logical AND."],
+    ["Which operator checks equality?", ["=", "==", "!=", ">"], 1, "== compares two values."],
+    ["What does ++ do?", ["Subtracts one", "Adds one", "Multiplies by two", "Divides by two"], 1, "The increment operator increases a value by one."]
+  ]
+},
+
+{
+  title: "Conditional Statements",
+
+  lessons: [
+    {
+      title: "if Statement",
+      text: "The if statement executes a block of code when a specified condition is true."
+    },
+    {
+      title: "if-else and else-if",
+      text: "if-else selects between two alternatives. An else-if ladder checks multiple conditions in sequence."
+    },
+    {
+      title: "switch Statement",
+      text: "The switch statement selects a matching case from multiple choices. The break statement prevents unintended fall-through.",
+      code: '#include <stdio.h>\n\nint main() {\n    int age = 20;\n\n    if (age >= 18) {\n        printf("Eligible");\n    } else {\n        printf("Not eligible");\n    }\n\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Write a program to check whether a number is positive, negative or zero.",
+
+  assignment: "Create a student grading system using if-else conditions.",
+
+  questions: [
+    ["Which statement is used for decision-making?", ["for", "if", "while", "goto"], 1, "if executes code based on a condition."],
+    ["Which keyword handles the alternative branch?", ["case", "else", "break", "continue"], 1, "else handles the alternative path."],
+    ["Which statement supports multiple fixed-value choices?", ["switch", "while", "do", "return"], 0, "switch selects among matching cases."],
+    ["Which keyword exits a switch case?", ["stop", "exit", "break", "continue"], 2, "break exits the switch statement."],
+    ["What is the result of 5 > 3?", ["False", "True", "0", "Error"], 1, "5 is greater than 3."]
+  ]
+},
+
+{
+  title: "Loops & Coding Challenges",
+
+  lessons: [
+    {
+      title: "for Loop",
+      text: "A for loop is useful when the number of repetitions is known. It contains initialization, a condition and an update expression."
+    },
+    {
+      title: "while and do-while",
+      text: "A while loop checks its condition before execution. A do-while loop executes its body at least once before checking the condition."
+    },
+    {
+      title: "break and continue",
+      text: "break terminates a loop. continue skips the remaining statements in the current iteration and proceeds to the next iteration.",
+      code: '#include <stdio.h>\n\nint main() {\n    for (int i = 1; i <= 5; i++) {\n        printf("%d\\n", i);\n    }\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Print numbers from 1 to 100 and calculate their sum.",
+
+  assignment: "Create a multiplication table generator and a number guessing game.",
+
+  questions: [
+    ["Which loop is suitable when repetitions are known?", ["for", "switch", "if", "goto"], 0, "for loops commonly handle a known number of repetitions."],
+    ["Which loop executes at least once?", ["for", "while", "do-while", "none"], 2, "do-while checks its condition after executing the body."],
+    ["Which keyword terminates a loop?", ["continue", "break", "skip", "next"], 1, "break exits the loop."],
+    ["What does continue do?", ["Ends the program", "Exits the loop", "Skips the current iteration", "Restarts the computer"], 2, "continue skips to the next iteration."],
+    ["What is an infinite loop?", ["A loop that never executes", "A loop that never ends", "A loop with one iteration", "A syntax error"], 1, "An infinite loop continues without reaching its exit condition."]
+  ]
+},
+
+{
+  title: "Functions & Modular Programming",
+
+  lessons: [
+    {
+      title: "Introduction to Functions",
+      text: "Functions divide a program into reusable blocks. They improve organization, readability, testing and maintenance."
+    },
+    {
+      title: "Function Declaration and Definition",
+      text: "A function declaration tells the compiler about the function. Its definition contains the statements that perform the task."
+    },
+    {
+      title: "Parameters and Return Values",
+      text: "Functions can receive arguments and return values. C passes ordinary arguments by value.",
+      code: '#include <stdio.h>\n\nint add(int a, int b) {\n    return a + b;\n}\n\nint main() {\n    printf("%d", add(5, 3));\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Create separate functions to calculate the area of a rectangle and a circle.",
+
+  assignment: "Build a menu-driven calculator using user-defined functions.",
+
+  questions: [
+    ["What is a function?", ["A reusable block of code", "A data type", "A compiler", "A loop"], 0, "Functions organize reusable program logic."],
+    ["Which keyword returns a value from a function?", ["break", "return", "continue", "goto"], 1, "return sends a value back to the caller."],
+    ["What is a function prototype?", ["A function call", "A declaration", "A loop", "A variable"], 1, "A prototype declares a function's interface."],
+    ["Which function is the usual entry point?", ["start()", "run()", "main()", "begin()"], 2, "main() is the program entry point."],
+    ["What is recursion?", ["A loop only", "A function calling itself", "A compiler error", "A data type"], 1, "Recursion occurs when a function calls itself."]
+  ]
+},
+
+{
+  title: "Arrays & Strings",
+
+  lessons: [
+    {
+      title: "One-Dimensional Arrays",
+      text: "An array stores multiple elements of the same type in contiguous memory. Array indexing begins at zero."
+    },
+    {
+      title: "Multidimensional Arrays",
+      text: "A two-dimensional array represents tabular data using rows and columns. It is useful for matrices and tables."
+    },
+    {
+      title: "Strings and String Functions",
+      text: "A C string is a character array terminated by the null character '\\0'. The string.h library provides functions such as strlen, strcpy, strcmp and strcat.",
+      code: '#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char name[] = "QuizConnect";\n    printf("%zu", strlen(name));\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Find the largest and smallest elements in an integer array.",
+
+  assignment: "Create a student marks management program using arrays and strings.",
+
+  questions: [
+    ["What is the first valid index of a C array?", ["1", "-1", "0", "2"], 2, "C arrays use zero-based indexing."],
+    ["Which character terminates a C string?", ["\\n", "\\0", "\\t", "\\r"], 1, "The null character terminates a C string."],
+    ["Which header provides strlen()?", ["stdio.h", "stdlib.h", "string.h", "math.h"], 2, "strlen is declared in string.h."],
+    ["How many elements are in int a[5]?", ["4", "5", "6", "Depends on input"], 1, "The array has five elements."],
+    ["Which function compares two strings?", ["strcpy()", "strcat()", "strlen()", "strcmp()"], 3, "strcmp compares two strings."]
+  ]
+},
+
+{
+  title: "Pointers & Dynamic Memory",
+
+  lessons: [
+    {
+      title: "Introduction to Pointers",
+      text: "A pointer is a variable that stores a memory address. The address-of operator & obtains an object's address."
+    },
+    {
+      title: "Pointer Operations",
+      text: "The dereference operator * accesses the value stored at the address held by a pointer. Pointer types should match the objects they point to."
+    },
+    {
+      title: "Dynamic Memory Allocation",
+      text: "malloc, calloc, realloc and free manage dynamically allocated memory. Always check allocation results and release memory when it is no longer needed.",
+      code: '#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    int *p = malloc(sizeof(int));\n\n    if (p == NULL) return 1;\n\n    *p = 25;\n    printf("%d", *p);\n\n    free(p);\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Write a program to swap two integers using pointers.",
+
+  assignment: "Build a dynamic student records program using dynamically allocated memory.",
+
+  questions: [
+    ["What does a pointer store?", ["A character only", "A memory address", "A loop", "A file"], 1, "A pointer stores an address."],
+    ["Which operator gets a variable's address?", ["*", "&", "%", "#"], 1, "& is the address-of operator."],
+    ["Which operator dereferences a pointer?", ["&", "*", "!", "%"], 1, "* accesses the pointed-to value."],
+    ["Which function releases allocated memory?", ["malloc()", "calloc()", "free()", "sizeof()"], 2, "free releases dynamically allocated memory."],
+    ["What should you check after malloc()?", ["Whether it returned NULL", "Whether it printed text", "Whether it changed the compiler", "Nothing"], 0, "Allocation can fail, so check for NULL."]
+  ]
+},
+
+{
+  title: "Structures, File Handling & Debugging",
+
+  lessons: [
+    {
+      title: "Structures",
+      text: "A structure groups related variables of different data types under one name. Structure members are accessed using the dot operator."
+    },
+    {
+      title: "File Handling",
+      text: "C uses FILE pointers and functions such as fopen, fprintf, fscanf, fgets and fclose to work with files. Always check whether fopen succeeded."
+    },
+    {
+      title: "Debugging and Error Handling",
+      text: "Debugging involves identifying and correcting errors. Compiler warnings, careful testing and debugging tools help locate problems.",
+      code: '#include <stdio.h>\n\nstruct Student {\n    int id;\n    char grade;\n};\n\nint main() {\n    struct Student s = {101, \'A\'};\n    printf("%d %c", s.id, s.grade);\n    return 0;\n}'
+    }
+  ],
+
+  exercise: "Create a structure to store student ID, name and marks.",
+
+  assignment: "Build a student record management program with file storage and retrieval.",
+
+  questions: [
+    ["Which keyword defines a structure?", ["class", "struct", "record", "object"], 1, "struct defines a structure."],
+    ["Which operator accesses a structure member?", [".", "->", "&", "%"], 0, "The dot operator accesses a member through a structure variable."],
+    ["Which function opens a file?", ["fopen()", "fclose()", "fprintf()", "fread()"], 0, "fopen opens a file."],
+    ["Which function closes a file?", ["fopen()", "fclose()", "printf()", "malloc()"], 1, "fclose closes an opened file."],
+    ["What is debugging?", ["Writing comments", "Finding and fixing errors", "Installing software", "Deleting files"], 1, "Debugging identifies and corrects program errors."]
+  ]
+},
+
+{
+  title: "Industry-Style Projects",
+
+  lessons: [
+    {
+      title: "Project Planning",
+      text: "Identify the problem, define requirements, design the program, divide work into functions and plan how data will be stored."
+    },
+    {
+      title: "Building Reliable Applications",
+      text: "Validate user input, handle file errors, manage memory carefully and test normal as well as unusual inputs."
+    },
+    {
+      title: "Code Quality and Documentation",
+      text: "Use meaningful names, consistent formatting, modular functions and comments where necessary. Document how to compile and run your project."
+    }
+  ],
+
+  exercise: "Design a menu-driven application with at least three operations.",
+
+  assignment: "Complete one industry-style C project and document its problem statement, features, source code, test cases and output.",
+
+  questions: [
+    ["What is the first step in project development?", ["Coding immediately", "Understanding requirements", "Deleting files", "Deploying"], 1, "Requirements should be understood before implementation."],
+    ["Why are functions useful in large projects?", ["They reduce organization", "They improve modularity", "They remove all bugs", "They replace data types"], 1, "Functions divide a program into manageable components."],
+    ["What is input validation?", ["Checking user input", "Deleting input", "Ignoring errors", "Changing the compiler"], 0, "Input validation checks whether entered data is acceptable."],
+    ["Why should allocated memory be freed?", ["To release resources", "To increase file size", "To stop compilation", "To change a variable"], 0, "free releases dynamically allocated memory."],
+    ["What should project documentation contain?", ["Only the title", "Requirements, features and usage instructions", "Only screenshots", "No information"], 1, "Documentation explains the project and how to use it."]
+  ]
+}
+
+];
+
+// ======================================================
+// UPDATE LEVEL LOCKS AND COMPLETION STATUS
+// ======================================================
+
+function updateCJobLevelButtons() {
+
+  document.querySelectorAll("[data-c-job-level]").forEach(button => {
+
+    const level = Number(button.dataset.cJobLevel);
+
+    const completed = cJobProgress.completedLevels.includes(level);
+
+    button.disabled = level > cJobProgress.unlockedLevel;
+
+    if (button.dataset.originalText === undefined) {
+      button.dataset.originalText = button.textContent;
+    }
+
+    if (completed) {
+      button.textContent = `✅ Review Level ${level}`;
+    } else if (button.disabled) {
+      button.textContent = `🔒 Level ${level} Locked`;
+    } else {
+      button.textContent = `Start Level ${level}`;
+    }
+
+  });
+
+}
+
+// ======================================================
+// OPEN ANY UNLOCKED LEVEL
+// ======================================================
+
+function openCJobLevel(levelNumber) {
+
+  if (
+    levelNumber < 1 ||
+    levelNumber > 10 ||
+    levelNumber > cJobProgress.unlockedLevel
+  ) {
+    return;
+  }
+
+  const level = cJobCourseData[levelNumber - 1];
+
+  cJobLevelsGrid.hidden = true;
+  cJobLevelContent.hidden = false;
+
+  cJobLevelTitle.textContent =
+    `Level ${levelNumber}: ${level.title}`;
+
+  let html = "";
+
+  level.lessons.forEach((lesson, index) => {
+
+    html += `
+      <article class="community-card">
+        <h3>📘 Lesson ${index + 1}: ${lesson.title}</h3>
+        <p>${lesson.text}</p>
+
+        ${lesson.code ? `
+          <pre><code>${lesson.code
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")}</code></pre>
+        ` : ""}
+      </article>
+    `;
+
+  });
+
+  html += `
+    <article class="community-card">
+      <h3>📝 Practical Exercise</h3>
+      <p>${level.exercise}</p>
+    </article>
+
+    <article class="community-card">
+      <h3>🎯 Level ${levelNumber} Assignment</h3>
+      <p>${level.assignment}</p>
+    </article>
+
+    <article class="community-card">
+      <h3>🧠 Level ${levelNumber} Assessment</h3>
+      <p>Answer all five questions. You need at least 4 correct answers to pass.</p>
+
+      <button class="primary-btn" id="startCJobAssessment">
+        Start Assessment →
+      </button>
+    </article>
+
+    <div id="cJobAssessmentArea"></div>
+  `;
+
+  cJobLevelLessons.innerHTML = html;
+
+  document.getElementById("startCJobAssessment")
+    .addEventListener("click", () => {
+      startCJobAssessment(levelNumber);
+    });
+
+  cJobLevelContent.scrollIntoView({
+    behavior: "smooth"
+  });
+
+}
+
+// ======================================================
+// LEVEL ASSESSMENT
+// ======================================================
+
+function startCJobAssessment(levelNumber) {
+
+  const questions = cJobCourseData[levelNumber - 1].questions;
+
+  const area = document.getElementById("cJobAssessmentArea");
+
+  let html = `
+    <h2>Level ${levelNumber} Assessment</h2>
+    <p>Choose one correct answer for each question.</p>
+
+    <form id="cJobAssessmentForm">
+  `;
+
+  questions.forEach((question, index) => {
+
+    html += `
+      <article class="community-card">
+        <h3>Question ${index + 1}: ${question[0]}</h3>
+
+        ${question[1].map((option, optionIndex) => `
+          <label style="display:block; margin:10px 0;">
+            <input
+              type="radio"
+              name="cJobQuestion${index}"
+              value="${optionIndex}"
+              required
+            >
+            ${option}
+          </label>
+        `).join("")}
+
+      </article>
+    `;
+
+  });
+
+  html += `
+      <button type="submit" class="primary-btn">
+        Submit Assessment
+      </button>
+    </form>
+  `;
+
+  area.innerHTML = html;
+
+  document.getElementById("cJobAssessmentForm")
+    .addEventListener("submit", event => {
+
+      event.preventDefault();
+
+      const form = event.target;
+
+      let score = 0;
+
+      let feedback = "";
+
+      questions.forEach((question, index) => {
+
+        const selected = Number(
+          new FormData(form).get(`cJobQuestion${index}`)
+        );
+
+        const correct = question[2];
+
+        const isCorrect = selected === correct;
+
+        if (isCorrect) {
+          score++;
+        }
+
+        feedback += `
+          <article class="community-card">
+            <h3>
+              ${isCorrect ? "✅ Correct" : "❌ Incorrect"}:
+              ${question[0]}
+            </h3>
+
+            <p><strong>Correct answer:</strong>
+              ${question[1][correct]}
+            </p>
+
+            <p>${question[3]}</p>
+          </article>
+        `;
+
+      });
+
+      const passed = score >= 4;
+
+      cJobProgress.scores[levelNumber] = score;
+
+      if (passed) {
+
+        if (!cJobProgress.completedLevels.includes(levelNumber)) {
+          cJobProgress.completedLevels.push(levelNumber);
+        }
+
+        if (levelNumber < 10) {
+          cJobProgress.unlockedLevel = Math.max(
+            cJobProgress.unlockedLevel,
+            levelNumber + 1
+          );
+        }
+
+        saveCJobProgress();
+        updateCJobLevelButtons();
+
+      }
+
+      area.innerHTML = `
+        <article class="community-card">
+          <h2>${passed ? "🎉 Assessment Passed!" : "📚 Keep Practising!"}</h2>
+
+          <h3>Your Score: ${score}/5</h3>
+
+          <p>${passed
+            ? "Congratulations! You have passed this level."
+            : "You need at least 4/5 to unlock the next level. Review the lessons and try again."
+          }</p>
+
+          <p>
+            ${passed && levelNumber < 10
+              ? `🔓 Level ${levelNumber + 1} is now unlocked!`
+              : passed
+                ? "🏆 Congratulations! You completed all 10 C Programming levels!"
+                : "You can retake this assessment whenever you are ready."
+            }
+          </p>
+        </article>
+
+        ${feedback}
+
+        <button class="primary-btn" id="retryCJobAssessment">
+          ${passed ? "Retake Assessment" : "Try Again"}
+        </button>
+
+        <button class="secondary-btn" id="returnCJobLevels">
+          Back to C Programming Levels
+        </button>
+
+        ${passed && levelNumber < 10 ? `
+          <button class="primary-btn" id="continueCJobNextLevel">
+            Continue to Level ${levelNumber + 1} →
+          </button>
+        ` : ""}
+      `;
+
+      document.getElementById("retryCJobAssessment")
+        .addEventListener("click", () => {
+          startCJobAssessment(levelNumber);
+        });
+
+      document.getElementById("returnCJobLevels")
+        .addEventListener("click", returnToCJobLevels);
+
+      if (passed && levelNumber < 10) {
+
+        document.getElementById("continueCJobNextLevel")
+          .addEventListener("click", () => {
+            openCJobLevel(levelNumber + 1);
+          });
+
+      }
+
+      area.scrollIntoView({
+        behavior: "smooth"
+      });
+
+    });
+
+}
+
+// ======================================================
+// LEVEL BUTTON EVENT LISTENERS
+// ======================================================
+
+document.querySelectorAll("[data-c-job-level]").forEach(button => {
+
+  button.addEventListener("click", () => {
+
+    const level = Number(button.dataset.cJobLevel);
+
+    openCJobLevel(level);
+
+  });
+
+});
+
+// ======================================================
+// BACK TO LEVELS
+// ======================================================
+
+function returnToCJobLevels() {
+
+  cJobLevelContent.hidden = true;
+  cJobLevelsGrid.hidden = false;
+
+  updateCJobLevelButtons();
+
+  cJobCourseSection.scrollIntoView({
+    behavior: "smooth"
+  });
+
+}
+
+document.getElementById("backToCJobLevels")
+  .addEventListener("click", returnToCJobLevels);
+
+// Initial level status
+updateCJobLevelButtons();
+
+console.log("C Job-Ready Course: 10 levels loaded.");
