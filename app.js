@@ -11004,3 +11004,49 @@ window.addEventListener("beforeunload", function (event) {
   }
 
 });
+// ==================================
+// STUDENT PROFILE - SAVE DETAILS
+// ==================================
+
+document.getElementById("studentProfileForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const message = document.getElementById("profileMessage");
+  message.textContent = "Saving your profile...";
+
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    message.textContent = "Please log in first.";
+    return;
+  }
+
+  const { data: existingProfile } = await supabaseClient
+    .from("student_profiles")
+    .select("full_name")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const profileData = {
+    user_id: user.id,
+    full_name: existingProfile?.full_name || user.user_metadata?.full_name || user.email,
+    education: document.getElementById("education").value,
+    study_year: document.getElementById("studyYear").value,
+    career_interest: document.getElementById("careerInterest").value,
+    career_goal: document.getElementById("careerGoal").value.trim(),
+    skill_level: document.getElementById("skillLevel").value
+  };
+
+  const { error } = await supabaseClient
+    .from("student_profiles")
+    .upsert(profileData, { onConflict: "user_id" });
+
+  if (error) {
+    console.error("Profile save error:", error);
+    message.textContent = "Unable to save profile. Please try again.";
+    return;
+  }
+
+  message.textContent = "✅ Your student profile has been saved successfully!";
+});
