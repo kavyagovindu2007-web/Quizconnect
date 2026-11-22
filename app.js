@@ -11050,3 +11050,32 @@ document.getElementById("studentProfileForm").addEventListener("submit", async (
 
   message.textContent = "✅ Your student profile has been saved successfully!";
 });
+// ==================================
+// LEARN NEW SKILLS - NAVIGATION
+// ==================================
+
+document.getElementById("learnNewSkillsBtn").addEventListener("click", () => {
+
+  document.getElementById("studentJourneySection").hidden = true;
+
+  document.getElementById("learnNewSkillsSection").hidden = false;
+
+  document.getElementById("learnNewSkillsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Back to Student Development Journey
+
+document.getElementById("backFromLearnNewSkills").addEventListener("click", () => {
+
+  document.getElementById("learnNewSkillsSection").hidden = true;
+
+  document.getElementById("studentJourneySection").hidden = false;
+
+  document.getElementById("studentJourneySection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
