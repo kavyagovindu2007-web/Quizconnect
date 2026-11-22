@@ -4609,69 +4609,73 @@ async function finishWebDevelopmentExamination() {
 
   // CERTIFICATE GENERATION
 
-  let certificateAwarded = false;
+let certificateAwarded = false;
 
-  if (score >= 45) {
+if (score >= 45) {
 
-    const studentName =
-      user.user_metadata?.full_name || user.email;
+  const studentName =
+    user.user_metadata?.full_name || user.email;
 
-    const { data: existingCertificate, error: certificateFetchError } =
-      await supabaseClient
+  const { data: existingCertificate, error: certificateFetchError } =
+    await supabaseClient
+      .from("certificates")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("exam_name", "Web Development Examination")
+      .maybeSingle();
+
+  if (certificateFetchError) {
+
+    console.error(
+      "Web Development certificate lookup error:",
+      certificateFetchError
+    );
+
+  } else if (
+    !existingCertificate ||
+    percentage > Number(existingCertificate.percentage) ||
+    (
+      percentage === Number(existingCertificate.percentage) &&
+      score > Number(existingCertificate.score)
+    )
+  ) {
+
+    const certificateData = {
+      user_id: user.id,
+      student_name: studentName,
+      exam_name: "Web Development Examination",
+      score: score,
+      total_questions: totalQuestions,
+      percentage: percentage
+    };
+
+    let certificateError;
+
+    if (existingCertificate) {
+
+      const { error } = await supabaseClient
         .from("certificates")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("exam_name", "Web Development Examination")
-        .maybeSingle();
+        .update(certificateData)
+        .eq("certificate_id", existingCertificate.certificate_id);
 
-    if (certificateFetchError) {
+      certificateError = error;
 
-      console.error("Web Development certificate lookup error:", certificateFetchError);
+    } else {
 
-    } else if (
-      !existingCertificate ||
-      score > existingCertificate.score
-    ) {
+      const { error } = await supabaseClient
+        .from("certificates")
+        .insert(certificateData);
 
-      const certificateData = {
-        user_id: user.id,
-        student_name: studentName,
-        exam_name: "Web Development Examination",
-        score: score,
-        total_questions: totalQuestions,
-        percentage: percentage
-      };
+      certificateError = error;
 
-      let certificateError;
+    }
 
-      if (existingCertificate) {
+    if (certificateError) {
 
-        const { error } = await supabaseClient
-          .from("certificates")
-          .update(certificateData)
-          .eq("certificate_id", existingCertificate.certificate_id);
-
-        certificateError = error;
-
-      } else {
-
-        const { error } = await supabaseClient
-          .from("certificates")
-          .insert(certificateData);
-
-        certificateError = error;
-
-      }
-
-      if (certificateError) {
-
-        console.error("Web Development certificate creation error:", certificateError);
-
-      } else {
-
-        certificateAwarded = true;
-
-      }
+      console.error(
+        "Web Development certificate save error:",
+        certificateError
+      );
 
     } else {
 
@@ -4679,8 +4683,13 @@ async function finishWebDevelopmentExamination() {
 
     }
 
+  } else {
+
+    certificateAwarded = true;
+
   }
 
+}
   // DISPLAY EXAMINATION RESULT
 
   const resultContainer = document.getElementById(
