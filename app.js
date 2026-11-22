@@ -3570,43 +3570,47 @@ async function finishPythonExamination() {
 
       let certificateError;
 
-      if (existingCertificate) {
+if (existingCertificate) {
 
-        const { error } = await supabaseClient
-          .from("certificates")
-          .update(certificateData)
-          .eq("certificate_id", existingCertificate.certificate_id);
+  console.log("Existing certificate:", existingCertificate);
 
-        certificateError = error;
+  const { error } = await supabaseClient
+    .from("certificates")
+    .update(certificateData)
+    .eq("certificate_id", existingCertificate.certificate_id);
 
-      } else {
+  console.log("Certificate update response:", error);
+  console.log("Updated certificate data:", certificateData);
 
-        const { error } = await supabaseClient
-          .from("certificates")
-          .insert(certificateData);
+  certificateError = error;
 
-        certificateError = error;
+} else {
 
-      }
+  const { error } = await supabaseClient
+    .from("certificates")
+    .insert(certificateData);
 
-      if (certificateError) {
+  console.log("Certificate insert response:", error);
 
-        console.error("Certificate creation error:", certificateError);
+  certificateError = error;
 
-      } else {
+}
 
-        certificateAwarded = true;
+if (certificateError) {
 
-      }
+  console.error("Certificate creation error:", certificateError);
 
-    } else {
+} else {
 
-      certificateAwarded = true;
+  certificateAwarded = true;
 
-    }
+}
 
-  }
+} else {
 
+  certificateAwarded = true;
+
+}
   // DISPLAY EXAMINATION RESULT
 
   const resultContainer = document.getElementById(
@@ -4286,7 +4290,7 @@ async function finishCExamination() {
     </div>
 
   `;
-
+    }
   // VIEW CERTIFICATE
 
   document.getElementById("cViewCertificateBtn")
@@ -4653,10 +4657,15 @@ if (score >= 45) {
 
     if (existingCertificate) {
 
-      const { error } = await supabaseClient
-        .from("certificates")
-        .update(certificateData)
-        .eq("certificate_id", existingCertificate.certificate_id);
+      console.log("Existing Web Development certificate:", existingCertificate);
+
+const { error } = await supabaseClient
+  .from("certificates")
+  .update(certificateData)
+  .eq("certificate_id", existingCertificate.certificate_id);
+
+console.log("Web Development certificate update response:", error);
+console.log("New certificate data:", certificateData);
 
       certificateError = error;
 
@@ -10789,16 +10798,15 @@ window.addEventListener("beforeunload", function (event) {
   const cExamSection = document.getElementById(
     "cExaminationQuizSection"
   );
+
   const dataStructuresExamSection = document.getElementById(
-  "dataStructuresExaminationQuizSection"
-);
-const webDevelopmentExamSection = document.getElementById(
-  "webDevelopmentExaminationQuizSection"
-);
-const webDevelopmentExamActive =
-  webDevelopmentExamSection &&
-  !webDevelopmentExamSection.hidden &&
-  !webDevelopmentExaminationSubmitted;
+    "dataStructuresExaminationQuizSection"
+  );
+
+  const webDevelopmentExamSection = document.getElementById(
+    "webDevelopmentExaminationQuizSection"
+  );
+
   const javaExamActive =
     javaExamSection &&
     !javaExamSection.hidden &&
@@ -10813,18 +10821,24 @@ const webDevelopmentExamActive =
     cExamSection &&
     !cExamSection.hidden &&
     !cExaminationSubmitted;
-    const dataStructuresExamActive =
-  dataStructuresExamSection &&
-  !dataStructuresExamSection.hidden &&
-  !dataStructuresExaminationSubmitted;
+
+  const dataStructuresExamActive =
+    dataStructuresExamSection &&
+    !dataStructuresExamSection.hidden &&
+    !dataStructuresExaminationSubmitted;
+
+  const webDevelopmentExamActive =
+    webDevelopmentExamSection &&
+    !webDevelopmentExamSection.hidden &&
+    !webDevelopmentExaminationSubmitted;
 
   if (
-  javaExamActive ||
-  pythonExamActive ||
-  cExamActive ||
-  dataStructuresExamActive ||
-  webDevelopmentExamActive
-) {
+    javaExamActive ||
+    pythonExamActive ||
+    cExamActive ||
+    dataStructuresExamActive ||
+    webDevelopmentExamActive
+  ) {
 
     event.preventDefault();
     event.returnValue = "";
