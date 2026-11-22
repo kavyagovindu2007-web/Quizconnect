@@ -1910,7 +1910,559 @@ const cExaminationQuestions = [
 
 console.log("C Examination questions:", cExaminationQuestions.length);
 
+// ==========================================
+// DATA STRUCTURES EXAMINATION - QUESTION BANK
+// ==========================================
 
+const dataStructuresExaminationQuestions = [
+
+  {
+    question: "What is a data structure?",
+    options: ["A programming language", "A way of organizing and storing data", "An operating system", "A database only"],
+    answer: 1
+  },
+  {
+    question: "Which data structure stores elements in contiguous memory locations?",
+    options: ["Linked List", "Tree", "Array", "Graph"],
+    answer: 2
+  },
+  {
+    question: "What is the index of the first element in an array?",
+    options: ["1", "0", "-1", "2"],
+    answer: 1
+  },
+  {
+    question: "Which operation adds an element to an array?",
+    options: ["Insertion", "Deletion", "Searching", "Sorting"],
+    answer: 0
+  },
+  {
+    question: "Which data structure follows the LIFO principle?",
+    options: ["Queue", "Stack", "Array", "Graph"],
+    answer: 1
+  },
+  {
+    question: "What is the time complexity of accessing an array element by index?",
+    options: ["O(n)", "O(log n)", "O(1)", "O(n²)"],
+    answer: 2
+  },
+  {
+    question: "Which data structure stores elements using nodes and pointers?",
+    options: ["Array", "Linked List", "Stack", "Queue"],
+    answer: 1
+  },
+  {
+    question: "What does a node in a singly linked list contain?",
+    options: ["Only data", "Data and a pointer to the next node", "Only an index", "Two arrays"],
+    answer: 1
+  },
+  {
+    question: "Which pointer indicates the end of a singly linked list?",
+    options: ["Head", "Tail", "NULL", "Root"],
+    answer: 2
+  },
+  {
+    question: "Which linked list allows traversal in both directions?",
+    options: ["Singly Linked List", "Doubly Linked List", "Circular Queue", "Stack"],
+    answer: 1
+  },
+  {
+    question: "What is the first node of a linked list called?",
+    options: ["Root", "Head", "Leaf", "Tail"],
+    answer: 1
+  },
+  {
+    question: "Which operation removes a node from a linked list?",
+    options: ["Insertion", "Deletion", "Traversal", "Sorting"],
+    answer: 1
+  },
+  {
+    question: "Which data structure follows the LIFO principle?",
+    options: ["Queue", "Stack", "Tree", "Graph"],
+    answer: 1
+  },
+  {
+    question: "Which operation inserts an element into a stack?",
+    options: ["Pop", "Push", "Dequeue", "Peek"],
+    answer: 1
+  },
+  {
+    question: "Which operation removes the top element from a stack?",
+    options: ["Push", "Pop", "Enqueue", "Search"],
+    answer: 1
+  },
+  {
+    question: "What happens when we try to pop an element from an empty stack?",
+    options: ["Overflow", "Underflow", "Insertion", "Traversal"],
+    answer: 1
+  },
+  {
+    question: "Which data structure is commonly used to evaluate expressions?",
+    options: ["Stack", "Queue", "Graph", "Array only"],
+    answer: 0
+  },
+  {
+    question: "Which principle does a queue follow?",
+    options: ["LIFO", "FIFO", "Random order", "Sorted order"],
+    answer: 1
+  },
+  {
+    question: "Which operation inserts an element into a queue?",
+    options: ["Push", "Pop", "Enqueue", "Dequeue"],
+    answer: 2
+  },
+  {
+    question: "Which operation removes an element from a queue?",
+    options: ["Enqueue", "Dequeue", "Push", "Peek"],
+    answer: 1
+  },
+  {
+    question: "From which end is an element removed in a standard queue?",
+    options: ["Rear", "Front", "Middle", "Any position"],
+    answer: 1
+  },
+  {
+    question: "Which queue connects its last position back to the first position?",
+    options: ["Simple Queue", "Circular Queue", "Priority Stack", "Linear List"],
+    answer: 1
+  },
+  {
+    question: "Which searching algorithm checks elements one by one?",
+    options: ["Binary Search", "Linear Search", "Merge Sort", "Quick Sort"],
+    answer: 1
+  },
+  {
+    question: "What is required before applying binary search?",
+    options: ["Elements must be sorted", "Elements must be duplicated", "Array must be empty", "Elements must be reversed"],
+    answer: 0
+  },
+  {
+    question: "What is the average time complexity of binary search?",
+    options: ["O(n)", "O(n²)", "O(log n)", "O(1)"],
+    answer: 2
+  },
+  {
+    question: "Which searching algorithm is suitable for an unsorted array?",
+    options: ["Binary Search", "Linear Search", "Merge Sort", "Heap Sort"],
+    answer: 1
+  },
+  {
+    question: "Which sorting algorithm repeatedly compares adjacent elements?",
+    options: ["Bubble Sort", "Merge Sort", "Quick Sort", "Selection Sort"],
+    answer: 0
+  },
+  {
+    question: "Which sorting algorithm repeatedly selects the smallest element?",
+    options: ["Bubble Sort", "Selection Sort", "Insertion Sort", "Merge Sort"],
+    answer: 1
+  },
+  {
+    question: "Which sorting algorithm uses the divide-and-conquer technique?",
+    options: ["Bubble Sort", "Selection Sort", "Merge Sort", "Linear Search"],
+    answer: 2
+  },
+  {
+    question: "What is the average time complexity of Merge Sort?",
+    options: ["O(n)", "O(n log n)", "O(n²)", "O(1)"],
+    answer: 1
+  },
+  {
+    question: "Which data structure represents hierarchical relationships?",
+    options: ["Queue", "Stack", "Tree", "Array"],
+    answer: 2
+  },
+  {
+    question: "What is the topmost node of a tree called?",
+    options: ["Leaf", "Root", "Edge", "Child"],
+    answer: 1
+  },
+  {
+    question: "What is a node with no children called?",
+    options: ["Root", "Parent", "Leaf", "Sibling"],
+    answer: 2
+  },
+  {
+    question: "In a binary tree, what is the maximum number of children a node can have?",
+    options: ["1", "2", "3", "4"],
+    answer: 1
+  },
+  {
+    question: "Which traversal visits the root, left subtree, and right subtree?",
+    options: ["Inorder", "Preorder", "Postorder", "Level order"],
+    answer: 1
+  },
+  {
+    question: "Which data structure is commonly used in level-order tree traversal?",
+    options: ["Stack", "Queue", "Hash Table", "Array only"],
+    answer: 1
+  },
+  {
+    question: "Which data structure represents connections between vertices?",
+    options: ["Stack", "Queue", "Graph", "Array"],
+    answer: 2
+  },
+  {
+    question: "What are the connecting links between vertices in a graph called?",
+    options: ["Nodes", "Edges", "Roots", "Leaves"],
+    answer: 1
+  },
+  {
+    question: "Which graph has edges with no direction?",
+    options: ["Directed Graph", "Undirected Graph", "Weighted Tree", "Binary Tree"],
+    answer: 1
+  },
+  {
+    question: "Which algorithm is commonly used for Breadth-First Search?",
+    options: ["Stack", "Queue", "Heap", "Linked List only"],
+    answer: 1
+  },
+  {
+    question: "Which algorithm is commonly used for Depth-First Search?",
+    options: ["Queue", "Stack", "Hash Table", "Priority Queue"],
+    answer: 1
+  },
+  {
+    question: "What is hashing used for?",
+    options: ["Sorting only", "Mapping keys to positions", "Creating trees", "Deleting arrays"],
+    answer: 1
+  },
+  {
+    question: "Which data structure commonly uses a hash function?",
+    options: ["Hash Table", "Stack", "Queue", "Binary Tree only"],
+    answer: 0
+  },
+  {
+    question: "What is a collision in hashing?",
+    options: ["Deleting a key", "Two keys mapping to the same index", "Sorting a table", "Emptying a table"],
+    answer: 1
+  },
+  {
+    question: "Which technique handles collisions using linked lists?",
+    options: ["Linear Search", "Separate Chaining", "Bubble Sort", "Binary Search"],
+    answer: 1
+  },
+  {
+    question: "Which operation is used to find an element in a data structure?",
+    options: ["Insertion", "Searching", "Deletion", "Traversal only"],
+    answer: 1
+  },
+  {
+    question: "What does time complexity describe?",
+    options: ["Memory used by a program", "How execution time grows with input size", "The size of a file", "The number of variables"],
+    answer: 1
+  },
+  {
+    question: "What does space complexity measure?",
+    options: ["Execution speed", "Memory required by an algorithm", "Number of functions", "Network speed"],
+    answer: 1
+  },
+  {
+    question: "Which notation describes an upper bound on algorithm growth?",
+    options: ["Big O", "Big Omega", "Big Theta only", "Little o only"],
+    answer: 0
+  },
+  {
+    question: "Which data structure is suitable for implementing undo operations?",
+    options: ["Queue", "Stack", "Graph", "Hash Table"],
+    answer: 1
+  }
+
+];
+
+console.log(
+  "Data Structures Examination questions:",
+  dataStructuresExaminationQuestions.length
+);
+// ==========================================
+// WEB DEVELOPMENT EXAMINATION - QUESTION BANK
+// ==========================================
+
+const webDevelopmentExaminationQuestions = [
+
+  // HTML FUNDAMENTALS
+
+  {
+    question: "What does HTML stand for?",
+    options: ["Hyper Text Markup Language", "High Text Machine Language", "Hyperlinks Text Management Language", "Home Tool Markup Language"],
+    answer: 0
+  },
+  {
+    question: "Which HTML tag defines the main heading?",
+    options: ["<head>", "<h1>", "<title>", "<header>"],
+    answer: 1
+  },
+  {
+    question: "Which tag is used to create a hyperlink?",
+    options: ["<link>", "<href>", "<a>", "<url>"],
+    answer: 2
+  },
+  {
+    question: "Which HTML attribute specifies an image location?",
+    options: ["alt", "src", "href", "link"],
+    answer: 1
+  },
+  {
+    question: "Which tag creates an ordered list?",
+    options: ["<ul>", "<li>", "<ol>", "<dl>"],
+    answer: 2
+  },
+  {
+    question: "Which HTML element is used to create a table row?",
+    options: ["<td>", "<th>", "<tr>", "<table-row>"],
+    answer: 2
+  },
+  {
+    question: "Which input type is used for email addresses?",
+    options: ["text", "email", "mail", "address"],
+    answer: 1
+  },
+  {
+    question: "Which attribute makes a form field compulsory?",
+    options: ["required", "validate", "important", "mandatory-field"],
+    answer: 0
+  },
+  {
+    question: "Which semantic HTML element represents navigation links?",
+    options: ["<section>", "<nav>", "<article>", "<footer>"],
+    answer: 1
+  },
+  {
+    question: "Which HTML tag is used to play video files?",
+    options: ["<media>", "<movie>", "<video>", "<play>"],
+    answer: 2
+  },
+
+  // CSS FUNDAMENTALS
+
+  {
+    question: "What does CSS stand for?",
+    options: ["Computer Style Sheets", "Cascading Style Sheets", "Creative Styling System", "Colorful Style Syntax"],
+    answer: 1
+  },
+  {
+    question: "Which CSS property changes text color?",
+    options: ["font-style", "background-color", "color", "text-decoration"],
+    answer: 2
+  },
+  {
+    question: "Which symbol selects an HTML element by its ID?",
+    options: [".", "#", "*", "&"],
+    answer: 1
+  },
+  {
+    question: "Which symbol selects elements by class?",
+    options: ["#", ".", "@", "$"],
+    answer: 1
+  },
+  {
+    question: "Which CSS property changes the background color?",
+    options: ["color", "background-color", "bg-style", "background-text"],
+    answer: 1
+  },
+  {
+    question: "Which property controls the size of text?",
+    options: ["font-size", "text-weight", "font-color", "text-style"],
+    answer: 0
+  },
+  {
+    question: "Which CSS layout system is designed for one-dimensional layouts?",
+    options: ["Grid", "Flexbox", "Float", "Position"],
+    answer: 1
+  },
+  {
+    question: "Which CSS property adds space inside an element's border?",
+    options: ["margin", "padding", "spacing", "outline"],
+    answer: 1
+  },
+  {
+    question: "Which CSS property adds space outside an element's border?",
+    options: ["padding", "border", "margin", "width"],
+    answer: 2
+  },
+  {
+    question: "Which CSS rule is used to apply styles based on screen size?",
+    options: ["@keyframes", "@media", "@import", "@font-face"],
+    answer: 1
+  },
+
+  // JAVASCRIPT FUNDAMENTALS
+
+  {
+    question: "Which language is commonly used to add interactivity to web pages?",
+    options: ["HTML", "CSS", "JavaScript", "SQL"],
+    answer: 2
+  },
+  {
+    question: "Which keyword declares a block-scoped variable that can be reassigned?",
+    options: ["const", "let", "static", "define"],
+    answer: 1
+  },
+  {
+    question: "Which keyword declares a variable that cannot be reassigned?",
+    options: ["var", "let", "const", "new"],
+    answer: 2
+  },
+  {
+    question: "Which operator checks both value and type equality?",
+    options: ["=", "==", "===", "!="],
+    answer: 2
+  },
+  {
+    question: "Which symbol is used for single-line comments in JavaScript?",
+    options: ["//", "##", "<!--", "**"],
+    answer: 0
+  },
+  {
+    question: "Which method displays a message in the browser console?",
+    options: ["console.write()", "console.log()", "print.console()", "display()"],
+    answer: 1
+  },
+  {
+    question: "Which method adds an element to the end of an array?",
+    options: ["pop()", "shift()", "push()", "unshift()"],
+    answer: 2
+  },
+  {
+    question: "Which method converts a JSON string into a JavaScript object?",
+    options: ["JSON.stringify()", "JSON.parse()", "JSON.convert()", "JSON.object()"],
+    answer: 1
+  },
+  {
+    question: "Which statement is used to make decisions in JavaScript?",
+    options: ["if", "repeat", "define", "include"],
+    answer: 0
+  },
+  {
+    question: "Which loop executes a block while a condition is true?",
+    options: ["if", "while", "switch", "break"],
+    answer: 1
+  },
+
+  // DOM AND EVENTS
+
+  {
+    question: "What does DOM stand for?",
+    options: ["Document Object Model", "Data Object Management", "Digital Ordinance Model", "Document Oriented Method"],
+    answer: 0
+  },
+  {
+    question: "Which method selects an element using its ID?",
+    options: ["getElementsByClassName()", "queryAll()", "getElementById()", "selectId()"],
+    answer: 2
+  },
+  {
+    question: "Which property changes the text content of an element?",
+    options: ["innerText", "src", "href", "valueOnly"],
+    answer: 0
+  },
+  {
+    question: "Which method attaches an event handler to an element?",
+    options: ["addEventListener()", "attachStyle()", "createEvent()", "eventHandler()"],
+    answer: 0
+  },
+  {
+    question: "Which event occurs when a user clicks an element?",
+    options: ["mouseover", "change", "click", "submit"],
+    answer: 2
+  },
+  {
+    question: "Which event is commonly used when a form is submitted?",
+    options: ["load", "submit", "scroll", "resize"],
+    answer: 1
+  },
+  {
+    question: "Which method creates a new HTML element using JavaScript?",
+    options: ["document.createElement()", "document.newTag()", "document.addTag()", "document.make()"],
+    answer: 0
+  },
+
+  // BACKEND AND APIs
+
+  {
+    question: "What is the main purpose of backend development?",
+    options: ["Designing colors", "Managing server-side logic and data", "Creating images only", "Writing HTML headings"],
+    answer: 1
+  },
+  {
+    question: "What does API stand for?",
+    options: ["Application Programming Interface", "Advanced Program Internet", "Application Process Integration", "Automated Programming Instruction"],
+    answer: 0
+  },
+  {
+    question: "Which HTTP method is commonly used to retrieve data?",
+    options: ["POST", "DELETE", "GET", "PATCH"],
+    answer: 2
+  },
+  {
+    question: "Which HTTP method is commonly used to create or submit data?",
+    options: ["GET", "POST", "HEAD", "OPTIONS"],
+    answer: 1
+  },
+  {
+    question: "What does HTTP status code 404 indicate?",
+    options: ["Success", "Server error", "Resource not found", "Request accepted"],
+    answer: 2
+  },
+  {
+    question: "What is JSON commonly used for?",
+    options: ["Styling web pages", "Exchanging structured data", "Creating images", "Compiling CSS"],
+    answer: 1
+  },
+  {
+    question: "Which JavaScript function can make an HTTP request?",
+    options: ["fetch()", "display()", "prompt()", "alert()"],
+    answer: 0
+  },
+  {
+    question: "What is a database used for?",
+    options: ["Storing and managing data", "Designing page layouts", "Playing videos", "Changing font sizes"],
+    answer: 0
+  },
+
+  // DEPLOYMENT AND WEB SECURITY
+
+  {
+    question: "What is web hosting?",
+    options: ["Writing JavaScript", "Making a website accessible on the internet", "Creating a database table", "Designing a logo"],
+    answer: 1
+  },
+  {
+    question: "What does HTTPS provide?",
+    options: ["Encrypted communication", "Faster typing", "Automatic website design", "Free domain names"],
+    answer: 0
+  },
+  {
+    question: "What is responsive web design?",
+    options: ["A website that works only on desktops", "A website that adapts to different screen sizes", "A website without images", "A website with fixed width"],
+    answer: 1
+  },
+  {
+    question: "Which tool is commonly used for version control?",
+    options: ["Photoshop", "Git", "Excel", "PowerPoint"],
+    answer: 1
+  },
+  {
+    question: "What is the purpose of GitHub?",
+    options: ["Hosting and collaborating on code repositories", "Editing videos", "Creating database queries only", "Designing animations"],
+    answer: 0
+  },
+  {
+    question: "What is the main purpose of website testing?",
+    options: ["To increase image size", "To identify errors and verify functionality", "To remove all HTML", "To change domain names"],
+    answer: 1
+  },
+  {
+    question: "Which practice helps protect a website from unauthorized access?",
+    options: ["Using weak passwords", "Sharing credentials publicly", "Implementing authentication and authorization", "Disabling security checks"],
+    answer: 2
+  }
+
+];
+
+console.log(
+  "Web Development Examination questions:",
+  webDevelopmentExaminationQuestions.length
+);
 
 // ==========================================
 // JAVA EXAMINATION VARIABLES
@@ -1971,7 +2523,17 @@ let cExaminationSubmitted = false;
 let cExaminationEndTime = null;
 let cExaminationUserId = null;
 let cExaminationTabSwitchCount = 0;
+// ==========================================
+// DATA STRUCTURES EXAMINATION VARIABLES
+// ==========================================
 
+let dataStructuresExaminationAnswers = {};
+let dataStructuresExaminationTimeLeft = 60 * 60;
+let dataStructuresExaminationTimerInterval = null;
+let dataStructuresExaminationSubmitted = false;
+let dataStructuresExaminationEndTime = null;
+let dataStructuresExaminationUserId = null;
+let dataStructuresExaminationTabSwitchCount = 0;
 // SAVE C EXAMINATION PROGRESS
 function saveCExaminationProgress(userId) {
 
@@ -1981,6 +2543,44 @@ function saveCExaminationProgress(userId) {
       answers: cExaminationAnswers,
       endTime: cExaminationEndTime,
       tabSwitchCount: cExaminationTabSwitchCount
+    })
+  );
+
+}
+// SAVE DATA STRUCTURES EXAMINATION PROGRESS
+function saveDataStructuresExaminationProgress(userId) {
+
+  localStorage.setItem(
+    `dataStructuresExam_${userId}`,
+    JSON.stringify({
+      answers: dataStructuresExaminationAnswers,
+      endTime: dataStructuresExaminationEndTime,
+      tabSwitchCount: dataStructuresExaminationTabSwitchCount
+    })
+  );
+
+}
+// ==========================================
+// WEB DEVELOPMENT EXAMINATION VARIABLES
+// ==========================================
+
+let webDevelopmentExaminationAnswers = {};
+let webDevelopmentExaminationTimeLeft = 60 * 60;
+let webDevelopmentExaminationTimerInterval = null;
+let webDevelopmentExaminationSubmitted = false;
+let webDevelopmentExaminationEndTime = null;
+let webDevelopmentExaminationUserId = null;
+let webDevelopmentExaminationTabSwitchCount = 0;
+
+// SAVE WEB DEVELOPMENT EXAMINATION PROGRESS
+function saveWebDevelopmentExaminationProgress(userId) {
+
+  localStorage.setItem(
+    `webDevelopmentExam_${userId}`,
+    JSON.stringify({
+      answers: webDevelopmentExaminationAnswers,
+      endTime: webDevelopmentExaminationEndTime,
+      tabSwitchCount: webDevelopmentExaminationTabSwitchCount
     })
   );
 
@@ -2023,6 +2623,36 @@ function loadCExaminationProgress(userId) {
 
   const savedData = localStorage.getItem(
     `cExam_${userId}`
+  );
+
+  if (!savedData) {
+    return null;
+  }
+
+  const examData = JSON.parse(savedData);
+
+  return examData;
+}
+// RESTORE DATA STRUCTURES EXAMINATION PROGRESS
+function loadDataStructuresExaminationProgress(userId) {
+
+  const savedData = localStorage.getItem(
+    `dataStructuresExam_${userId}`
+  );
+
+  if (!savedData) {
+    return null;
+  }
+
+  const examData = JSON.parse(savedData);
+
+  return examData;
+}
+// RESTORE WEB DEVELOPMENT EXAMINATION PROGRESS
+function loadWebDevelopmentExaminationProgress(userId) {
+
+  const savedData = localStorage.getItem(
+    `webDevelopmentExam_${userId}`
   );
 
   if (!savedData) {
@@ -2168,6 +2798,108 @@ function startCExaminationTimer() {
   }
 
 }
+// ==========================================
+// DATA STRUCTURES EXAMINATION TIMER
+// ==========================================
+
+function updateDataStructuresExaminationTimer() {
+
+  const minutes = Math.floor(dataStructuresExaminationTimeLeft / 60);
+  const seconds = dataStructuresExaminationTimeLeft % 60;
+
+  document.getElementById("dataStructuresExaminationTimer").textContent =
+    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+}
+
+function startDataStructuresExaminationTimer() {
+
+  clearInterval(dataStructuresExaminationTimerInterval);
+
+  function updateTimer() {
+
+    dataStructuresExaminationTimeLeft = Math.max(
+      0,
+      Math.ceil((dataStructuresExaminationEndTime - Date.now()) / 1000)
+    );
+
+    updateDataStructuresExaminationTimer();
+
+    if (dataStructuresExaminationUserId) {
+      saveDataStructuresExaminationProgress(
+        dataStructuresExaminationUserId
+      );
+    }
+
+    if (dataStructuresExaminationTimeLeft <= 0) {
+      clearInterval(dataStructuresExaminationTimerInterval);
+      finishDataStructuresExamination();
+    }
+
+  }
+
+  updateTimer();
+
+  if (dataStructuresExaminationTimeLeft > 0) {
+    dataStructuresExaminationTimerInterval = setInterval(updateTimer, 1000);
+  }
+
+}
+// ==========================================
+// WEB DEVELOPMENT EXAMINATION TIMER
+// ==========================================
+
+function updateWebDevelopmentExaminationTimer() {
+
+  const minutes = Math.floor(
+    webDevelopmentExaminationTimeLeft / 60
+  );
+
+  const seconds = webDevelopmentExaminationTimeLeft % 60;
+
+  document.getElementById(
+    "webDevelopmentExaminationTimer"
+  ).textContent =
+    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+}
+
+function startWebDevelopmentExaminationTimer() {
+
+  clearInterval(webDevelopmentExaminationTimerInterval);
+
+  function updateTimer() {
+
+    webDevelopmentExaminationTimeLeft = Math.max(
+      0,
+      Math.ceil(
+        (webDevelopmentExaminationEndTime - Date.now()) / 1000
+      )
+    );
+
+    updateWebDevelopmentExaminationTimer();
+
+    if (webDevelopmentExaminationUserId) {
+      saveWebDevelopmentExaminationProgress(
+        webDevelopmentExaminationUserId
+      );
+    }
+
+    if (webDevelopmentExaminationTimeLeft <= 0) {
+      clearInterval(webDevelopmentExaminationTimerInterval);
+      finishWebDevelopmentExamination();
+    }
+
+  }
+
+  updateTimer();
+
+  if (webDevelopmentExaminationTimeLeft > 0) {
+    webDevelopmentExaminationTimerInterval =
+      setInterval(updateTimer, 1000);
+  }
+
+}
 // Connect Java Submit Examination button
 document.getElementById("examinationSubmitBtn")
   .addEventListener("click", () => {
@@ -2183,6 +2915,222 @@ document.getElementById("pythonExaminationSubmitBtn")
 document.getElementById("cExaminationSubmitBtn")
   .addEventListener("click", () => {
     finishCExamination();
+  });
+  // Connect Data Structures Submit Examination button
+
+document.getElementById("dataStructuresExaminationSubmitBtn")
+  .addEventListener("click", () => {
+    finishDataStructuresExamination();
+  });
+  // Connect Web Development Submit Examination button
+
+document.getElementById("webDevelopmentExaminationSubmitBtn")
+  .addEventListener("click", () => {
+    finishWebDevelopmentExamination();
+  });
+// START DATA STRUCTURES EXAMINATION
+
+document.getElementById("startDataStructuresExaminationBtn")
+  .addEventListener("click", async () => {
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+      alert("Please log in first.");
+      return;
+    }
+
+    dataStructuresExaminationUserId = user.id;
+    dataStructuresExaminationSubmitted = false;
+
+    const savedExam = loadDataStructuresExaminationProgress(user.id);
+
+    // Check whether saved examination time has expired
+    if (savedExam && savedExam.endTime <= Date.now()) {
+
+      dataStructuresExaminationAnswers = savedExam.answers || {};
+      dataStructuresExaminationEndTime = savedExam.endTime;
+      dataStructuresExaminationTabSwitchCount = savedExam.tabSwitchCount || 0;
+      dataStructuresExaminationTimeLeft = 0;
+
+      alert("Your Data Structures examination time has expired. Your answers will be submitted automatically.");
+
+      await finishDataStructuresExamination();
+      return;
+    }
+
+    // Check examination eligibility for a new attempt
+    if (!savedExam) {
+
+      const { count: eligibleQuizCount, error: eligibilityError } =
+        await supabaseClient
+          .from("quiz_results")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("total_questions", 5)
+          .gte("score", 3);
+
+      if (eligibilityError) {
+        console.error(eligibilityError);
+        alert("Unable to check examination eligibility.");
+        return;
+      }
+
+      if (eligibleQuizCount < 10) {
+        alert(
+          `You have completed ${eligibleQuizCount} qualifying quizzes out of 10.\n\nYou need at least 10 quizzes with a score of 3/5 or above.`
+        );
+        return;
+      }
+    }
+
+    // Restore previous examination
+    if (savedExam) {
+
+      dataStructuresExaminationAnswers = savedExam.answers || {};
+      dataStructuresExaminationEndTime = savedExam.endTime;
+      dataStructuresExaminationTabSwitchCount = savedExam.tabSwitchCount || 0;
+
+      dataStructuresExaminationTimeLeft = Math.ceil(
+        (dataStructuresExaminationEndTime - Date.now()) / 1000
+      );
+
+      alert("Your previous Data Structures examination has been restored!");
+
+    } else {
+
+      // Start a new examination
+      dataStructuresExaminationAnswers = {};
+      dataStructuresExaminationTabSwitchCount = 0;
+      dataStructuresExaminationTimeLeft = 60 * 60;
+
+      dataStructuresExaminationEndTime = Date.now() + (60 * 60 * 1000);
+
+      saveDataStructuresExaminationProgress(user.id);
+    }
+
+    document.getElementById("examinationSection").hidden = true;
+
+    document.getElementById(
+      "dataStructuresExaminationQuizSection"
+    ).hidden = false;
+
+    try {
+      displayAllDataStructuresExaminationQuestions();
+    } catch (error) {
+      alert("Data Structures Examination Error: " + error.message);
+      console.error(error);
+      return;
+    }
+
+    startDataStructuresExaminationTimer();
+
+    document.getElementById(
+      "dataStructuresExaminationQuizSection"
+    ).scrollIntoView({ behavior: "smooth" });
+
+  });
+// START WEB DEVELOPMENT EXAMINATION
+
+document.getElementById("startWebDevelopmentExaminationBtn")
+  .addEventListener("click", async () => {
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+      alert("Please log in first.");
+      return;
+    }
+
+    webDevelopmentExaminationUserId = user.id;
+    webDevelopmentExaminationSubmitted = false;
+
+    const savedExam = loadWebDevelopmentExaminationProgress(user.id);
+
+    // Check whether saved examination time has expired
+    if (savedExam && savedExam.endTime <= Date.now()) {
+
+      webDevelopmentExaminationAnswers = savedExam.answers || {};
+      webDevelopmentExaminationEndTime = savedExam.endTime;
+      webDevelopmentExaminationTabSwitchCount = savedExam.tabSwitchCount || 0;
+      webDevelopmentExaminationTimeLeft = 0;
+
+      alert("Your Web Development examination time has expired. Your answers will be submitted automatically.");
+
+      await finishWebDevelopmentExamination();
+      return;
+    }
+
+    // Check examination eligibility for a new attempt
+    if (!savedExam) {
+
+      const { count: eligibleQuizCount, error: eligibilityError } =
+        await supabaseClient
+          .from("quiz_results")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("total_questions", 5)
+          .gte("score", 3);
+
+      if (eligibilityError) {
+        console.error(eligibilityError);
+        alert("Unable to check examination eligibility.");
+        return;
+      }
+
+      if (eligibleQuizCount < 10) {
+        alert(
+          `You have completed ${eligibleQuizCount} qualifying quizzes out of 10.\n\nYou need at least 10 quizzes with a score of 3/5 or above.`
+        );
+        return;
+      }
+    }
+
+    // Restore previous examination
+    if (savedExam) {
+
+      webDevelopmentExaminationAnswers = savedExam.answers || {};
+      webDevelopmentExaminationEndTime = savedExam.endTime;
+      webDevelopmentExaminationTabSwitchCount = savedExam.tabSwitchCount || 0;
+
+      webDevelopmentExaminationTimeLeft = Math.ceil(
+        (webDevelopmentExaminationEndTime - Date.now()) / 1000
+      );
+
+      alert("Your previous Web Development examination has been restored!");
+
+    } else {
+
+      // Start a new examination
+      webDevelopmentExaminationAnswers = {};
+      webDevelopmentExaminationTabSwitchCount = 0;
+      webDevelopmentExaminationTimeLeft = 60 * 60;
+
+      webDevelopmentExaminationEndTime = Date.now() + (60 * 60 * 1000);
+
+      saveWebDevelopmentExaminationProgress(user.id);
+    }
+
+    document.getElementById("examinationSection").hidden = true;
+
+    document.getElementById(
+      "webDevelopmentExaminationQuizSection"
+    ).hidden = false;
+
+    try {
+      displayAllWebDevelopmentExaminationQuestions();
+    } catch (error) {
+      alert("Web Development Examination Error: " + error.message);
+      console.error(error);
+      return;
+    }
+
+    startWebDevelopmentExaminationTimer();
+
+    document.getElementById(
+      "webDevelopmentExaminationQuizSection"
+    ).scrollIntoView({ behavior: "smooth" });
+
   });
 // ==========================================
 // FINISH JAVA EXAMINATION
@@ -2891,6 +3839,262 @@ function displayCReviewAnswers() {
 
 }
 // ==========================================
+// DATA STRUCTURES EXAMINATION - REVIEW ANSWERS
+// ==========================================
+
+function displayDataStructuresReviewAnswers() {
+
+  const resultContainer = document.getElementById(
+    "dataStructuresExaminationResult"
+  );
+
+  document.getElementById(
+    "dataStructuresReviewAnswersContainer"
+  )?.remove();
+
+  let correctAnswers = 0;
+  let incorrectAnswers = 0;
+  let unansweredQuestions = 0;
+
+  dataStructuresExaminationQuestions.forEach((question, index) => {
+
+    if (dataStructuresExaminationAnswers[index] === undefined) {
+      unansweredQuestions++;
+    } else if (
+      dataStructuresExaminationAnswers[index] === question.answer
+    ) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+    }
+
+  });
+
+  const performancePercentage = Math.round(
+    (correctAnswers / dataStructuresExaminationQuestions.length) * 100
+  );
+
+  let performanceLevel = "";
+
+  if (performancePercentage >= 90) {
+    performanceLevel = "Excellent 🏆";
+  } else if (performancePercentage >= 75) {
+    performanceLevel = "Very Good 🌟";
+  } else if (performancePercentage >= 50) {
+    performanceLevel = "Good 👍";
+  } else {
+    performanceLevel = "Needs Improvement 📚";
+  }
+
+  const reviewContainer = document.createElement("div");
+  reviewContainer.id = "dataStructuresReviewAnswersContainer";
+
+  reviewContainer.innerHTML =
+    "<h2>📋 Review Your Data Structures Answers</h2>";
+
+  // PERFORMANCE ANALYTICS
+
+  const analyticsCard = document.createElement("div");
+  analyticsCard.className = "result-card";
+
+  analyticsCard.innerHTML = `
+    <h2>📊 Your Performance Analytics</h2>
+
+    <h3>Correct Answers: ${correctAnswers}</h3>
+    <h3>Incorrect Answers: ${incorrectAnswers}</h3>
+    <h3>Unanswered Questions: ${unansweredQuestions}</h3>
+
+    <h3>Performance: ${performancePercentage}%</h3>
+
+    <h2>${performanceLevel}</h2>
+
+    <p>
+      ${
+        performancePercentage >= 90
+          ? "Outstanding performance! Keep up the excellent work."
+          : performancePercentage >= 75
+          ? "Great work! Keep practising to reach excellence."
+          : performancePercentage >= 50
+          ? "Good effort! Revise the topics where you made mistakes."
+          : "Don't give up! Practise regularly and improve step by step."
+      }
+    </p>
+  `;
+
+  reviewContainer.appendChild(analyticsCard);
+
+  // DISPLAY ALL QUESTIONS AND ANSWERS
+
+  dataStructuresExaminationQuestions.forEach((question, qIndex) => {
+
+    const card = document.createElement("div");
+    card.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    card.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const answer = document.createElement("p");
+
+      answer.textContent =
+        `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+
+      if (optionIndex === question.answer) {
+        answer.style.color = "green";
+        answer.textContent += " ✓ Correct Answer";
+      }
+
+      if (
+        dataStructuresExaminationAnswers[qIndex] === optionIndex &&
+        optionIndex !== question.answer
+      ) {
+        answer.style.color = "red";
+        answer.textContent += " ✗ Your Answer";
+      }
+
+      card.appendChild(answer);
+
+    });
+
+    reviewContainer.appendChild(card);
+
+  });
+
+  resultContainer.appendChild(reviewContainer);
+
+}
+// ==========================================
+// WEB DEVELOPMENT EXAMINATION - REVIEW ANSWERS
+// ==========================================
+
+function displayWebDevelopmentReviewAnswers() {
+
+  const resultContainer = document.getElementById(
+    "webDevelopmentExaminationResult"
+  );
+
+  document.getElementById(
+    "webDevelopmentReviewAnswersContainer"
+  )?.remove();
+
+  let correctAnswers = 0;
+  let incorrectAnswers = 0;
+  let unansweredQuestions = 0;
+
+  webDevelopmentExaminationQuestions.forEach((question, index) => {
+
+    if (webDevelopmentExaminationAnswers[index] === undefined) {
+      unansweredQuestions++;
+    } else if (
+      webDevelopmentExaminationAnswers[index] === question.answer
+    ) {
+      correctAnswers++;
+    } else {
+      incorrectAnswers++;
+    }
+
+  });
+
+  const performancePercentage = Math.round(
+    (correctAnswers / webDevelopmentExaminationQuestions.length) * 100
+  );
+
+  let performanceLevel = "";
+
+  if (performancePercentage >= 90) {
+    performanceLevel = "Excellent 🏆";
+  } else if (performancePercentage >= 75) {
+    performanceLevel = "Very Good 🌟";
+  } else if (performancePercentage >= 50) {
+    performanceLevel = "Good 👍";
+  } else {
+    performanceLevel = "Needs Improvement 📚";
+  }
+
+  const reviewContainer = document.createElement("div");
+  reviewContainer.id = "webDevelopmentReviewAnswersContainer";
+
+  reviewContainer.innerHTML =
+    "<h2>📋 Review Your Web Development Answers</h2>";
+
+  const analyticsCard = document.createElement("div");
+  analyticsCard.className = "result-card";
+
+  analyticsCard.innerHTML = `
+    <h2>📊 Your Performance Analytics</h2>
+
+    <h3>Correct Answers: ${correctAnswers}</h3>
+    <h3>Incorrect Answers: ${incorrectAnswers}</h3>
+    <h3>Unanswered Questions: ${unansweredQuestions}</h3>
+
+    <h3>Performance: ${performancePercentage}%</h3>
+
+    <h2>${performanceLevel}</h2>
+
+    <p>
+      ${
+        performancePercentage >= 90
+          ? "Outstanding performance! Keep up the excellent work."
+          : performancePercentage >= 75
+          ? "Great work! Keep practising to reach excellence."
+          : performancePercentage >= 50
+          ? "Good effort! Revise the topics where you made mistakes."
+          : "Don't give up! Practise regularly and improve step by step."
+      }
+    </p>
+  `;
+
+  reviewContainer.appendChild(analyticsCard);
+
+  webDevelopmentExaminationQuestions.forEach((question, qIndex) => {
+
+    const card = document.createElement("div");
+    card.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    card.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const answer = document.createElement("p");
+
+      answer.textContent =
+        `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+
+      if (optionIndex === question.answer) {
+        answer.style.color = "green";
+        answer.textContent += " ✓ Correct Answer";
+      }
+
+      if (
+        webDevelopmentExaminationAnswers[qIndex] === optionIndex &&
+        optionIndex !== question.answer
+      ) {
+        answer.style.color = "red";
+        answer.textContent += " ✗ Your Answer";
+      }
+
+      card.appendChild(answer);
+
+    });
+
+    reviewContainer.appendChild(card);
+
+  });
+
+  resultContainer.appendChild(reviewContainer);
+
+}
+// ==========================================
 // FINISH C PROGRAMMING EXAMINATION
 // ==========================================
 
@@ -3120,6 +4324,466 @@ async function finishCExamination() {
     });
 
 }
+// ==========================================
+// FINISH DATA STRUCTURES EXAMINATION
+// ==========================================
+
+async function finishDataStructuresExamination() {
+
+  if (dataStructuresExaminationSubmitted) return;
+
+  dataStructuresExaminationSubmitted = true;
+
+  clearInterval(dataStructuresExaminationTimerInterval);
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Please log in again.");
+    dataStructuresExaminationSubmitted = false;
+    return;
+  }
+
+  const totalQuestions = dataStructuresExaminationQuestions.length;
+
+  let score = 0;
+
+  dataStructuresExaminationQuestions.forEach((question, index) => {
+
+    if (dataStructuresExaminationAnswers[index] === question.answer) {
+      score++;
+    }
+
+  });
+
+  const wrongAnswers = totalQuestions - score;
+
+  const percentage = Math.round(
+    (score / totalQuestions) * 100
+  );
+
+  // SAVE EXAMINATION RESULT
+
+  const { error: resultError } = await supabaseClient
+    .from("quiz_results")
+    .insert({
+      user_id: user.id,
+      quiz_name: "Data Structures Examination",
+      score: score,
+      total_questions: totalQuestions,
+      percentage: percentage
+    });
+
+  if (resultError) {
+
+    console.error("Data Structures result saving error:", resultError);
+
+    alert("Unable to save your examination result. Please try again.");
+
+    dataStructuresExaminationSubmitted = false;
+    return;
+
+  }
+
+  localStorage.removeItem(`dataStructuresExam_${user.id}`);
+
+  // CERTIFICATE GENERATION
+
+  let certificateAwarded = false;
+
+  if (score >= 45) {
+
+    const studentName =
+      user.user_metadata?.full_name || user.email;
+
+    const { data: existingCertificate, error: certificateFetchError } =
+      await supabaseClient
+        .from("certificates")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("exam_name", "Data Structures Examination")
+        .maybeSingle();
+
+    if (certificateFetchError) {
+
+      console.error("Certificate lookup error:", certificateFetchError);
+
+    } else if (
+      !existingCertificate ||
+      score > existingCertificate.score
+    ) {
+
+      const certificateData = {
+        user_id: user.id,
+        student_name: studentName,
+        exam_name: "Data Structures Examination",
+        score: score,
+        total_questions: totalQuestions,
+        percentage: percentage
+      };
+
+      let certificateError;
+
+      if (existingCertificate) {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .update(certificateData)
+          .eq("certificate_id", existingCertificate.certificate_id);
+
+        certificateError = error;
+
+      } else {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .insert(certificateData);
+
+        certificateError = error;
+
+      }
+
+      if (certificateError) {
+
+        console.error("Data Structures certificate creation error:", certificateError);
+
+      } else {
+
+        certificateAwarded = true;
+
+      }
+
+    } else {
+
+      certificateAwarded = true;
+
+    }
+
+  }
+
+  // DISPLAY EXAMINATION RESULT
+
+  const resultContainer = document.getElementById(
+    "dataStructuresExaminationResult"
+  );
+
+  document.getElementById(
+    "dataStructuresExaminationQuestionsContainer"
+  ).hidden = true;
+
+  document.getElementById(
+    "dataStructuresExaminationTimer"
+  ).closest(".timer-box").hidden = true;
+
+  document.getElementById(
+    "dataStructuresExaminationSubmitBtn"
+  ).hidden = true;
+
+  resultContainer.hidden = false;
+
+  resultContainer.innerHTML = `
+
+    <div class="result-card">
+
+      <h2>🎉 Data Structures Examination Completed!</h2>
+
+      <h1>${score} / ${totalQuestions}</h1>
+
+      <h2>${percentage}%</h2>
+
+      <p>Correct Answers: ${score}</p>
+
+      <p>Incorrect / Unanswered: ${wrongAnswers}</p>
+
+      <h3>
+        ${
+          percentage >= 90
+            ? "Excellent Performance! 🏆"
+            : percentage >= 75
+            ? "Very Good! 🌟"
+            : percentage >= 50
+            ? "Good Effort! 👍"
+            : "Keep Practising! 📚"
+        }
+      </h3>
+
+      ${
+        score >= 45
+          ? "<h2>🏆 Congratulations! You qualified for a certificate.</h2>"
+          : "<p>You need at least 45/50 marks to earn a certificate.</p>"
+      }
+
+      ${
+        certificateAwarded
+          ? '<button class="primary-btn" id="dataStructuresViewCertificateBtn">View My Certificate</button>'
+          : ""
+      }
+
+      <button class="secondary-btn" id="dataStructuresReviewAnswersBtn">
+        Review Answers
+      </button>
+
+    </div>
+
+  `;
+
+  // VIEW CERTIFICATE
+
+  document.getElementById("dataStructuresViewCertificateBtn")
+    ?.addEventListener("click", () => {
+
+      document.getElementById(
+        "dataStructuresExaminationQuizSection"
+      ).hidden = true;
+
+      document.getElementById("myCertificateBtn")?.click();
+
+    });
+
+  // REVIEW ANSWERS
+
+  document.getElementById("dataStructuresReviewAnswersBtn")
+    .addEventListener("click", () => {
+
+      displayDataStructuresReviewAnswers();
+
+      document.getElementById(
+        "dataStructuresReviewAnswersBtn"
+      ).hidden = true;
+
+    });
+
+}
+// ==========================================
+// FINISH WEB DEVELOPMENT EXAMINATION
+// ==========================================
+
+async function finishWebDevelopmentExamination() {
+
+  if (webDevelopmentExaminationSubmitted) return;
+
+  webDevelopmentExaminationSubmitted = true;
+
+  clearInterval(webDevelopmentExaminationTimerInterval);
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Please log in again.");
+    webDevelopmentExaminationSubmitted = false;
+    return;
+  }
+
+  const totalQuestions = webDevelopmentExaminationQuestions.length;
+
+  let score = 0;
+
+  webDevelopmentExaminationQuestions.forEach((question, index) => {
+
+    if (webDevelopmentExaminationAnswers[index] === question.answer) {
+      score++;
+    }
+
+  });
+
+  const wrongAnswers = totalQuestions - score;
+
+  const percentage = Math.round(
+    (score / totalQuestions) * 100
+  );
+
+  // SAVE EXAMINATION RESULT
+
+  const { error: resultError } = await supabaseClient
+    .from("quiz_results")
+    .insert({
+      user_id: user.id,
+      quiz_name: "Web Development Examination",
+      score: score,
+      total_questions: totalQuestions,
+      percentage: percentage
+    });
+
+  if (resultError) {
+
+    console.error("Web Development result saving error:", resultError);
+
+    alert("Unable to save your examination result. Please try again.");
+
+    webDevelopmentExaminationSubmitted = false;
+    return;
+
+  }
+
+  localStorage.removeItem(`webDevelopmentExam_${user.id}`);
+
+  // CERTIFICATE GENERATION
+
+  let certificateAwarded = false;
+
+  if (score >= 45) {
+
+    const studentName =
+      user.user_metadata?.full_name || user.email;
+
+    const { data: existingCertificate, error: certificateFetchError } =
+      await supabaseClient
+        .from("certificates")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("exam_name", "Web Development Examination")
+        .maybeSingle();
+
+    if (certificateFetchError) {
+
+      console.error("Web Development certificate lookup error:", certificateFetchError);
+
+    } else if (
+      !existingCertificate ||
+      score > existingCertificate.score
+    ) {
+
+      const certificateData = {
+        user_id: user.id,
+        student_name: studentName,
+        exam_name: "Web Development Examination",
+        score: score,
+        total_questions: totalQuestions,
+        percentage: percentage
+      };
+
+      let certificateError;
+
+      if (existingCertificate) {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .update(certificateData)
+          .eq("certificate_id", existingCertificate.certificate_id);
+
+        certificateError = error;
+
+      } else {
+
+        const { error } = await supabaseClient
+          .from("certificates")
+          .insert(certificateData);
+
+        certificateError = error;
+
+      }
+
+      if (certificateError) {
+
+        console.error("Web Development certificate creation error:", certificateError);
+
+      } else {
+
+        certificateAwarded = true;
+
+      }
+
+    } else {
+
+      certificateAwarded = true;
+
+    }
+
+  }
+
+  // DISPLAY EXAMINATION RESULT
+
+  const resultContainer = document.getElementById(
+    "webDevelopmentExaminationResult"
+  );
+
+  document.getElementById(
+    "webDevelopmentExaminationQuestionsContainer"
+  ).hidden = true;
+
+  document.getElementById(
+    "webDevelopmentExaminationTimer"
+  ).closest(".timer-box").hidden = true;
+
+  document.getElementById(
+    "webDevelopmentExaminationSubmitBtn"
+  ).hidden = true;
+
+  resultContainer.hidden = false;
+
+  resultContainer.innerHTML = `
+
+    <div class="result-card">
+
+      <h2>🎉 Web Development Examination Completed!</h2>
+
+      <h1>${score} / ${totalQuestions}</h1>
+
+      <h2>${percentage}%</h2>
+
+      <p>Correct Answers: ${score}</p>
+
+      <p>Incorrect / Unanswered: ${wrongAnswers}</p>
+
+      <h3>
+        ${
+          percentage >= 90
+            ? "Excellent Performance! 🏆"
+            : percentage >= 75
+            ? "Very Good! 🌟"
+            : percentage >= 50
+            ? "Good Effort! 👍"
+            : "Keep Practising! 📚"
+        }
+      </h3>
+
+      ${
+        score >= 45
+          ? "<h2>🏆 Congratulations! You qualified for a certificate.</h2>"
+          : "<p>You need at least 45/50 marks to earn a certificate.</p>"
+      }
+
+      ${
+        certificateAwarded
+          ? '<button class="primary-btn" id="webDevelopmentViewCertificateBtn">View My Certificate</button>'
+          : ""
+      }
+
+      <button class="secondary-btn" id="webDevelopmentReviewAnswersBtn">
+        Review Answers
+      </button>
+
+    </div>
+
+  `;
+
+  // VIEW CERTIFICATE
+
+  document.getElementById("webDevelopmentViewCertificateBtn")
+    ?.addEventListener("click", () => {
+
+      document.getElementById(
+        "webDevelopmentExaminationQuizSection"
+      ).hidden = true;
+
+      document.getElementById("myCertificateBtn")?.click();
+
+    });
+
+  // REVIEW ANSWERS
+
+  document.getElementById("webDevelopmentReviewAnswersBtn")
+    .addEventListener("click", () => {
+
+      displayWebDevelopmentReviewAnswers();
+
+      document.getElementById(
+        "webDevelopmentReviewAnswersBtn"
+      ).hidden = true;
+
+    });
+
+}
 // ==================================
 // SUPABASE SIGNUP AND LOGIN
 // ==================================
@@ -3219,7 +4883,37 @@ document.getElementById("cExitExaminationBtn").addEventListener("click", () => {
   });
 
 });
+// Exit Data Structures Examination
+document.getElementById("dataStructuresExitExaminationBtn")
+  .addEventListener("click", () => {
 
+    document.getElementById(
+      "dataStructuresExaminationQuizSection"
+    ).hidden = true;
+
+    document.getElementById("examinationSection").hidden = false;
+
+    document.getElementById("examinationSection").scrollIntoView({
+      behavior: "smooth"
+    });
+
+});
+// Exit Web Development Examination
+
+document.getElementById("webDevelopmentExitExaminationBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById(
+      "webDevelopmentExaminationQuizSection"
+    ).hidden = true;
+
+    document.getElementById("examinationSection").hidden = false;
+
+    document.getElementById("examinationSection").scrollIntoView({
+      behavior: "smooth"
+    });
+
+});
 // Back to Home from Examination
 document.getElementById("backFromExamination").addEventListener("click", () => {
 
@@ -3343,10 +5037,9 @@ async function checkLoginSession() {
        for (const subject of subjects) {
     const progress = await loadLearningProgress(user.id, subject);
 
-    if (progress) {
-    unlockedLevels[subject] = progress.unlocked_level;
-}
-
+    unlockedLevels[subject] = progress
+    ? progress.unlocked_level
+    : 1;
 console.log(
     `${subject} unlocked level:`,
     unlockedLevels[subject]
@@ -4150,6 +5843,301 @@ function increase() {
   }
 ];
 // ==========================================
+// QUIZCONNECT - DATA STRUCTURES LEARNING SYSTEM
+// PART 1: ALL 10 LEARNING LEVELS
+// ==========================================
+
+const dataStructuresLevels = [
+
+  {
+    title: "Introduction to Data Structures",
+    difficulty: "Beginner",
+    content: `
+      <h3>What are Data Structures?</h3>
+      <p>Data structures are ways of organizing and storing data so it can be accessed and modified efficiently.</p>
+
+      <h3>Why are they important?</h3>
+      <ul>
+        <li>Organize large amounts of data</li>
+        <li>Improve program efficiency</li>
+        <li>Make searching and sorting easier</li>
+      </ul>
+
+      <h3>Types of Data Structures</h3>
+      <ul>
+        <li>Linear: Arrays, Linked Lists, Stacks and Queues</li>
+        <li>Non-linear: Trees and Graphs</li>
+      </ul>
+
+      <h3>Example</h3>
+      <pre><code>int marks[5] = {80, 85, 90, 75, 95};</code></pre>
+      <p>This array stores five student marks.</p>
+    `
+  },
+
+  {
+    title: "Arrays",
+    difficulty: "Beginner",
+    content: `
+      <h3>What are Arrays?</h3>
+      <p>An array stores multiple elements of the same data type in consecutive memory locations.</p>
+
+      <h3>Creating an Array in C</h3>
+      <pre><code>int numbers[5] = {10, 20, 30, 40, 50};</code></pre>
+
+      <h3>Accessing Elements</h3>
+      <pre><code>printf("%d", numbers[0]);</code></pre>
+      <p>Array indexing starts from 0.</p>
+
+      <h3>Common Operations</h3>
+      <ul>
+        <li>Traversal</li>
+        <li>Insertion</li>
+        <li>Deletion</li>
+        <li>Searching</li>
+        <li>Updating</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "Linked Lists",
+    difficulty: "Beginner",
+    content: `
+      <h3>What is a Linked List?</h3>
+      <p>A linked list is a linear data structure consisting of nodes. Each node stores data and a link to another node.</p>
+
+      <h3>Node Structure in C</h3>
+      <pre><code>struct Node {
+    int data;
+    struct Node *next;
+};</code></pre>
+
+      <h3>Types of Linked Lists</h3>
+      <ul>
+        <li>Singly Linked List</li>
+        <li>Doubly Linked List</li>
+        <li>Circular Linked List</li>
+      </ul>
+
+      <h3>Advantages</h3>
+      <p>Linked lists allow dynamic memory allocation and flexible insertion and deletion.</p>
+    `
+  },
+
+  {
+    title: "Stacks",
+    difficulty: "Easy",
+    content: `
+      <h3>What is a Stack?</h3>
+      <p>A stack is a linear data structure that follows LIFO (Last In, First Out).</p>
+
+      <h3>Stack Operations</h3>
+      <ul>
+        <li>Push - Adds an element</li>
+        <li>Pop - Removes the top element</li>
+        <li>Peek - Displays the top element</li>
+      </ul>
+
+      <h3>Example</h3>
+      <pre><code>int stack[5];
+int top = -1;
+
+top++;
+stack[top] = 10;</code></pre>
+
+      <h3>Applications</h3>
+      <ul>
+        <li>Undo operations</li>
+        <li>Function calls</li>
+        <li>Expression evaluation</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "Queues",
+    difficulty: "Easy",
+    content: `
+      <h3>What is a Queue?</h3>
+      <p>A queue is a linear data structure that follows FIFO (First In, First Out).</p>
+
+      <h3>Queue Operations</h3>
+      <ul>
+        <li>Enqueue - Inserts an element</li>
+        <li>Dequeue - Removes an element</li>
+        <li>Front - Returns the first element</li>
+        <li>Rear - Returns the last element</li>
+      </ul>
+
+      <h3>Types of Queues</h3>
+      <ul>
+        <li>Simple Queue</li>
+        <li>Circular Queue</li>
+        <li>Priority Queue</li>
+        <li>Double Ended Queue</li>
+      </ul>
+
+      <h3>Applications</h3>
+      <p>CPU scheduling, printer scheduling and task management.</p>
+    `
+  },
+
+  {
+    title: "Searching Algorithms",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What is Searching?</h3>
+      <p>Searching is the process of finding a particular element in a collection of data.</p>
+
+      <h3>Linear Search</h3>
+      <p>Checks each element one by one.</p>
+
+      <pre><code>for (int i = 0; i < n; i++) {
+    if (arr[i] == key) {
+        printf("Found");
+        break;
+    }
+}</code></pre>
+
+      <h3>Binary Search</h3>
+      <p>Repeatedly divides a sorted array into two halves.</p>
+
+      <h3>Time Complexity</h3>
+      <ul>
+        <li>Linear Search: O(n)</li>
+        <li>Binary Search: O(log n)</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "Sorting Algorithms",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What is Sorting?</h3>
+      <p>Sorting arranges data in ascending or descending order.</p>
+
+      <h3>Common Sorting Algorithms</h3>
+      <ul>
+        <li>Bubble Sort</li>
+        <li>Selection Sort</li>
+        <li>Insertion Sort</li>
+        <li>Merge Sort</li>
+        <li>Quick Sort</li>
+      </ul>
+
+      <h3>Bubble Sort Example</h3>
+      <pre><code>for (int i = 0; i < n - 1; i++) {
+    for (int j = 0; j < n - i - 1; j++) {
+        if (arr[j] > arr[j + 1]) {
+            int temp = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = temp;
+        }
+    }
+}</code></pre>
+
+      <p>Bubble Sort repeatedly compares adjacent elements and swaps them when necessary.</p>
+    `
+  },
+
+  {
+    title: "Trees",
+    difficulty: "Advanced",
+    content: `
+      <h3>What is a Tree?</h3>
+      <p>A tree is a non-linear hierarchical data structure consisting of nodes connected by edges.</p>
+
+      <h3>Important Terms</h3>
+      <ul>
+        <li>Root - Topmost node</li>
+        <li>Parent - Node with children</li>
+        <li>Child - Node connected below a parent</li>
+        <li>Leaf - Node without children</li>
+        <li>Height - Longest path from root to a leaf</li>
+      </ul>
+
+      <h3>Types of Trees</h3>
+      <ul>
+        <li>Binary Tree</li>
+        <li>Binary Search Tree</li>
+        <li>AVL Tree</li>
+        <li>Heap</li>
+      </ul>
+
+      <h3>Tree Traversals</h3>
+      <p>Preorder, Inorder and Postorder are common tree traversal methods.</p>
+    `
+  },
+
+  {
+    title: "Graphs",
+    difficulty: "Advanced",
+    content: `
+      <h3>What is a Graph?</h3>
+      <p>A graph is a non-linear data structure made up of vertices (nodes) and edges (connections).</p>
+
+      <h3>Types of Graphs</h3>
+      <ul>
+        <li>Directed Graph</li>
+        <li>Undirected Graph</li>
+        <li>Weighted Graph</li>
+        <li>Unweighted Graph</li>
+      </ul>
+
+      <h3>Graph Representation</h3>
+      <ul>
+        <li>Adjacency Matrix</li>
+        <li>Adjacency List</li>
+      </ul>
+
+      <h3>Graph Traversal</h3>
+      <ul>
+        <li>BFS - Breadth First Search</li>
+        <li>DFS - Depth First Search</li>
+      </ul>
+
+      <h3>Applications</h3>
+      <p>Social networks, navigation systems and computer networks.</p>
+    `
+  },
+
+  {
+    title: "Hashing and Applications",
+    difficulty: "Expert",
+    content: `
+      <h3>What is Hashing?</h3>
+      <p>Hashing is a technique that converts a key into an index using a hash function.</p>
+
+      <h3>Hash Table</h3>
+      <p>A hash table stores data using key-value pairs for efficient searching and retrieval.</p>
+
+      <h3>Collision</h3>
+      <p>A collision occurs when two different keys produce the same hash index.</p>
+
+      <h3>Collision Resolution Techniques</h3>
+      <ul>
+        <li>Separate Chaining</li>
+        <li>Linear Probing</li>
+        <li>Quadratic Probing</li>
+        <li>Double Hashing</li>
+      </ul>
+
+      <h3>Applications</h3>
+      <ul>
+        <li>Database indexing</li>
+        <li>Password storage</li>
+        <li>Caching</li>
+        <li>Fast data retrieval</li>
+      </ul>
+    `
+  }
+
+];
+
+console.log("Data Structures levels:", dataStructuresLevels.length);
+// ==========================================
 // QUIZCONNECT - PYTHON LEARNING SYSTEM
 // PART 1: ALL 10 LEARNING LEVELS
 // ==========================================
@@ -4912,7 +6900,292 @@ ON Student.dept_id = Department.dept_id;</code></pre>
   }
 
 ];
+// ==========================================
+// WEB DEVELOPMENT - 10 LEARNING LEVELS
+// ==========================================
 
+const webDevelopmentLevels = [
+
+  {
+    title: "Introduction to Web Development",
+    difficulty: "Beginner",
+    content: `
+      <h3>What is Web Development?</h3>
+      <p>Web development is the process of creating websites and web applications.</p>
+
+      <h3>Types of Web Development</h3>
+      <ul>
+        <li>Frontend Development – User interface.</li>
+        <li>Backend Development – Server-side functionality.</li>
+        <li>Full Stack Development – Frontend and backend.</li>
+      </ul>
+
+      <h3>Core Technologies</h3>
+      <ul>
+        <li>HTML – Structure of a webpage.</li>
+        <li>CSS – Styling and layout.</li>
+        <li>JavaScript – Interactivity.</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "HTML Fundamentals",
+    difficulty: "Beginner",
+    content: `
+      <h3>What is HTML?</h3>
+      <p>HTML stands for HyperText Markup Language. It defines webpage structure.</p>
+
+      <h3>Basic HTML Structure</h3>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My Website&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello World&lt;/h1&gt;
+  &lt;p&gt;Welcome to my website.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+      <h3>Common HTML Tags</h3>
+      <ul>
+        <li>Headings – h1 to h6</li>
+        <li>Paragraph – p</li>
+        <li>Link – a</li>
+        <li>Image – img</li>
+        <li>List – ul, ol, li</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "HTML Forms and Semantic Elements",
+    difficulty: "Beginner",
+    content: `
+      <h3>HTML Forms</h3>
+      <p>Forms collect information from users.</p>
+
+      <pre><code>&lt;form&gt;
+  &lt;label&gt;Name:&lt;/label&gt;
+  &lt;input type="text"&gt;
+  &lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+      <h3>Common Input Types</h3>
+      <ul>
+        <li>text</li>
+        <li>email</li>
+        <li>password</li>
+        <li>number</li>
+        <li>date</li>
+        <li>checkbox</li>
+        <li>radio</li>
+      </ul>
+
+      <h3>Semantic Elements</h3>
+      <p>header, nav, main, section, article, aside and footer give meaning to webpage structure.</p>
+    `
+  },
+
+  {
+    title: "CSS Fundamentals",
+    difficulty: "Easy",
+    content: `
+      <h3>What is CSS?</h3>
+      <p>CSS stands for Cascading Style Sheets. It controls the appearance of webpages.</p>
+
+      <h3>Types of CSS</h3>
+      <ul>
+        <li>Inline CSS</li>
+        <li>Internal CSS</li>
+        <li>External CSS</li>
+      </ul>
+
+      <h3>CSS Example</h3>
+      <pre><code>h1 {
+  color: blue;
+  font-size: 30px;
+}
+
+p {
+  color: gray;
+}</code></pre>
+
+      <h3>CSS Selectors</h3>
+      <ul>
+        <li>Element selector</li>
+        <li>Class selector</li>
+        <li>ID selector</li>
+        <li>Universal selector</li>
+      </ul>
+    `
+  },
+
+  {
+    title: "CSS Box Model and Layout",
+    difficulty: "Intermediate",
+    content: `
+      <h3>CSS Box Model</h3>
+      <p>Every HTML element is represented as a rectangular box.</p>
+
+      <ul>
+        <li>Content – Actual content.</li>
+        <li>Padding – Space around content.</li>
+        <li>Border – Surrounds padding and content.</li>
+        <li>Margin – Space outside the border.</li>
+      </ul>
+
+      <h3>CSS Layout Techniques</h3>
+      <ul>
+        <li>Flexbox – One-dimensional layouts.</li>
+        <li>CSS Grid – Two-dimensional layouts.</li>
+        <li>Position – Controls element positioning.</li>
+      </ul>
+
+      <h3>Example</h3>
+      <pre><code>.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}</code></pre>
+    `
+  },
+
+  {
+    title: "Responsive Web Design",
+    difficulty: "Intermediate",
+    content: `
+      <h3>What is Responsive Design?</h3>
+      <p>Responsive design makes websites adapt to different screen sizes and devices.</p>
+
+      <h3>Important Techniques</h3>
+      <ul>
+        <li>Flexible layouts</li>
+        <li>Relative units such as %, rem and vw</li>
+        <li>Responsive images</li>
+        <li>Media queries</li>
+      </ul>
+
+      <h3>Media Query Example</h3>
+      <pre><code>@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+}</code></pre>
+
+      <p>Responsive design improves usability on mobiles, tablets and desktops.</p>
+    `
+  },
+
+  {
+    title: "JavaScript for Web Development",
+    difficulty: "Intermediate",
+    content: `
+      <h3>JavaScript in Websites</h3>
+      <p>JavaScript adds dynamic behavior and interactivity to webpages.</p>
+
+      <h3>Variables</h3>
+      <pre><code>let name = "Kavya";
+const age = 20;</code></pre>
+
+      <h3>Functions</h3>
+      <pre><code>function greet() {
+  alert("Welcome!");
+}</code></pre>
+
+      <h3>Events</h3>
+      <p>Events allow webpages to respond to user actions such as clicks, typing and form submissions.</p>
+    `
+  },
+
+  {
+    title: "DOM Manipulation and Events",
+    difficulty: "Advanced",
+    content: `
+      <h3>What is the DOM?</h3>
+      <p>The Document Object Model represents an HTML page as a tree of objects.</p>
+
+      <h3>Selecting Elements</h3>
+      <pre><code>document.getElementById("demo");
+document.querySelector(".heading");</code></pre>
+
+      <h3>Changing Content</h3>
+      <pre><code>document.getElementById("demo")
+  .textContent = "Hello!";</code></pre>
+
+      <h3>Event Listener</h3>
+      <pre><code>button.addEventListener("click", function() {
+  alert("Button clicked!");
+});</code></pre>
+    `
+  },
+
+  {
+    title: "Backend Development and APIs",
+    difficulty: "Advanced",
+    content: `
+      <h3>What is Backend Development?</h3>
+      <p>Backend development handles server-side logic, data processing and database communication.</p>
+
+      <h3>Important Concepts</h3>
+      <ul>
+        <li>Server – Processes client requests.</li>
+        <li>Database – Stores application data.</li>
+        <li>API – Allows different applications to communicate.</li>
+        <li>HTTP – Protocol used for web communication.</li>
+      </ul>
+
+      <h3>HTTP Methods</h3>
+      <ul>
+        <li>GET – Retrieve data.</li>
+        <li>POST – Create data.</li>
+        <li>PUT – Update data.</li>
+        <li>DELETE – Remove data.</li>
+      </ul>
+
+      <h3>JSON Example</h3>
+      <pre><code>{
+  "name": "Student",
+  "course": "Web Development"
+}</code></pre>
+    `
+  },
+
+  {
+    title: "Web Hosting, Deployment and Mini Project",
+    difficulty: "Expert",
+    content: `
+      <h3>What is Web Hosting?</h3>
+      <p>Web hosting makes websites accessible through the internet.</p>
+
+      <h3>Deployment Steps</h3>
+      <ul>
+        <li>Prepare HTML, CSS and JavaScript files.</li>
+        <li>Test the website locally.</li>
+        <li>Upload the project to a hosting platform.</li>
+        <li>Configure deployment settings.</li>
+        <li>Test the live website.</li>
+      </ul>
+
+      <h3>Version Control</h3>
+      <p>Git helps track changes in source code. GitHub hosts repositories and supports collaboration.</p>
+
+      <h3>Mini Project</h3>
+      <p>Create a responsive student portfolio website containing:</p>
+      <ul>
+        <li>Home section</li>
+        <li>About section</li>
+        <li>Skills section</li>
+        <li>Projects section</li>
+        <li>Contact form</li>
+      </ul>
+    `
+  }
+
+];
+
+console.log("Web Development levels:", webDevelopmentLevels.length);
 // Current learning progress
 let unlockedJavaScriptLevel = 1;
 let currentJavaScriptLevel = 1;
@@ -6257,22 +8530,702 @@ const cLevelQuestions = [
 console.log("C question bank:", cLevelQuestions.length);
 console.log("C Level 1 questions:", cLevelQuestions[0].length);
 // ==========================================
-// PART 3: JAVASCRIPT LEARNING LEVEL NAVIGATION
+// DATA STRUCTURES - 50 LEARNING QUIZ QUESTIONS
 // ==========================================
 
+const dataStructuresLevelQuestions = [
+
+  // LEVEL 1 - INTRODUCTION TO DATA STRUCTURES
+  [
+    {
+      question: "What is a data structure?",
+      options: ["A programming language", "A way to organize and store data", "An operating system", "A compiler"],
+      answer: 1
+    },
+    {
+      question: "Which of these is a linear data structure?",
+      options: ["Tree", "Graph", "Array", "Network"],
+      answer: 2
+    },
+    {
+      question: "Which data structure follows LIFO?",
+      options: ["Queue", "Array", "Linked List", "Stack"],
+      answer: 3
+    },
+    {
+      question: "Which data structure follows FIFO?",
+      options: ["Queue", "Stack", "Tree", "Graph"],
+      answer: 0
+    },
+    {
+      question: "Which is a non-linear data structure?",
+      options: ["Array", "Tree", "Stack", "Queue"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 2 - ARRAYS
+  [
+    {
+      question: "What is an array?",
+      options: ["A collection of different functions", "A collection of similar data elements", "A programming language", "A loop"],
+      answer: 1
+    },
+    {
+      question: "What is the index of the first array element in C?",
+      options: ["1", "0", "-1", "2"],
+      answer: 1
+    },
+    {
+      question: "Which operation adds an element to an array?",
+      options: ["Insertion", "Deletion", "Traversal", "Searching"],
+      answer: 0
+    },
+    {
+      question: "What is the time complexity of accessing an array element by index?",
+      options: ["O(n)", "O(log n)", "O(1)", "O(n²)"],
+      answer: 2
+    },
+    {
+      question: "What is a common limitation of a static array?",
+      options: ["It cannot store numbers", "It cannot be traversed", "It has no index", "Its size is fixed"],
+      answer: 3
+    }
+  ],
+
+  // LEVEL 3 - LINKED LISTS
+  [
+    {
+      question: "What does a linked list consist of?",
+      options: ["Nodes", "Rows only", "Columns only", "Functions"],
+      answer: 0
+    },
+    {
+      question: "What does each node in a singly linked list contain?",
+      options: ["Only data", "Data and a pointer to the next node", "Only an index", "Two arrays"],
+      answer: 1
+    },
+    {
+      question: "What does the last node of a singly linked list point to?",
+      options: ["The first node", "The middle node", "NULL", "Itself"],
+      answer: 2
+    },
+    {
+      question: "Which linked list allows traversal in both directions?",
+      options: ["Singly linked list", "Circular singly linked list", "Linear list", "Doubly linked list"],
+      answer: 3
+    },
+    {
+      question: "What is a major advantage of linked lists over fixed-size arrays?",
+      options: ["Dynamic memory allocation", "Constant-time random access", "No memory usage", "Always faster searching"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 4 - STACKS
+  [
+    {
+      question: "Which principle does a stack follow?",
+      options: ["FIFO", "LIFO", "Random order", "Sorted order"],
+      answer: 1
+    },
+    {
+      question: "Which operation inserts an element into a stack?",
+      options: ["Pop", "Peek", "Push", "Dequeue"],
+      answer: 2
+    },
+    {
+      question: "Which operation removes the top element from a stack?",
+      options: ["Push", "Insert", "Enqueue", "Pop"],
+      answer: 3
+    },
+    {
+      question: "What is stack overflow?",
+      options: ["Trying to push onto a full stack", "Removing from an empty stack", "Displaying a stack", "Searching a stack"],
+      answer: 0
+    },
+    {
+      question: "Which application commonly uses a stack?",
+      options: ["Printer scheduling", "Function call management", "CPU temperature monitoring", "Network cabling"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 5 - QUEUES
+  [
+    {
+      question: "Which principle does a queue follow?",
+      options: ["LIFO", "Random order", "FIFO", "Sorted order"],
+      answer: 2
+    },
+    {
+      question: "Which operation inserts an element into a queue?",
+      options: ["Push", "Pop", "Dequeue", "Enqueue"],
+      answer: 3
+    },
+    {
+      question: "Which operation removes an element from a queue?",
+      options: ["Dequeue", "Enqueue", "Push", "Peek"],
+      answer: 0
+    },
+    {
+      question: "From which end is an element normally removed in a queue?",
+      options: ["Rear", "Front", "Middle", "Any position"],
+      answer: 1
+    },
+    {
+      question: "Which queue connects its last position back to its first?",
+      options: ["Priority queue", "Linear queue", "Circular queue", "Simple stack"],
+      answer: 2
+    }
+  ],
+    
+
+    // LEVEL 6 - SEARCHING ALGORITHMS
+  [
+    {
+      question: "Which algorithm searches elements one by one?",
+      options: ["Binary Search", "Linear Search", "Quick Sort", "Merge Sort"],
+      answer: 1
+    },
+    {
+      question: "Which searching algorithm requires sorted data?",
+      options: ["Linear Search", "Depth First Search", "Binary Search", "Breadth First Search"],
+      answer: 2
+    },
+    {
+      question: "What is the time complexity of linear search in the worst case?",
+      options: ["O(1)", "O(log n)", "O(n²)", "O(n)"],
+      answer: 3
+    },
+    {
+      question: "What is the average time complexity of binary search?",
+      options: ["O(log n)", "O(n)", "O(n²)", "O(1)"],
+      answer: 0
+    },
+    {
+      question: "Which condition is necessary for binary search?",
+      options: ["Random data", "Sorted data", "Duplicate data", "Empty data"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 7 - SORTING ALGORITHMS
+  [
+    {
+      question: "Which sorting algorithm repeatedly compares adjacent elements?",
+      options: ["Merge Sort", "Quick Sort", "Bubble Sort", "Binary Search"],
+      answer: 2
+    },
+    {
+      question: "Which sorting algorithm uses divide and conquer?",
+      options: ["Bubble Sort", "Selection Sort", "Linear Search", "Merge Sort"],
+      answer: 3
+    },
+    {
+      question: "Which sorting algorithm selects the smallest element in each pass?",
+      options: ["Selection Sort", "Bubble Sort", "Merge Sort", "Insertion Sort"],
+      answer: 0
+    },
+    {
+      question: "What is the worst-case time complexity of Bubble Sort?",
+      options: ["O(n)", "O(n²)", "O(log n)", "O(1)"],
+      answer: 1
+    },
+    {
+      question: "Which algorithm is generally efficient for large datasets?",
+      options: ["Linear Search", "Bubble Sort", "Merge Sort", "Simple Traversal"],
+      answer: 2
+    }
+  ],
+
+  // LEVEL 8 - TREES
+  [
+    {
+      question: "What is the topmost node of a tree called?",
+      options: ["Leaf", "Child", "Edge", "Root"],
+      answer: 3
+    },
+    {
+      question: "A node with no children is called:",
+      options: ["Leaf node", "Root node", "Parent node", "Internal node"],
+      answer: 0
+    },
+    {
+      question: "How many children can a binary tree node have at most?",
+      options: ["1", "2", "3", "4"],
+      answer: 1
+    },
+    {
+      question: "Which traversal visits the root between left and right subtrees?",
+      options: ["Preorder", "Postorder", "Inorder", "Level order"],
+      answer: 2
+    },
+    {
+      question: "Which data structure is commonly used for level-order traversal?",
+      options: ["Stack", "Array only", "Linked list only", "Queue"],
+      answer: 3
+    }
+  ],
+
+  // LEVEL 9 - GRAPHS
+  [
+    {
+      question: "A graph consists of:",
+      options: ["Vertices and edges", "Rows and columns", "Roots and leaves only", "Stacks and queues"],
+      answer: 0
+    },
+    {
+      question: "What is a vertex in a graph?",
+      options: ["A connection", "A node", "A sorting method", "A path only"],
+      answer: 1
+    },
+    {
+      question: "Which traversal uses a queue?",
+      options: ["DFS", "Inorder", "BFS", "Postorder"],
+      answer: 2
+    },
+    {
+      question: "Which traversal commonly uses a stack?",
+      options: ["BFS", "Level order", "Binary search", "DFS"],
+      answer: 3
+    },
+    {
+      question: "What is a directed graph?",
+      options: ["A graph whose edges have directions", "A graph without vertices", "A graph with no edges", "A tree only"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 10 - HASHING AND APPLICATIONS
+  [
+    {
+      question: "What is hashing?",
+      options: ["Sorting elements", "Mapping keys to table positions", "Deleting a tree", "Traversing a graph"],
+      answer: 1
+    },
+    {
+      question: "Which structure commonly uses hashing?",
+      options: ["Stack only", "Queue only", "Hash table", "Binary tree only"],
+      answer: 2
+    },
+    {
+      question: "What is a hash collision?",
+      options: ["Deleting a key", "Sorting a table", "Emptying a table", "Two keys mapping to the same index"],
+      answer: 3
+    },
+    {
+      question: "Which technique handles collisions using linked lists?",
+      options: ["Chaining", "Binary search", "Bubble sort", "Traversal"],
+      answer: 0
+    },
+    {
+      question: "Which is a common application of hashing?",
+      options: ["Printing documents", "Fast data lookup", "Drawing graphics only", "Playing audio"],
+      answer: 1
+     }
+  ]
+]; // End of Data Structures question bank
+
+
+// ==========================================
+// WEB DEVELOPMENT - 50 LEARNING QUIZ QUESTIONS
+// ==========================================
+
+const webDevelopmentLevelQuestions = [
+
+  // LEVEL 1: Introduction to Web Development
+  [
+    {
+      question: "What is Web Development?",
+      options: [
+        "Creating and maintaining websites",
+        "Repairing computers",
+        "Designing hardware",
+        "Managing databases only"
+      ],
+      answer: 0
+    },
+    {
+      question: "Which language is used to structure web pages?",
+      options: ["Python", "HTML", "Java", "C"],
+      answer: 1
+    },
+    {
+      question: "What does CSS stand for?",
+      options: [
+        "Computer Style System",
+        "Creative Software Structure",
+        "Cascading Style Sheets",
+        "Colorful Style Syntax"
+      ],
+      answer: 2
+    },
+    {
+      question: "Which language adds interactivity to websites?",
+      options: ["HTML", "CSS", "SQL", "JavaScript"],
+      answer: 3
+    },
+    {
+      question: "What is a web browser?",
+      options: [
+        "A tool used to access websites",
+        "A programming language",
+        "A database",
+        "An operating system"
+      ],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 2: HTML Fundamentals
+  [
+    {
+      question: "What does HTML stand for?",
+      options: [
+        "Hyper Trainer Marking Language",
+        "HyperText Markup Language",
+        "HighText Machine Language",
+        "HyperText Managing Language"
+      ],
+      answer: 1
+    },
+    {
+      question: "Which tag creates the largest heading?",
+      options: ["<h6>", "<head>", "<h1>", "<heading>"],
+      answer: 2
+    },
+    {
+      question: "Which HTML tag creates a hyperlink?",
+      options: ["<link>", "<href>", "<p>", "<a>"],
+      answer: 3
+    },
+    {
+      question: "Which tag is used to display an image?",
+      options: ["<img>", "<image>", "<picture>", "<src>"],
+      answer: 0
+    },
+    {
+      question: "Which tag creates a paragraph?",
+      options: ["<h1>", "<p>", "<para>", "<text>"],
+      answer: 1
+    }
+  ],
+    // LEVEL 3: HTML Forms and Semantic Elements
+  [
+    {
+      question: "Which HTML tag is used to create a form?",
+      options: ["<input>", "<form>", "<fieldset>", "<button>"],
+      answer: 1
+    },
+    {
+      question: "Which input type is used for email addresses?",
+      options: ["text", "number", "email", "password"],
+      answer: 2
+    },
+    {
+      question: "Which attribute connects a label to an input?",
+      options: ["name", "class", "value", "for"],
+      answer: 3
+    },
+    {
+      question: "Which semantic tag represents the main content?",
+      options: ["<main>", "<aside>", "<footer>", "<nav>"],
+      answer: 0
+    },
+    {
+      question: "Which HTML tag represents navigation links?",
+      options: ["<section>", "<nav>", "<article>", "<header>"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 4: CSS Fundamentals
+  [
+    {
+      question: "What does CSS control in a webpage?",
+      options: [
+        "Database storage",
+        "Server operations",
+        "Appearance and styling",
+        "Internet connection"
+      ],
+      answer: 2
+    },
+    {
+      question: "Which HTML tag is used for internal CSS?",
+      options: ["<css>", "<script>", "<style>", "<design>"],
+      answer: 2
+    },
+    {
+      question: "Which CSS property changes text color?",
+      options: ["font-style", "background", "text-size", "color"],
+      answer: 3
+    },
+    {
+      question: "Which symbol is used to select an ID in CSS?",
+      options: ["#", ".", "*", "&"],
+      answer: 0
+    },
+    {
+      question: "Which property changes the background color?",
+      options: ["color", "background-color", "font-color", "border-color"],
+      answer: 1
+    }
+  ],
+    // LEVEL 5: CSS Box Model and Layout
+  [
+    {
+      question: "Which four parts make up the CSS box model?",
+      options: [
+        "Content, padding, border, margin",
+        "Width, height, color, font",
+        "Header, body, footer, nav",
+        "Top, bottom, left, right"
+      ],
+      answer: 0
+    },
+    {
+      question: "Which CSS property controls the space inside an element's border?",
+      options: ["margin", "padding", "outline", "display"],
+      answer: 1
+    },
+    {
+      question: "Which property controls the space outside an element's border?",
+      options: ["padding", "border", "margin", "width"],
+      answer: 2
+    },
+    {
+      question: "Which CSS property enables Flexbox layout?",
+      options: [
+        "position: flex",
+        "layout: flex",
+        "flex: display",
+        "display: flex"
+      ],
+      answer: 3
+    },
+    {
+      question: "Which CSS property creates a grid layout?",
+      options: ["display: grid", "position: grid", "grid: block", "layout: grid"],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 6: Responsive Web Design
+  [
+    {
+      question: "What is responsive web design?",
+      options: [
+        "A website that works only on desktops",
+        "A design that adapts to different screen sizes",
+        "A website without images",
+        "A website with only text"
+      ],
+      answer: 1
+    },
+    {
+      question: "Which HTML element helps control the viewport on mobile devices?",
+      options: ["<title>", "<header>", "<meta>", "<footer>"],
+      answer: 2
+    },
+    {
+      question: "Which CSS feature applies styles based on screen conditions?",
+      options: ["Animation", "Transition", "Transform", "Media queries"],
+      answer: 3
+    },
+    {
+      question: "Which unit is relative to the viewport width?",
+      options: ["vw", "px", "cm", "pt"],
+      answer: 0
+    },
+    {
+      question: "Which approach is commonly used for responsive images?",
+      options: [
+        "Fixed width for every screen",
+        "max-width: 100%",
+        "display: none",
+        "position: absolute"
+      ],
+      answer: 1
+    }
+  ],
+    // LEVEL 7: JavaScript for Web Development
+  [
+    {
+      question: "Which keyword declares a block-scoped variable in JavaScript?",
+      options: ["var", "let", "int", "define"],
+      answer: 1
+    },
+    {
+      question: "Which operator checks both value and data type?",
+      options: ["=", "==", "===", "!="],
+      answer: 2
+    },
+    {
+      question: "Which method displays a message in the browser console?",
+      options: ["alert()", "print()", "display()", "console.log()"],
+      answer: 3
+    },
+    {
+      question: "Which keyword is used to define a function?",
+      options: ["function", "method", "func", "define"],
+      answer: 0
+    },
+    {
+      question: "Which event occurs when a user clicks an element?",
+      options: ["mouseover", "click", "change", "load"],
+      answer: 1
+    }
+  ],
+
+  // LEVEL 8: DOM Manipulation and Events
+  [
+    {
+      question: "What does DOM stand for?",
+      options: [
+        "Data Object Management",
+        "Document Order Model",
+        "Document Object Model",
+        "Digital Output Method"
+      ],
+      answer: 2
+    },
+    {
+      question: "Which method selects an element using its ID?",
+      options: [
+        "getElementsByClassName()",
+        "queryAll()",
+        "getElementsByTagName()",
+        "getElementById()"
+      ],
+      answer: 3
+    },
+    {
+      question: "Which property changes the text content of an element?",
+      options: ["textContent", "style", "src", "href"],
+      answer: 0
+    },
+    {
+      question: "Which method attaches an event handler to an element?",
+      options: ["addStyle()", "addEventListener()", "createEvent()", "setEvent()"],
+      answer: 1
+    },
+    {
+      question: "Which event occurs when a form is submitted?",
+      options: ["click", "change", "submit", "mouseover"],
+      answer: 2
+    }
+  ],
+    // LEVEL 9: Backend Development and APIs
+  [
+    {
+      question: "What is the primary role of backend development?",
+      options: [
+        "Managing server-side logic and data",
+        "Changing text colors",
+        "Creating animations only",
+        "Designing page layouts"
+      ],
+      answer: 0
+    },
+    {
+      question: "What does API stand for?",
+      options: [
+        "Application Programming Internet",
+        "Application Programming Interface",
+        "Advanced Program Integration",
+        "Automated Processing Interface"
+      ],
+      answer: 1
+    },
+    {
+      question: "Which HTTP method is commonly used to retrieve data?",
+      options: ["POST", "DELETE", "GET", "PATCH"],
+      answer: 2
+    },
+    {
+      question: "Which format is commonly used for exchanging API data?",
+      options: ["MP3", "JPG", "DOCX", "JSON"],
+      answer: 3
+    },
+    {
+      question: "What is the purpose of a database in web applications?",
+      options: [
+        "To store and manage application data",
+        "To style web pages",
+        "To create HTML tags",
+        "To display animations"
+      ],
+      answer: 0
+    }
+  ],
+
+  // LEVEL 10: Web Hosting, Deployment and Mini Project
+  [
+    {
+      question: "What is web hosting?",
+      options: [
+        "Writing HTML code",
+        "Making a website accessible on the internet",
+        "Creating database tables",
+        "Designing logos"
+      ],
+      answer: 1
+    },
+    {
+      question: "What is deployment?",
+      options: [
+        "Deleting website files",
+        "Writing CSS styles",
+        "Making an application available in a target environment",
+        "Creating a programming language"
+      ],
+      answer: 2
+    },
+    {
+      question: "Which protocol is used for secure communication on websites?",
+      options: ["FTP", "HTTP", "SMTP", "HTTPS"],
+      answer: 3
+    },
+    {
+      question: "What is the main purpose of Git?",
+      options: [
+        "Version control and tracking code changes",
+        "Creating images",
+        "Hosting databases only",
+        "Designing web pages"
+      ],
+      answer: 0
+    },
+    {
+      question: "Which of the following is an example of a web hosting platform?",
+      options: ["Notepad", "Render", "Calculator", "Paint"],
+      answer: 1
+    }
+  ]
+
+];
+
+console.log("Web Development question bank:", webDevelopmentLevelQuestions.length);
+console.log("Web Development Level 1 questions:", webDevelopmentLevelQuestions[0].length);
+// ==========================================
+// PART 3: JAVASCRIPT LEARNING LEVEL NAVIGATION
+// ==========================================
+const subjectLevels = {
+  "JavaScript": javascriptLevels,
+  "Database": databaseLevels,
+  "Python": pythonLevels,
+  "C": cLevels,
+  "Data Structures": dataStructuresLevels,
+  "Web Development": webDevelopmentLevels
+};
 // Display learning levels for the selected subject
 function displayJavaScriptLevels() {
 
   levelsContainer.innerHTML = "";
 
   // Select learning content for each subject
-const subjectLevels = {
-  "JavaScript": javascriptLevels,
-  "Database": databaseLevels,
-  "Python": pythonLevels,
-  "C": cLevels
-};
-
   const selectedLevels = subjectLevels[currentLearningSubject];
 
   // Get unlocked level for selected subject
@@ -6441,6 +9394,79 @@ document.querySelector('[data-path="c"]')
     document.getElementById("javascriptLevelsSection")
       .scrollIntoView({ behavior: "smooth" });
 });
+// Open Data Structures Learning Path
+document.querySelector('[data-path="data-structures"]')
+  .addEventListener("click", async () => {
+
+    currentLearningSubject = "Data Structures";
+    currentLearningLevel = 1;
+
+    document.getElementById("learningPathLabel").textContent =
+      "DATA STRUCTURES LEARNING PATH";
+
+    document.getElementById("learningPathTitle").textContent =
+      "📚 Data Structures – 10 Levels";
+
+    // Restore saved Data Structures progress
+    const { data: { user } } =
+      await supabaseClient.auth.getUser();
+
+    if (user) {
+      const savedProgress =
+        await loadLearningProgress(user.id, "Data Structures");
+
+      unlockedLevels["Data Structures"] = savedProgress
+        ? savedProgress.unlocked_level
+        : 1;
+    } else {
+      unlockedLevels["Data Structures"] = 1;
+    }
+
+    document.getElementById("learningPathsSection").hidden = true;
+
+    document.getElementById("javascriptLevelsSection").hidden = false;
+
+    displayJavaScriptLevels();
+
+    document.getElementById("javascriptLevelsSection")
+      .scrollIntoView({ behavior: "smooth" });
+});
+// Open Web Development Learning Path
+document.querySelector('[data-path="web-development"]')
+  .addEventListener("click", async () => {
+
+    currentLearningSubject = "Web Development";
+    currentLearningLevel = 1;
+
+    document.getElementById("learningPathLabel").textContent =
+      "WEB DEVELOPMENT LEARNING PATH";
+
+    document.getElementById("learningPathTitle").textContent =
+      "🌐 Web Development – 10 Levels";
+
+    // Restore saved Web Development progress
+    const { data: { user } } =
+      await supabaseClient.auth.getUser();
+
+    if (user) {
+      const savedProgress =
+        await loadLearningProgress(user.id, "Web Development");
+
+      unlockedLevels["Web Development"] = savedProgress
+        ? savedProgress.unlocked_level
+        : 1;
+    } else {
+      unlockedLevels["Web Development"] = 1;
+    }
+
+    document.getElementById("learningPathsSection").hidden = true;
+    document.getElementById("javascriptLevelsSection").hidden = false;
+
+    displayJavaScriptLevels();
+
+    document.getElementById("javascriptLevelsSection")
+      .scrollIntoView({ behavior: "smooth" });
+});
 // Open a selected learning level
 levelsContainer.addEventListener("click", (event) => {
 
@@ -6466,9 +9492,18 @@ levelsContainer.addEventListener("click", (event) => {
     currentLearningLevel = levelNumber;
     level = pythonLevels[levelNumber - 1];
   }
-  else if (currentLearningSubject === "C") {
+ 
+else if (currentLearningSubject === "C") {
   currentLearningLevel = levelNumber;
   level = cLevels[levelNumber - 1];
+}
+else if (currentLearningSubject === "Data Structures") {
+  currentLearningLevel = levelNumber;
+  level = dataStructuresLevels[levelNumber - 1];
+}
+else if (currentLearningSubject === "Web Development") {
+  currentLearningLevel = levelNumber;
+  level = webDevelopmentLevels[levelNumber - 1];
 }
 
   if (!level) return;
@@ -6547,12 +9582,7 @@ document.getElementById("startLearningQuizBtn")
     document.getElementById("learningQuizLabel").textContent =
       `${currentLearningSubject.toUpperCase()} • LEVEL ${levelNumber}`;
 
-  const subjectLevels = {
-  "JavaScript": javascriptLevels,
-  "Database": databaseLevels,
-  "Python": pythonLevels,
-  "C": cLevels
-};
+
 const selectedLevels = subjectLevels[currentLearningSubject];
 document.getElementById("learningQuizTitle").textContent =
   selectedLevels[levelNumber - 1].title + " Quiz";
@@ -6594,6 +9624,10 @@ if (currentLearningSubject === "JavaScript") {
   questions =
     cLevelQuestions[currentLearningLevel - 1];
 
+}
+else if (currentLearningSubject === "Data Structures") {
+  currentLearningLevel = levelNumber;
+  level = dataStructuresLevels[levelNumber - 1];
 }
 console.log("Current subject:", currentLearningSubject);
 console.log("Current level:", currentLearningLevel);
@@ -6669,6 +9703,18 @@ function displayLearningQuestion() {
       cLevelQuestions[currentLearningLevel - 1];
 
   }
+  else if (currentLearningSubject === "Data Structures") {
+
+    questions =
+      dataStructuresLevelQuestions[currentLearningLevel - 1];
+
+}
+else if (currentLearningSubject === "Web Development") {
+
+  questions =
+    webDevelopmentLevelQuestions[currentLearningLevel - 1];
+
+}
 
   if (!questions) {
     console.error("Questions not found for:", currentLearningSubject);
@@ -6817,6 +9863,16 @@ async function finishLearningQuiz() {
 } else if (currentLearningSubject === "C") {
 
   questions = cLevelQuestions[currentLearningLevel - 1];
+
+}
+else if (currentLearningSubject === "Data Structures") {
+
+  questions = dataStructuresLevelQuestions[currentLearningLevel - 1];
+
+}
+else if (currentLearningSubject === "Web Development") {
+
+  questions = webDevelopmentLevelQuestions[currentLearningLevel - 1];
 
 }
   if (!questions) {
@@ -6981,6 +10037,18 @@ else if (currentLearningSubject === "C") {
 
   questions =
     cLevelQuestions[currentLearningLevel - 1];
+
+}
+else if (currentLearningSubject === "Data Structures") {
+
+  questions =
+    dataStructuresLevelQuestions[currentLearningLevel - 1];
+
+}
+else if (currentLearningSubject === "Web Development") {
+
+  questions =
+    webDevelopmentLevelQuestions[currentLearningLevel - 1];
 
 }
 
@@ -7267,6 +10335,140 @@ function displayAllCExaminationQuestions() {
 
 }
 // ==========================================
+// DATA STRUCTURES EXAMINATION - DISPLAY ALL QUESTIONS
+// ==========================================
+
+function displayAllDataStructuresExaminationQuestions() {
+
+  const container = document.getElementById(
+    "dataStructuresExaminationQuestionsContainer"
+  );
+
+  container.innerHTML = "";
+
+  dataStructuresExaminationQuestions.forEach((question, qIndex) => {
+
+    const questionCard = document.createElement("div");
+    questionCard.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    questionCard.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const label = document.createElement("label");
+
+      label.style.display = "block";
+      label.style.margin = "12px 0";
+      label.style.padding = "10px";
+      label.style.cursor = "pointer";
+
+      const radio = document.createElement("input");
+
+      radio.type = "radio";
+      radio.name = `dataStructuresExaminationQuestion${qIndex}`;
+      radio.value = optionIndex;
+
+      radio.checked =
+        dataStructuresExaminationAnswers[qIndex] === optionIndex;
+
+      radio.addEventListener("change", () => {
+
+        dataStructuresExaminationAnswers[qIndex] = optionIndex;
+
+        saveDataStructuresExaminationProgress(
+          dataStructuresExaminationUserId
+        );
+
+      });
+
+      label.appendChild(radio);
+
+      label.append(
+        ` ${String.fromCharCode(65 + optionIndex)}. ${option}`
+      );
+
+      questionCard.appendChild(label);
+
+    });
+
+    container.appendChild(questionCard);
+
+  });
+
+}
+// ==========================================
+// WEB DEVELOPMENT EXAMINATION - DISPLAY ALL QUESTIONS
+// ==========================================
+
+function displayAllWebDevelopmentExaminationQuestions() {
+
+  const container = document.getElementById(
+    "webDevelopmentExaminationQuestionsContainer"
+  );
+
+  container.innerHTML = "";
+
+  webDevelopmentExaminationQuestions.forEach((question, qIndex) => {
+
+    const questionCard = document.createElement("div");
+    questionCard.className = "question-card";
+
+    const heading = document.createElement("h3");
+
+    heading.textContent =
+      `Question ${qIndex + 1}. ${question.question}`;
+
+    questionCard.appendChild(heading);
+
+    question.options.forEach((option, optionIndex) => {
+
+      const label = document.createElement("label");
+
+      label.style.display = "block";
+      label.style.margin = "12px 0";
+      label.style.padding = "10px";
+      label.style.cursor = "pointer";
+
+      const radio = document.createElement("input");
+
+      radio.type = "radio";
+      radio.name = `webDevelopmentExaminationQuestion${qIndex}`;
+      radio.value = optionIndex;
+
+      radio.checked =
+        webDevelopmentExaminationAnswers[qIndex] === optionIndex;
+
+      radio.addEventListener("change", () => {
+
+        webDevelopmentExaminationAnswers[qIndex] = optionIndex;
+
+        saveWebDevelopmentExaminationProgress(
+          webDevelopmentExaminationUserId
+        );
+
+      });
+
+      label.appendChild(radio);
+
+      label.append(
+        ` ${String.fromCharCode(65 + optionIndex)}. ${option}`
+      );
+
+      questionCard.appendChild(label);
+
+    });
+
+    container.appendChild(questionCard);
+
+  });
+
+}
+// ==========================================
 // REVIEW EXAMINATION ANSWERS
 // ==========================================
 
@@ -7472,7 +10674,74 @@ document.addEventListener("visibilitychange", function () {
 
     return;
   }
+// DATA STRUCTURES EXAMINATION SECURITY
 
+const dataStructuresExamSection = document.getElementById(
+  "dataStructuresExaminationQuizSection"
+);
+
+if (
+  dataStructuresExamSection &&
+  !dataStructuresExamSection.hidden &&
+  !dataStructuresExaminationSubmitted
+) {
+
+  dataStructuresExaminationTabSwitchCount++;
+
+  saveDataStructuresExaminationProgress(
+    dataStructuresExaminationUserId
+  );
+
+  if (dataStructuresExaminationTabSwitchCount >= 3) {
+
+    alert("🚫 Maximum tab-switch limit reached! Your Data Structures examination will be submitted automatically.");
+
+    finishDataStructuresExamination();
+
+  } else {
+
+    alert(`⚠️ Data Structures Examination Warning ${dataStructuresExaminationTabSwitchCount}/3!`);
+
+  }
+
+  return;
+}
+// WEB DEVELOPMENT EXAMINATION SECURITY
+
+const webDevelopmentExamSection = document.getElementById(
+  "webDevelopmentExaminationQuizSection"
+);
+
+if (
+  webDevelopmentExamSection &&
+  !webDevelopmentExamSection.hidden &&
+  !webDevelopmentExaminationSubmitted
+) {
+
+  webDevelopmentExaminationTabSwitchCount++;
+
+  saveWebDevelopmentExaminationProgress(
+    webDevelopmentExaminationUserId
+  );
+
+  if (webDevelopmentExaminationTabSwitchCount >= 3) {
+
+    alert(
+      "🚫 Maximum tab-switch limit reached! Your Web Development examination will be submitted automatically."
+    );
+
+    finishWebDevelopmentExamination();
+
+  } else {
+
+    alert(
+      `⚠️ Web Development Examination Warning ${webDevelopmentExaminationTabSwitchCount}/3!`
+    );
+
+  }
+
+  return;
+}
   // JAVA EXAMINATION SECURITY
 
   const examSection = document.getElementById(
@@ -7521,7 +10790,16 @@ window.addEventListener("beforeunload", function (event) {
   const cExamSection = document.getElementById(
     "cExaminationQuizSection"
   );
-
+  const dataStructuresExamSection = document.getElementById(
+  "dataStructuresExaminationQuizSection"
+);
+const webDevelopmentExamSection = document.getElementById(
+  "webDevelopmentExaminationQuizSection"
+);
+const webDevelopmentExamActive =
+  webDevelopmentExamSection &&
+  !webDevelopmentExamSection.hidden &&
+  !webDevelopmentExaminationSubmitted;
   const javaExamActive =
     javaExamSection &&
     !javaExamSection.hidden &&
@@ -7536,8 +10814,18 @@ window.addEventListener("beforeunload", function (event) {
     cExamSection &&
     !cExamSection.hidden &&
     !cExaminationSubmitted;
+    const dataStructuresExamActive =
+  dataStructuresExamSection &&
+  !dataStructuresExamSection.hidden &&
+  !dataStructuresExaminationSubmitted;
 
-  if (javaExamActive || pythonExamActive || cExamActive) {
+  if (
+  javaExamActive ||
+  pythonExamActive ||
+  cExamActive ||
+  dataStructuresExamActive ||
+  webDevelopmentExamActive
+) {
 
     event.preventDefault();
     event.returnValue = "";

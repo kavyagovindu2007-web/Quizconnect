@@ -318,13 +318,14 @@
 </article>
 
     <article class="community-card">
-      <h3>🌐 Web Development</h3>
-      <p>Explore HTML, CSS and JavaScript.</p>
-      <p>10 Levels</p>
-      <button class="primary-btn" data-path="web">
-        Start Learning
-      </button>
-    </article>
+  <h3>🌐 Web Development</h3>
+  <p>Explore HTML, CSS and JavaScript.</p>
+  <p>10 Levels</p>
+
+  <button class="primary-btn" data-path="web-development">
+    Start Learning
+  </button>
+</article>
         <!-- C Programming Learning Path -->
     <article class="community-card">
       <h3>💻 C Programming</h3>
@@ -334,7 +335,16 @@
         Start Learning
       </button>
     </article>
+<!-- Data Structures Learning Path -->
+<article class="community-card">
+  <h3>📚 Data Structures</h3>
+  <p>Learn arrays, linked lists, stacks, queues, trees, graphs and algorithms.</p>
+  <p>10 Levels</p>
 
+  <button class="primary-btn" data-path="data-structures">
+    Start Learning
+  </button>
+</article>
   </div>
 
   <button class="secondary-btn" id="backFromLearningPaths">
@@ -454,7 +464,6 @@
   </div>
 
   <!-- JAVA EXAMINATION -->
-
   <div class="community-card">
 
     <h3>☕ Java Examination</h3>
@@ -477,7 +486,6 @@
   </div>
 
   <!-- PYTHON EXAMINATION -->
-
   <div class="community-card">
 
     <h3>🐍 Python Programming Examination</h3>
@@ -498,34 +506,78 @@
     </button>
 
   </div>
+
   <!-- C PROGRAMMING EXAMINATION -->
+  <div class="community-card">
 
-<div class="community-card">
+    <h3>💻 C Programming Examination</h3>
+    <p><strong>Subject:</strong> C Programming</p>
 
-  <h3>💻 C Programming Examination</h3>
-  <p><strong>Subject:</strong> C Programming</p>
+    <ul>
+      <li>Total Questions: 50</li>
+      <li>Duration: 60 Minutes</li>
+      <li>Eligibility: Complete at least 10 qualifying quizzes with 3/5 or above in each.</li>
+      <li>Each question carries equal marks.</li>
+      <li>Certificate for 45/50 or above.</li>
+      <li>Three tab switches automatically submit the examination.</li>
+      <li>Progress and remaining time are saved.</li>
+    </ul>
 
-  <ul>
-    <li>Total Questions: 50</li>
-    <li>Duration: 60 Minutes</li>
-    <li>Eligibility: Complete at least 10 qualifying quizzes with 3/5 or above in each.</li>
-    <li>Each question carries equal marks.</li>
-    <li>Certificate for 45/50 or above.</li>
-    <li>Three tab switches automatically submit the examination.</li>
-    <li>Progress and remaining time are saved.</li>
-  </ul>
+    <button class="primary-btn" id="startCExaminationBtn">
+      🚀 Start C Programming Examination
+    </button>
 
-  <button class="primary-btn" id="startCExaminationBtn">
-    🚀 Start C Programming Examination
-  </button>
+  </div>
 
-</div>
+  <!-- DATA STRUCTURES EXAMINATION -->
+  <div class="community-card">
 
+    <h3>📚 Data Structures Examination</h3>
+    <p><strong>Subject:</strong> Data Structures</p>
+
+    <ul>
+      <li>Total Questions: 50</li>
+      <li>Duration: 60 Minutes</li>
+      <li>Eligibility: Complete at least 10 qualifying quizzes with 3/5 or above in each.</li>
+      <li>Each question carries equal marks.</li>
+      <li>Certificate for 45/50 or above.</li>
+      <li>Three tab switches automatically submit the examination.</li>
+      <li>Progress and remaining time are saved.</li>
+    </ul>
+
+    <button class="primary-btn" id="startDataStructuresExaminationBtn">
+      🚀 Start Data Structures Examination
+    </button>
+
+  </div>
+  <!-- WEB DEVELOPMENT EXAMINATION -->
+  <div class="community-card">
+
+    <h3>🌐 Web Development Examination</h3>
+    <p><strong>Subject:</strong> Web Development</p>
+
+    <ul>
+      <li>Total Questions: 50</li>
+      <li>Duration: 60 Minutes</li>
+      <li>Eligibility: Complete at least 10 qualifying quizzes with 3/5 or above in each.</li>
+      <li>Each question carries equal marks.</li>
+      <li>Certificate for 45/50 or above.</li>
+      <li>Three tab switches automatically submit the examination.</li>
+      <li>Progress and remaining time are saved.</li>
+    </ul>
+
+    <button class="primary-btn" id="startWebDevelopmentExaminationBtn">
+      🚀 Start Web Development Examination
+    </button>
+
+  </div>
+  <!-- BACK TO HOME -->
   <button class="secondary-btn" id="backFromExamination">
     ← Back to Home
   </button>
 
 </section>
+
 <!-- JAVA EXAMINATION SCREEN -->
 
 <section class="quiz-section" id="examinationQuizSection" hidden>
@@ -621,6 +673,72 @@
   <div class="quiz-navigation">
     <button class="submit-btn" id="cExaminationSubmitBtn">
       Submit C Examination
+    </button>
+  </div>
+
+</section>
+<!-- DATA STRUCTURES EXAMINATION SCREEN -->
+
+<section class="quiz-section" id="dataStructuresExaminationQuizSection" hidden>
+
+  <div class="quiz-top">
+    <div>
+      <p class="eyebrow">DATA STRUCTURES EXAMINATION</p>
+      <h2>Data Structures Online Examination</h2>
+    </div>
+
+    <div class="timer-box">
+      <p>Time Remaining</p>
+      <h2 id="dataStructuresExaminationTimer">60:00</h2>
+    </div>
+  </div>
+
+  <!-- ALL 50 DATA STRUCTURES QUESTIONS -->
+  <div id="dataStructuresExaminationQuestionsContainer"></div>
+
+  <!-- EXAMINATION RESULT -->
+  <div id="dataStructuresExaminationResult" hidden></div>
+
+  <button class="secondary-btn" id="dataStructuresExitExaminationBtn">
+    ← Back to Instructions
+  </button>
+
+  <div class="quiz-navigation">
+    <button class="submit-btn" id="dataStructuresExaminationSubmitBtn">
+      Submit Data Structures Examination
+    </button>
+  </div>
+
+</section>
+<!-- WEB DEVELOPMENT EXAMINATION SCREEN -->
+
+<section class="quiz-section" id="webDevelopmentExaminationQuizSection" hidden>
+
+  <div class="quiz-top">
+    <div>
+      <p class="eyebrow">WEB DEVELOPMENT EXAMINATION</p>
+      <h2>Web Development Online Examination</h2>
+    </div>
+
+    <div class="timer-box">
+      <p>Time Remaining</p>
+      <h2 id="webDevelopmentExaminationTimer">60:00</h2>
+    </div>
+  </div>
+
+  <!-- ALL 50 WEB DEVELOPMENT QUESTIONS -->
+  <div id="webDevelopmentExaminationQuestionsContainer"></div>
+
+  <!-- EXAMINATION RESULT -->
+  <div id="webDevelopmentExaminationResult" hidden></div>
+
+  <button class="secondary-btn" id="webDevelopmentExitExaminationBtn">
+    ← Back to Instructions
+  </button>
+
+  <div class="quiz-navigation">
+    <button class="submit-btn" id="webDevelopmentExaminationSubmitBtn">
+      Submit Web Development Examination
     </button>
   </div>
 
