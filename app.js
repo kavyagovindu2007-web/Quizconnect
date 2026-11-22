@@ -11246,24 +11246,61 @@ document.querySelectorAll("[data-job-course]").forEach(button => {
 
     document.getElementById("jobReadyLevelsGrid").innerHTML = "";
 
-    for (let level = 1; level <= 10; level++) {
+  for (let level = 1; level <= 10; level++) {
 
-      document.getElementById("jobReadyLevelsGrid").innerHTML += `
-        <article class="community-card">
-          <h3>Level ${level}</h3>
-          <p>${course.title} – Professional Learning</p>
-          <button class="primary-btn" disabled>
-            Course Content Coming Soon
-          </button>
-        </article>
-      `;
+  document.getElementById("jobReadyLevelsGrid").innerHTML += `
+    <article class="community-card">
+      <h3>Level ${level}</h3>
+      <p>${course.title} – Professional Learning</p>
 
-    }
+      <button class="primary-btn" data-job-level="${level}">
+        Start Level ${level} →
+      </button>
+    </article>
+  `;
+
+}
 
     document.getElementById("jobReadyCourseView").scrollIntoView({
       behavior: "smooth"
     });
+// Open selected job-ready level
+document.querySelectorAll("[data-job-level]").forEach(button => {
 
+  button.addEventListener("click", () => {
+
+    const level = Number(button.dataset.jobLevel);
+
+    document.getElementById("jobReadyLevelsGrid").hidden = true;
+
+    document.getElementById("jobReadyLevelContent").hidden = false;
+
+    document.getElementById("jobReadyLevelTitle").textContent =
+      `Level ${level}: ${course.title}`;
+
+    document.getElementById("jobReadyLessons").innerHTML = `
+      <article class="community-card">
+        <h3>📘 Level ${level} Learning Content</h3>
+        <p>Professional lessons and practical exercises will be added here.</p>
+      </article>
+    `;
+
+    document.getElementById("jobReadyAssessment").innerHTML = `
+      <article class="community-card">
+        <h3>📝 Level ${level} Assessment</h3>
+        <p>Assessment questions will be added here.</p>
+      </article>
+    `;
+
+    document.getElementById("backToJobReadyLevels").hidden = false;
+
+    document.getElementById("jobReadyLevelContent").scrollIntoView({
+      behavior: "smooth"
+    });
+
+  });
+
+});
   });
 
 });
@@ -11283,6 +11320,21 @@ document.getElementById("backToJobReadyCourses")
     document.getElementById("backFromCJobReady").hidden = false;
 
     document.getElementById("cJobReadySection").scrollIntoView({
+      behavior: "smooth"
+    });
+
+  });
+  // Back to Job-Ready Levels
+document.getElementById("backToJobReadyLevels")
+  .addEventListener("click", () => {
+
+    document.getElementById("jobReadyLevelContent").hidden = true;
+
+    document.getElementById("jobReadyLevelsGrid").hidden = false;
+
+    document.getElementById("backToJobReadyLevels").hidden = true;
+
+    document.getElementById("jobReadyLevelsGrid").scrollIntoView({
       behavior: "smooth"
     });
 
