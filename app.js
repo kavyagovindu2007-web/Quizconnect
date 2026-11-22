@@ -773,6 +773,112 @@ document.getElementById("learningPathsBtn").addEventListener("click", () => {
   });
 
 });
+// Open Startup & Placement Hub
+document.getElementById("placementHubBtn").addEventListener("click", () => {
+
+  welcomeSection.hidden = true;
+  statsSection.hidden = true;
+  homeQuizSection.hidden = true;
+
+  document.getElementById("communitySection").hidden = true;
+  document.getElementById("achievementsSection").hidden = true;
+  document.getElementById("learningPathsSection").hidden = true;
+
+  document.getElementById("placementHubSection").hidden = false;
+
+  document.getElementById("placementHubSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Open Startup Companies
+document.getElementById("exploreCompaniesBtn").addEventListener("click", () => {
+
+  document.getElementById("placementHubSection").hidden = true;
+  document.getElementById("startupCompaniesSection").hidden = false;
+
+  document.getElementById("startupCompaniesSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Open Internships
+document.getElementById("exploreInternshipsBtn").addEventListener("click", () => {
+
+  document.getElementById("placementHubSection").hidden = true;
+  document.getElementById("internshipsSection").hidden = false;
+
+  document.getElementById("internshipsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Open Fresher Jobs
+document.getElementById("exploreJobsBtn").addEventListener("click", () => {
+
+  document.getElementById("placementHubSection").hidden = true;
+  document.getElementById("fresherJobsSection").hidden = false;
+
+  document.getElementById("fresherJobsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Open Industry Required Skills
+document.getElementById("exploreSkillsBtn").addEventListener("click", () => {
+
+  document.getElementById("placementHubSection").hidden = true;
+  document.getElementById("requiredSkillsSection").hidden = false;
+
+  document.getElementById("requiredSkillsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Back to Placement Hub from Required Skills
+document.getElementById("backFromSkills").addEventListener("click", () => {
+
+  document.getElementById("requiredSkillsSection").hidden = true;
+  document.getElementById("placementHubSection").hidden = false;
+
+  document.getElementById("placementHubSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Back to Placement Hub from Fresher Jobs
+document.getElementById("backFromJobs").addEventListener("click", () => {
+
+  document.getElementById("fresherJobsSection").hidden = true;
+  document.getElementById("placementHubSection").hidden = false;
+
+  document.getElementById("placementHubSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Back to Placement Hub from Internships
+document.getElementById("backFromInternships").addEventListener("click", () => {
+
+  document.getElementById("internshipsSection").hidden = true;
+  document.getElementById("placementHubSection").hidden = false;
+
+  document.getElementById("placementHubSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Back to Placement Hub from Startup Companies
+document.getElementById("backToPlacementHub").addEventListener("click", () => {
+
+  document.getElementById("startupCompaniesSection").hidden = true;
+  document.getElementById("placementHubSection").hidden = false;
+
+  document.getElementById("placementHubSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
 // Open Online Examination
 document.getElementById("examinationBtn").addEventListener("click", () => {
 
@@ -4963,6 +5069,21 @@ document.getElementById("backFromLearningPaths").addEventListener("click", () =>
   homeQuizSection.hidden = false;
 
   window.scrollTo({ top: 0, behavior: "smooth" });
+
+});
+// Back to Home from Placement Hub
+document.getElementById("backFromPlacementHub").addEventListener("click", () => {
+
+  document.getElementById("placementHubSection").hidden = true;
+
+  welcomeSection.hidden = false;
+  statsSection.hidden = false;
+  homeQuizSection.hidden = false;
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 
 });
 // Load saved learning progress for any subject
