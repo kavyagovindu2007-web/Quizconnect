@@ -11108,3 +11108,32 @@ document.getElementById("backFromProgramming").addEventListener("click", () => {
   });
 
 });
+// ==================================
+// C PROGRAMMING SECTION NAVIGATION
+// ==================================
+
+document.getElementById("startCLearningBtn").addEventListener("click", () => {
+
+  document.getElementById("programmingSection").hidden = true;
+
+  document.getElementById("cLearningSection").hidden = false;
+
+  document.getElementById("cLearningSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Back to Programming Languages
+
+document.getElementById("backFromCLearning").addEventListener("click", () => {
+
+  document.getElementById("cLearningSection").hidden = true;
+
+  document.getElementById("programmingSection").hidden = false;
+
+  document.getElementById("programmingSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
