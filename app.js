@@ -135,6 +135,7 @@ const quizzes = {
   ],
 
   "C Programming": [
+  
     {
       question: "Who developed the C programming language?",
       options: [
@@ -220,7 +221,15 @@ const homeBtn = document.getElementById("homeBtn");
 
 const welcomeSection = document.querySelector(".welcome");
 const statsSection = document.querySelector(".stats");
-const homeQuizSection = document.querySelector(".container > .section:not(.community)");
+const homeQuizSection = document.querySelector("#homeQuizSection");
+console.log("Welcome ID:", welcomeSection?.id);
+console.log("Welcome class:", welcomeSection?.className);
+
+console.log("Stats ID:", statsSection?.id);
+console.log("Stats class:", statsSection?.className);
+
+console.log("Home quiz ID:", homeQuizSection?.id);
+console.log("Home quiz class:", homeQuizSection?.className);
 
 const message = document.getElementById("message");
 const profileName = document.getElementById("profileName");
@@ -281,6 +290,59 @@ function displayQuestion() {
     `Question ${currentQuestion + 1} of ${currentQuiz.length}`;
 
   answerOptions.innerHTML = "";
+  // BOOKMARK CURRENT QUESTION
+
+const bookmarkBtn = document.createElement("button");
+
+bookmarkBtn.className = "secondary-btn";
+bookmarkBtn.textContent = "🔖 Bookmark Question";
+
+bookmarkBtn.addEventListener("click", async () => {
+
+  try {
+
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      alert("Please log in first!");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("bookmarked_questions")
+      .insert({
+        user_id: user.id,
+        question_text: question.question,
+        options: question.options,
+        correct_answer: question.answer,
+        explanation: null,
+        category: quizTitle.textContent
+      });
+
+    if (error) {
+      if (error.code === "23505") {
+        alert("This question is already bookmarked! 🔖");
+      } else {
+        throw error;
+      }
+      return;
+    }
+
+    bookmarkBtn.textContent = "✅ Bookmarked!";
+    bookmarkBtn.disabled = true;
+
+  } catch (error) {
+
+    alert("Bookmark error: " + error.message);
+
+  }
+
+});
+
+answerOptions.appendChild(bookmarkBtn);
 
   question.options.forEach((option, index) => {
     const button = document.createElement("button");
@@ -494,13 +556,13 @@ function reviewAnswers() {
           <strong>
             ${selected === null
               ? "Not Answered"
-              : question.options[selected]}
+              : escapeHTML(question.options[selected])}
           </strong>
         </p>
 
         <p>
           Correct Answer:
-          <strong>${question.options[correct]}</strong>
+          <strong>${escapeHTML(question.options[correct])}</strong>
         </p>
 
         <p>
@@ -769,6 +831,44 @@ document.getElementById("learningPathsBtn").addEventListener("click", () => {
   document.getElementById("learningPathsSection").hidden = false;
 
   document.getElementById("learningPathsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+// Open Personalized Learning Recommendations
+document.getElementById("learningRecommendationsBtn").addEventListener("click", () => {
+  
+
+  welcomeSection.hidden = true;
+  statsSection.hidden = true;
+  homeQuizSection.hidden = true;
+
+  document.getElementById("communitySection").hidden = true;
+  document.getElementById("achievementsSection").hidden = true;
+  document.getElementById("learningPathsSection").hidden = true;
+
+  document.getElementById("learningRecommendationsSection").hidden = false;
+  loadPersonalizedRecommendations();
+
+  document.getElementById("learningRecommendationsSection").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+// Back to Home from Recommendations
+document.getElementById("backFromRecommendations").addEventListener("click", () => {
+
+  document.getElementById("learningRecommendationsSection").hidden = true;
+
+  welcomeSection.hidden = false;
+  statsSection.hidden = false;
+  homeQuizSection.hidden = false;
+
+  document.getElementById("communitySection").hidden = false;
+
+  window.scrollTo({
+    top: 0,
     behavior: "smooth"
   });
 
@@ -5546,6 +5646,228 @@ async function loadQuizHistory() {
 }
 
 loadQuizHistory();
+// Load Personalized Learning Recommendations
+async function loadPersonalizedRecommendations() {
+  console.log("RECOMMENDATIONS FUNCTION STARTED");
+
+  const list = document.getElementById("learningRecommendationsList");
+
+  list.innerHTML = "<p>Analysing your learning progress...</p>";
+
+  try {
+
+    const { data: { user }, error: authError } =
+      await supabaseClient.auth.getUser();
+      console.log("USER AUTH CHECK COMPLETED");
+
+    if (authError || !user) {
+      list.innerHTML = "<p>Please log in to view recommendations.</p>";
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("quiz_results")
+      .select("quiz_name, score, total_questions, percentage")
+      .eq("user_id", user.id);
+      console.log("QUIZ RESULTS FETCHED:", data, error);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      list.innerHTML =
+        "<p>Complete some quizzes to receive personalized recommendations!</p>";
+      return;
+    }
+
+    // Group results by main subject
+    const subjects = {};
+
+    function identifySubject(name) {
+
+      if (/javascript/i.test(name)) return "JavaScript";
+      if (/python/i.test(name)) return "Python Programming";
+      if (/database/i.test(name)) return "Database Management";
+      if (/web development/i.test(name)) return "Web Development";
+      if (/c programming|^c learning path/i.test(name)) return "C Programming";
+      if (/data structures/i.test(name)) return "Data Structures";
+      if (/^java examination$/i.test(name)) return "Java Programming";
+
+      return name;
+    }
+
+    data.forEach(result => {
+
+      const subject = identifySubject(result.quiz_name || "Other");
+
+      if (!subjects[subject]) {
+        subjects[subject] = [];
+      }
+
+      const percentage = Number(
+        result.percentage ??
+        (result.score / result.total_questions) * 100
+      );
+
+      subjects[subject].push(percentage);
+    });
+
+    let recommendations = "";
+
+    Object.entries(subjects).forEach(([subject, scores]) => {
+
+      const average = Math.round(
+        scores.reduce((sum, score) => sum + score, 0) / scores.length
+      );
+
+      let suggestion = "";
+      let status = "";
+
+      if (average < 60) {
+        status = "Needs Improvement";
+        suggestion = "⚠️ Revise the fundamentals and practise more questions.";
+      } else if (average < 80) {
+        status = "Good Progress";
+        suggestion = "📚 Practise intermediate questions to improve further.";
+      } else {
+        status = "Strong Subject";
+        suggestion = "🌟 Excellent performance! Challenge yourself with harder tests.";
+      }
+
+      recommendations += `
+        <article class="community-card">
+          <h3>${escapeHTML(subject)}</h3>
+          <p><strong>Average Score:</strong> ${average}%</p>
+          <p><strong>Attempts:</strong> ${scores.length}</p>
+          <p><strong>Status:</strong> ${status}</p>
+          <p>${suggestion}</p>
+        </article>
+      `;
+    });
+
+    list.innerHTML = recommendations;
+
+  } catch (error) {
+
+    console.error("Recommendation loading error:", error);
+
+    list.innerHTML =
+      "<p>Unable to load recommendations. Please try again.</p>";
+  }
+}
+// =====================================
+// PERFORMANCE ANALYTICS DASHBOARD
+// =====================================
+
+async function loadPerformanceAnalytics() {
+
+  const { data: { user } } =
+    await supabaseClient.auth.getUser();
+
+  if (!user) return;
+
+  const { data, error } = await supabaseClient
+    .from("quiz_results")
+    .select("quiz_name, score, total_questions, percentage")
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Analytics loading error:", error.message);
+    return;
+  }
+
+  const results = data || [];
+
+  // Separate quizzes and examinations
+  const examinations = results.filter(result =>
+    result.quiz_name.toLowerCase().includes("examination")
+  );
+
+  const quizzes = results.filter(result =>
+    !result.quiz_name.toLowerCase().includes("examination")
+  );
+
+  // Total counts
+  document.getElementById("analyticsTotalQuizzes").textContent =
+    quizzes.length;
+
+  document.getElementById("analyticsTotalExams").textContent =
+    examinations.length;
+
+  // Overall average percentage
+const averageScore = results.length
+  ? results.reduce((sum, result) =>
+      sum + Number(result.percentage || 0), 0) / results.length
+  : 0;
+
+document.getElementById("analyticsAverageScore").textContent =
+  Math.round(averageScore) + "%";
+
+// Subject-wise performance
+const subjectScores = {};
+
+results.forEach(result => {
+
+  let subject = result.quiz_name
+    .replace(/\s*Learning Path\s*-\s*Level\s*\d+/i, "")
+    .replace(/\s*Examination$/i, "")
+    .replace(/\s*Basics$/i, "")
+    .trim();
+
+  const subjectNames = {
+    "Python Programming": "Python",
+    "C": "C Programming"
+  };
+
+  subject = subjectNames[subject] || subject;
+
+  if (!subjectScores[subject]) {
+    subjectScores[subject] = [];
+  }
+
+  subjectScores[subject].push(
+    Number(result.percentage || 0)
+  );
+
+});
+
+let bestSubject = "--";
+let highestAverage = -1;
+
+const subjectContainer =
+  document.getElementById("subjectPerformanceContainer");
+
+subjectContainer.innerHTML = "";
+
+Object.entries(subjectScores).forEach(([subject, scores]) => {
+
+  const average =
+    scores.reduce((sum, value) => sum + value, 0) / scores.length;
+
+  if (average > highestAverage) {
+    highestAverage = average;
+    bestSubject = subject;
+  }
+
+  const subjectCard = document.createElement("div");
+  subjectCard.className = "history-item";
+
+  subjectCard.innerHTML = `
+    <h4>${subject}</h4>
+    <p>Attempts: ${scores.length}</p>
+    <p>Average Score: ${Math.round(average)}%</p>
+  `;
+
+  subjectContainer.appendChild(subjectCard);
+
+});
+
+document.getElementById("analyticsBestSubject").textContent =
+  bestSubject;
+
+}
+
+loadPerformanceAnalytics();
+
 
 // Load total quizzes attended from Supabase
 async function loadTotalQuizzes() {
@@ -10238,11 +10560,15 @@ else if (currentLearningSubject === "Web Development") {
           selectedAnswer === undefined
             ? "Not answered"
             : question.options[selectedAnswer]
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
         }`;
 
-      const correctAnswer = document.createElement("p");
-      correctAnswer.textContent =
-        `Correct answer: ${question.options[question.answer]}`;
+     const correctAnswer = document.createElement("p");
+correctAnswer.textContent =
+`Correct answer: ${question.options[question.answer]
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")}`
 
       const status = document.createElement("p");
       status.textContent =
@@ -11210,100 +11536,1994 @@ const jobReadyCourseCatalog = {
     title: "Cybersecurity",
     description: "Learn network security and protection fundamentals."
   },
-  git: {
+   git: {
     title: "Git & GitHub",
     description: "Learn version control and collaborative development."
+  },
+
+    accounting: {
+    title: "Accounting & Finance",
+    description: "Learn accounting principles, financial statements and budgeting."
+  },
+  business: {
+    title: "Business Management",
+    description: "Learn business operations, planning and management."
+  },
+  marketing: {
+    title: "Digital Marketing",
+    description: "Learn SEO, social media and digital marketing strategies."
+  },
+  communication: {
+    title: "Communication Skills",
+    description: "Develop speaking, writing and presentation skills."
+  },
+  leadership: {
+    title: "Leadership & Teamwork",
+    description: "Develop leadership, collaboration and teamwork skills."
+  },
+  design: {
+    title: "Graphic Design",
+    description: "Learn visual communication and creative design."
+  },
+  entrepreneurship: {
+    title: "Entrepreneurship",
+    description: "Learn startup fundamentals, business planning and innovation."
+  },
+  aptitude: {
+    title: "Aptitude & Logical Reasoning",
+    description: "Develop quantitative aptitude and logical reasoning."
+  },
+  analytical: {
+    title: "Analytical & Problem-Solving Skills",
+    description: "Develop critical thinking and decision-making skills."
   }
 };
+// ==========================================
+// JOB-READY CURRICULUM - 22 COURSES
+// ==========================================
 
-// Open selected technical course
-document.querySelectorAll("[data-job-course]").forEach(button => {
+const jobReadyCurriculum = {
 
-  button.addEventListener("click", () => {
+  cpp: [
+    "Introduction to C++ and Programming",
+    "Variables, Data Types and Operators",
+    "Conditional Statements",
+    "Loops and Iteration",
+    "Functions and Recursion",
+    "Arrays, Strings and Pointers",
+    "Object-Oriented Programming",
+    "Inheritance and Polymorphism",
+    "STL and Problem Solving",
+    "C++ Mini Project and Interview Preparation"
+  ],
 
-    const courseKey = button.dataset.jobCourse;
-    const course = jobReadyCourseCatalog[courseKey];
+  java: [
+    "Introduction to Java and JVM",
+    "Variables, Data Types and Operators",
+    "Conditional Statements and Loops",
+    "Methods and Arrays",
+    "Object-Oriented Programming",
+    "Inheritance and Polymorphism",
+    "Exception Handling",
+    "Collections and Generics",
+    "File Handling and Multithreading",
+    "Java Mini Project and Interview Preparation"
+  ],
 
-    if (!course) return;
+  python: [
+    "Introduction to Python",
+    "Variables and Data Types",
+    "Operators and Conditional Statements",
+    "Loops and Iteration",
+    "Functions and Modules",
+    "Lists, Tuples and Dictionaries",
+    "Strings and File Handling",
+    "Object-Oriented Programming",
+    "Libraries and Automation",
+    "Python Mini Project and Interview Preparation"
+  ],
 
-    document.getElementById("technicalCoursesHeading").hidden = true;
-    document.getElementById("technicalCoursesGrid").hidden = true;
+  html: [
+    "Introduction to HTML",
+    "HTML Document Structure",
+    "Text Formatting and Links",
+    "Images and Multimedia",
+    "Lists and Tables",
+    "Forms and Input Elements",
+    "Semantic HTML",
+    "HTML Accessibility",
+    "SEO-Friendly HTML",
+    "Build a Complete Web Page"
+  ],
 
-    document.getElementById("nonTechnicalCoursesHeading").hidden = true;
-    document.getElementById("nonTechnicalCoursesGrid").hidden = true;
+  css: [
+    "Introduction to CSS",
+    "Selectors and Properties",
+    "Colors, Fonts and Typography",
+    "Box Model",
+    "Display and Positioning",
+    "Flexbox Layout",
+    "CSS Grid",
+    "Responsive Web Design",
+    "Animations and Transitions",
+    "Responsive Website Project"
+  ],
 
-    document.getElementById("backFromCJobReady").hidden = true;
+  javascript: [
+    "Introduction to JavaScript",
+    "Variables and Data Types",
+    "Operators and Expressions",
+    "Conditional Statements",
+    "Loops",
+    "Functions",
+    "Arrays and Objects",
+    "DOM Manipulation",
+    "Events and Asynchronous JavaScript",
+    "Interactive Website Project"
+  ],
 
-    document.getElementById("jobReadyCourseTitle").textContent =
-      course.title;
+  fullstack: [
+    "Introduction to Full Stack Development",
+    "HTML and CSS Fundamentals",
+    "JavaScript for Frontend",
+    "Responsive Frontend Development",
+    "Backend Development Fundamentals",
+    "Server and REST APIs",
+    "Database Integration",
+    "Authentication and Security",
+    "Testing and Deployment",
+    "Full Stack Application Project"
+  ],
 
-    document.getElementById("jobReadyCourseDescription").textContent =
-      course.description;
+  sql: [
+    "Introduction to Databases",
+    "Database Tables and Relationships",
+    "SELECT Queries",
+    "Filtering and Sorting Data",
+    "Aggregate Functions",
+    "Joins and Subqueries",
+    "Insert, Update and Delete",
+    "Database Design and Normalization",
+    "Indexes and Transactions",
+    "Database Project"
+  ],
 
-    document.getElementById("jobReadyCourseView").hidden = false;
+  dsa: [
+    "Introduction to Data Structures",
+    "Arrays and Strings",
+    "Linked Lists",
+    "Stacks and Queues",
+    "Searching Algorithms",
+    "Sorting Algorithms",
+    "Trees and Binary Search Trees",
+    "Graphs and Traversal",
+    "Hashing and Dynamic Programming",
+    "DSA Interview Problem Solving"
+  ],
 
-    document.getElementById("jobReadyLevelContent").hidden = true;
+  aiml: [
+    "Introduction to AI and Machine Learning",
+    "Python for Data Science",
+    "Data Collection and Preparation",
+    "Statistics and Data Visualization",
+    "Supervised Learning",
+    "Unsupervised Learning",
+    "Model Training and Evaluation",
+    "Neural Networks Fundamentals",
+    "Natural Language Processing",
+    "Machine Learning Mini Project"
+  ],
 
-    document.getElementById("jobReadyLevelsGrid").innerHTML = "";
+  cloud: [
+    "Introduction to Cloud Computing",
+    "Cloud Service Models",
+    "Cloud Deployment Models",
+    "Virtual Machines and Storage",
+    "Networking Fundamentals",
+    "Cloud Databases",
+    "Identity and Access Management",
+    "Containers and Virtualization",
+    "Cloud Security and Monitoring",
+    "Cloud Deployment Project"
+  ],
 
-  for (let level = 1; level <= 10; level++) {
+  cybersecurity: [
+    "Introduction to Cybersecurity",
+    "Networking Fundamentals",
+    "Operating System Security",
+    "Common Cyber Threats",
+    "Cryptography Fundamentals",
+    "Authentication and Access Control",
+    "Web Application Security",
+    "Network Security",
+    "Incident Response and Security Ethics",
+    "Cybersecurity Case Study"
+  ],
 
-  document.getElementById("jobReadyLevelsGrid").innerHTML += `
-    <article class="community-card">
-      <h3>Level ${level}</h3>
-      <p>${course.title} – Professional Learning</p>
+  git: [
+    "Introduction to Git and Version Control",
+    "Installing and Configuring Git",
+    "Repositories and Commits",
+    "Branches and Merging",
+    "Undoing Changes",
+    "Remote Repositories",
+    "GitHub Collaboration",
+    "Pull Requests and Code Reviews",
+    "Merge Conflicts and Workflows",
+    "Collaborative GitHub Project"
+  ],
 
-      <button class="primary-btn" data-job-level="${level}">
-        Start Level ${level} →
-      </button>
-    </article>
-  `;
+  accounting: [
+    "Introduction to Accounting",
+    "Accounting Principles and Concepts",
+    "Journal Entries and Ledgers",
+    "Trial Balance",
+    "Financial Statements",
+    "Profit and Loss Analysis",
+    "Balance Sheet",
+    "Budgeting and Cost Management",
+    "Financial Analysis",
+    "Accounting Case Study"
+  ],
 
-}
+  business: [
+    "Introduction to Business Management",
+    "Business Planning",
+    "Organizational Structures",
+    "Human Resource Management",
+    "Operations Management",
+    "Marketing Management",
+    "Financial Management",
+    "Business Strategy",
+    "Project Management",
+    "Business Planning Project"
+  ],
 
-    document.getElementById("jobReadyCourseView").scrollIntoView({
-      behavior: "smooth"
-    });
-// Open selected job-ready level
-document.querySelectorAll("[data-job-level]").forEach(button => {
+  marketing: [
+    "Introduction to Digital Marketing",
+    "Digital Marketing Channels",
+    "Search Engine Optimization",
+    "Social Media Marketing",
+    "Content Marketing",
+    "Email Marketing",
+    "Paid Advertising",
+    "Web Analytics",
+    "Marketing Strategy",
+    "Digital Marketing Campaign Project"
+  ],
 
-  button.addEventListener("click", () => {
+  communication: [
+    "Fundamentals of Communication",
+    "Verbal Communication",
+    "Non-Verbal Communication",
+    "Professional Writing",
+    "Email and Workplace Etiquette",
+    "Presentation Skills",
+    "Public Speaking",
+    "Active Listening",
+    "Interview Communication",
+    "Professional Presentation Project"
+  ],
 
-    const level = Number(button.dataset.jobLevel);
+  leadership: [
+    "Introduction to Leadership",
+    "Leadership Styles",
+    "Team Building",
+    "Team Communication",
+    "Conflict Resolution",
+    "Decision Making",
+    "Time and Task Management",
+    "Delegation and Accountability",
+    "Motivation and Collaboration",
+    "Team Leadership Case Study"
+  ],
 
-    document.getElementById("jobReadyLevelsGrid").hidden = true;
+  design: [
+    "Introduction to Graphic Design",
+    "Design Principles",
+    "Color Theory",
+    "Typography",
+    "Layout and Composition",
+    "Image Editing",
+    "Branding Fundamentals",
+    "UI Design Fundamentals",
+    "Design Tools and Portfolio",
+    "Graphic Design Project"
+  ],
 
-    document.getElementById("jobReadyLevelContent").hidden = false;
+  entrepreneurship: [
+    "Introduction to Entrepreneurship",
+    "Identifying Business Opportunities",
+    "Idea Validation",
+    "Market Research",
+    "Business Models",
+    "Business Planning",
+    "Startup Finance",
+    "Marketing a Startup",
+    "Startup Operations",
+    "Startup Pitch Project"
+  ],
 
-    document.getElementById("jobReadyLevelTitle").textContent =
-      `Level ${level}: ${course.title}`;
+  aptitude: [
+    "Number Systems",
+    "Percentages and Ratios",
+    "Profit and Loss",
+    "Averages and Mixtures",
+    "Time, Speed and Distance",
+    "Time and Work",
+    "Logical Reasoning",
+    "Coding-Decoding and Series",
+    "Verbal Reasoning",
+    "Placement Aptitude Practice"
+  ],
 
-    document.getElementById("jobReadyLessons").innerHTML = `
+  analytical: [
+    "Introduction to Analytical Thinking",
+    "Problem Identification",
+    "Critical Thinking",
+    "Data Interpretation",
+    "Logical Analysis",
+    "Root Cause Analysis",
+    "Decision Making",
+    "Problem-Solving Frameworks",
+    "Case Study Analysis",
+    "Real-World Problem-Solving Project"
+  ]
+
+};
+
+console.log("Job-Ready courses:", Object.keys(jobReadyCurriculum).length);
+// ==========================================
+// JOB-READY COURSE CONTENT ENGINE
+// ==========================================
+
+const jobReadyCourseContent = {
+
+  cpp: {
+
+    1: {
+      lessons: [
+        {
+          title: "What is C++?",
+          content: "C++ is a general-purpose programming language used to develop software, games, operating systems and high-performance applications.",
+          example: "Examples of C++ applications include game engines, desktop software and system tools."
+        },
+        {
+          title: "History and Features of C++",
+          content: "C++ was developed by Bjarne Stroustrup. It supports procedural, object-oriented and generic programming.",
+          example: "C++ provides classes, objects, inheritance, polymorphism and templates."
+        },
+        {
+          title: "Writing Your First C++ Program",
+          content: "A C++ program commonly starts execution from the main() function. The cout statement displays output.",
+          example: "#include <iostream>\nusing namespace std;\nint main() {\n    cout << \"Hello, World!\";\n    return 0;\n}"
+        }
+      ],
+
+      exercise: "Write a C++ program that displays your name, college and course using cout.",
+
+      assignment: "Create a program that prints a simple student introduction with at least three output statements."
+    }
+
+  }
+
+};
+
+
+// ==========================================
+// JOB-READY PRACTICE TEST QUESTION BANK
+// ==========================================
+
+const jobReadyAssessmentQuestions = {
+
+  cpp: [
+    {
+      question: "Who developed C++?",
+      options: [
+        "James Gosling",
+        "Bjarne Stroustrup",
+        "Dennis Ritchie",
+        "Guido van Rossum"
+      ],
+      answer: 1,
+      explanation: "Bjarne Stroustrup developed C++."
+    },
+    {
+      question: "Which function is the entry point of a C++ program?",
+      options: ["start()", "run()", "main()", "execute()"],
+      answer: 2,
+      explanation: "Execution of a standard C++ program begins in main()."
+    },
+    {
+      question: "Which statement displays output in C++?",
+      options: ["cin", "cout", "print", "display"],
+      answer: 1,
+      explanation: "cout displays output in C++."
+    },
+    {
+      question: "Which header file is commonly used for cout?",
+      options: ["<stdio.h>", "<string>", "<iostream>", "<math.h>"],
+      answer: 2,
+      explanation: "The iostream header provides input and output functionality."
+    },
+    {
+      question: "Which symbol terminates a normal C++ statement?",
+      options: [":", ".", ";", ","],
+      answer: 2,
+      explanation: "A semicolon terminates most C++ statements."
+    },
+    {
+      question: "Which keyword is used to create a class in C++?",
+      options: ["object", "class", "structclass", "define"],
+      answer: 1,
+      explanation: "The class keyword declares a class in C++."
+    },
+    {
+      question: "Which operator is used for addition?",
+      options: ["*", "+", "/", "%"],
+      answer: 1,
+      explanation: "The + operator performs addition."
+    },
+    {
+      question: "Which loop executes at least once?",
+      options: ["for", "while", "do-while", "none"],
+      answer: 2,
+      explanation: "A do-while loop checks its condition after executing the loop body."
+    },
+    {
+      question: "Which data type stores whole numbers?",
+      options: ["float", "int", "char", "bool"],
+      answer: 1,
+      explanation: "The int data type stores integer values."
+    },
+    {
+      question: "Which operator checks equality?",
+      options: ["=", "==", "!=", ">"],
+      answer: 1,
+      explanation: "The == operator compares two values for equality."
+    }
+  ],
+  // Add these entries inside jobReadyAssessmentQuestions,
+// after cpp. Do not create another object.
+
+java: [
+  {
+    question: "Who developed Java?",
+    options: ["Dennis Ritchie", "James Gosling", "Bjarne Stroustrup", "Guido van Rossum"],
+    answer: 1,
+    explanation: "James Gosling led the development of Java."
+  },
+  {
+    question: "Which method is the entry point of a Java application?",
+    options: ["start()", "main()", "run()", "init()"],
+    answer: 1,
+    explanation: "The main() method is the standard entry point."
+  },
+  {
+    question: "Which keyword creates an object?",
+    options: ["make", "new", "class", "this"],
+    answer: 1,
+    explanation: "The new keyword creates objects."
+  },
+  {
+    question: "Which is not a primitive Java data type?",
+    options: ["int", "boolean", "String", "double"],
+    answer: 2,
+    explanation: "String is a class, not a primitive type."
+  },
+  {
+    question: "Which keyword supports class inheritance?",
+    options: ["implements", "extends", "inherits", "super"],
+    answer: 1,
+    explanation: "extends is used for class inheritance."
+  },
+  {
+    question: "Which collection does not allow duplicate elements?",
+    options: ["ArrayList", "LinkedList", "HashSet", "Vector"],
+    answer: 2,
+    explanation: "HashSet stores unique elements."
+  },
+  {
+    question: "What does JVM stand for?",
+    options: ["Java Variable Method", "Java Virtual Machine", "Joint Virtual Memory", "Java Verified Module"],
+    answer: 1,
+    explanation: "JVM stands for Java Virtual Machine."
+  },
+  {
+    question: "Which block handles exceptions?",
+    options: ["try-catch", "if-else", "for-next", "switch-case"],
+    answer: 0,
+    explanation: "try-catch is used for exception handling."
+  },
+  {
+    question: "Which access modifier allows broad access?",
+    options: ["private", "protected", "public", "default"],
+    answer: 2,
+    explanation: "public members are accessible wherever their class is accessible."
+  },
+  {
+    question: "Which keyword prevents a class from being extended?",
+    options: ["static", "final", "const", "void"],
+    answer: 1,
+    explanation: "A final class cannot be subclassed."
+  }
+],
+
+python: [
+  {
+    question: "Who created Python?",
+    options: ["James Gosling", "Guido van Rossum", "Dennis Ritchie", "Brendan Eich"],
+    answer: 1,
+    explanation: "Guido van Rossum created Python."
+  },
+  {
+    question: "Which symbol starts a single-line comment?",
+    options: ["//", "#", "/*", "--"],
+    answer: 1,
+    explanation: "Python uses # for comments."
+  },
+  {
+    question: "Which function displays output?",
+    options: ["echo()", "write()", "print()", "show()"],
+    answer: 2,
+    explanation: "print() displays output."
+  },
+  {
+    question: "Which type stores True or False?",
+    options: ["int", "str", "bool", "list"],
+    answer: 2,
+    explanation: "bool is the Boolean data type."
+  },
+  {
+    question: "Which brackets create a list?",
+    options: ["()", "{}", "[]", "<>"],
+    answer: 2,
+    explanation: "Square brackets create lists."
+  },
+  {
+    question: "Which keyword defines a function?",
+    options: ["func", "define", "def", "function"],
+    answer: 2,
+    explanation: "Python uses def to define functions."
+  },
+  {
+    question: "What is 7 // 2?",
+    options: ["3.5", "3", "4", "1"],
+    answer: 1,
+    explanation: "// performs floor division."
+  },
+  {
+    question: "Which loop iterates over a sequence?",
+    options: ["foreach", "for", "repeat", "loop"],
+    answer: 1,
+    explanation: "A for loop iterates over iterable objects."
+  },
+  {
+    question: "Which method adds an item to a list?",
+    options: ["add()", "append()", "push()", "insertEnd()"],
+    answer: 1,
+    explanation: "append() adds an item to the end of a list."
+  },
+  {
+    question: "Which keyword provides an alternative branch?",
+    options: ["otherwise", "elseif", "else", "default"],
+    answer: 2,
+    explanation: "else executes when the if condition is false."
+  }
+],
+
+html: [
+  {
+    question: "What does HTML stand for?",
+    options: ["Hyper Trainer Marking Language", "HyperText Markup Language", "HighText Machine Language", "HyperText Markdown Language"],
+    answer: 1,
+    explanation: "HTML stands for HyperText Markup Language."
+  },
+  {
+    question: "Which element creates the largest standard heading?",
+    options: ["<h6>", "<head>", "<h1>", "<header6>"],
+    answer: 2,
+    explanation: "<h1> is the highest-level heading."
+  },
+  {
+    question: "Which element creates a hyperlink?",
+    options: ["<link>", "<a>", "<href>", "<url>"],
+    answer: 1,
+    explanation: "The anchor element creates hyperlinks."
+  },
+  {
+    question: "Which attribute provides image alternative text?",
+    options: ["title", "src", "alt", "name"],
+    answer: 2,
+    explanation: "The alt attribute provides alternative text."
+  },
+  {
+    question: "Which element inserts a line break?",
+    options: ["<break>", "<lb>", "<br>", "<line>"],
+    answer: 2,
+    explanation: "<br> inserts a line break."
+  },
+  {
+    question: "Which element defines a table row?",
+    options: ["<td>", "<tr>", "<th>", "<table-row>"],
+    answer: 1,
+    explanation: "<tr> defines a table row."
+  },
+  {
+    question: "Which declaration identifies an HTML5 document?",
+    options: ["<!DOCTYPE html>", "<html5>", "<?html>", "<doctype>"],
+    answer: 0,
+    explanation: "<!DOCTYPE html> declares an HTML document."
+  },
+  {
+    question: "Which element collects user input?",
+    options: ["<form>", "<inputbox>", "<data>", "<fieldset-only>"],
+    answer: 0,
+    explanation: "<form> groups input controls."
+  },
+  {
+    question: "Which attribute connects a label to an input ID?",
+    options: ["for", "src", "target", "rel"],
+    answer: 0,
+    explanation: "The label's for attribute matches the input's id."
+  },
+  {
+    question: "Which element represents the main page content?",
+    options: ["<aside>", "<main>", "<footer>", "<nav>"],
+    answer: 1,
+    explanation: "<main> represents the primary content."
+  }
+],
+
+css: [
+  {
+    question: "What does CSS stand for?",
+    options: ["Computer Style Sheets", "Cascading Style Sheets", "Creative Styling System", "Colorful Style Syntax"],
+    answer: 1,
+    explanation: "CSS stands for Cascading Style Sheets."
+  },
+  {
+    question: "Which property changes text color?",
+    options: ["font-style", "text-color", "color", "background"],
+    answer: 2,
+    explanation: "The color property changes text color."
+  },
+  {
+    question: "Which selector targets id='menu'?",
+    options: [".menu", "#menu", "menu*", "@menu"],
+    answer: 1,
+    explanation: "The # selector targets an ID."
+  },
+  {
+    question: "Which property controls inner spacing?",
+    options: ["margin", "padding", "outline", "border"],
+    answer: 1,
+    explanation: "Padding creates space inside the border."
+  },
+  {
+    question: "Which property controls outer spacing?",
+    options: ["padding", "margin", "line-height", "border-style"],
+    answer: 1,
+    explanation: "Margin creates space outside the border."
+  },
+  {
+    question: "Which value enables Flexbox?",
+    options: ["display:block", "display:flex", "position:flex", "float:flex"],
+    answer: 1,
+    explanation: "display:flex enables Flexbox."
+  },
+  {
+    question: "Which unit is relative to the root font size?",
+    options: ["px", "em", "rem", "vh"],
+    answer: 2,
+    explanation: "rem is relative to the root element's font size."
+  },
+  {
+    question: "Which pseudo-class applies when hovering?",
+    options: [":active", ":visited", ":hover", "::before"],
+    answer: 2,
+    explanation: ":hover applies while the pointer is over an element."
+  },
+  {
+    question: "Which property rounds corners?",
+    options: ["corner-style", "border-radius", "round-edge", "radius"],
+    answer: 1,
+    explanation: "border-radius rounds element corners."
+  },
+  {
+    question: "Which rule supports responsive breakpoints?",
+    options: ["@font-face", "@import", "@media", "@keyframes"],
+    answer: 2,
+    explanation: "@media applies styles based on device or viewport conditions."
+  }
+],
+
+javascript: [
+  {
+    question: "Which keyword declares a reassignable block-scoped variable?",
+    options: ["const", "let", "static", "define"],
+    answer: 1,
+    explanation: "let declares a block-scoped variable."
+  },
+  {
+    question: "Which symbol starts a single-line comment?",
+    options: ["#", "//", "<!--", "**"],
+    answer: 1,
+    explanation: "// starts a single-line comment."
+  },
+  {
+    question: "Which method selects an element by ID?",
+    options: ["querySelectorAll()", "getElementById()", "getElementsByClassName()", "findId()"],
+    answer: 1,
+    explanation: "getElementById() selects an element using its ID."
+  },
+  {
+    question: "Which operator checks both value and type?",
+    options: ["=", "==", "===", "!="],
+    answer: 2,
+    explanation: "=== performs strict equality comparison."
+  },
+  {
+    question: "Which method adds an item to the end of an array?",
+    options: ["pop()", "push()", "shift()", "slice()"],
+    answer: 1,
+    explanation: "push() appends items to an array."
+  },
+  {
+    question: "Which event occurs when an element is clicked?",
+    options: ["change", "submit", "click", "load"],
+    answer: 2,
+    explanation: "The click event occurs when an element is clicked."
+  },
+  {
+    question: "Which keyword declares a function?",
+    options: ["function", "method", "def", "fun"],
+    answer: 0,
+    explanation: "The function keyword declares a function."
+  },
+  {
+    question: "What does JSON.parse() do?",
+    options: ["Converts an object to JSON text", "Parses JSON text into a JavaScript value", "Deletes JSON", "Formats HTML"],
+    answer: 1,
+    explanation: "JSON.parse() converts JSON text into a JavaScript value."
+  },
+  {
+    question: "Which array method transforms each item into a new array?",
+    options: ["filter()", "map()", "find()", "some()"],
+    answer: 1,
+    explanation: "map() returns a new array containing transformed values."
+  },
+  {
+    question: "Which keyword waits for a Promise inside an async function?",
+    options: ["defer", "await", "pause", "thenOnly"],
+    answer: 1,
+    explanation: "await waits for a Promise to settle."
+  }
+],
+fullstack: [
+  {
+    question: "What does full-stack development involve?",
+    options: ["Only frontend", "Only backend", "Frontend and backend", "Only database"],
+    answer: 2,
+    explanation: "Full-stack development involves both frontend and backend development."
+  },
+  {
+    question: "Which technology is commonly used to structure web pages?",
+    options: ["HTML", "Python", "MySQL", "Git"],
+    answer: 0,
+    explanation: "HTML provides the structure of web pages."
+  },
+  {
+    question: "Which technology styles web pages?",
+    options: ["SQL", "CSS", "Java", "Node.js"],
+    answer: 1,
+    explanation: "CSS controls the presentation and styling of web pages."
+  },
+  {
+    question: "Which language adds interactivity to web pages?",
+    options: ["HTML", "CSS", "JavaScript", "SQL"],
+    answer: 2,
+    explanation: "JavaScript adds dynamic behavior and interactivity."
+  },
+  {
+    question: "Which technology is commonly used for backend JavaScript?",
+    options: ["React", "Node.js", "Bootstrap", "HTML"],
+    answer: 1,
+    explanation: "Node.js allows JavaScript to run on the server."
+  },
+  {
+    question: "What is an API?",
+    options: ["A programming language", "An interface for software communication", "A database table", "A CSS framework"],
+    answer: 1,
+    explanation: "An API allows different software systems to communicate."
+  },
+  {
+    question: "Which HTTP method is commonly used to retrieve data?",
+    options: ["POST", "DELETE", "GET", "PATCH"],
+    answer: 2,
+    explanation: "GET requests retrieve resources from a server."
+  },
+  {
+    question: "What is responsive web design?",
+    options: ["Design for desktop only", "Design that adapts to different screen sizes", "Design without CSS", "Design using only images"],
+    answer: 1,
+    explanation: "Responsive design adapts layouts to different screen sizes."
+  },
+  {
+    question: "Which tool is commonly used to manage frontend packages?",
+    options: ["npm", "Photoshop", "Excel", "Notepad"],
+    answer: 0,
+    explanation: "npm manages JavaScript packages and dependencies."
+  },
+  {
+    question: "What does deployment mean?",
+    options: ["Deleting source code", "Making an application available to users", "Writing comments", "Creating variables"],
+    answer: 1,
+    explanation: "Deployment makes an application available in its target environment."
+  }
+],
+
+sql: [
+  {
+    question: "What does SQL stand for?",
+    options: ["Structured Query Language", "Simple Question Language", "System Query Logic", "Standard Quick Language"],
+    answer: 0,
+    explanation: "SQL stands for Structured Query Language."
+  },
+  {
+    question: "Which command retrieves data from a table?",
+    options: ["INSERT", "SELECT", "DELETE", "UPDATE"],
+    answer: 1,
+    explanation: "SELECT retrieves records from database tables."
+  },
+  {
+    question: "Which command adds new records?",
+    options: ["INSERT", "DROP", "ALTER", "SELECT"],
+    answer: 0,
+    explanation: "INSERT adds new records to a table."
+  },
+  {
+    question: "Which clause filters records?",
+    options: ["ORDER BY", "GROUP BY", "WHERE", "JOIN"],
+    answer: 2,
+    explanation: "WHERE filters records based on a condition."
+  },
+  {
+    question: "What is a primary key?",
+    options: ["A duplicate column", "A unique identifier for each row", "A table name", "A database password"],
+    answer: 1,
+    explanation: "A primary key uniquely identifies each row."
+  },
+  {
+    question: "Which command modifies existing records?",
+    options: ["UPDATE", "CREATE", "SELECT", "DROP"],
+    answer: 0,
+    explanation: "UPDATE modifies existing records."
+  },
+  {
+    question: "Which function counts rows?",
+    options: ["SUM()", "AVG()", "COUNT()", "MAX()"],
+    answer: 2,
+    explanation: "COUNT() returns the number of rows matching a query."
+  },
+  {
+    question: "Which clause sorts query results?",
+    options: ["WHERE", "ORDER BY", "HAVING", "VALUES"],
+    answer: 1,
+    explanation: "ORDER BY sorts query results."
+  },
+  {
+    question: "What is a foreign key?",
+    options: ["A password", "A key referencing a key in another or the same table", "A duplicate primary key", "A database server"],
+    answer: 1,
+    explanation: "A foreign key establishes a relationship by referencing a candidate key, commonly a primary key."
+  },
+  {
+    question: "Which command removes a table structure?",
+    options: ["DELETE", "UPDATE", "DROP", "INSERT"],
+    answer: 2,
+    explanation: "DROP TABLE removes a table and its structure."
+  }
+],
+
+dsa: [
+  {
+    question: "What does DSA stand for?",
+    options: ["Data System Application", "Data Structures and Algorithms", "Digital Software Analysis", "Database Storage Architecture"],
+    answer: 1,
+    explanation: "DSA stands for Data Structures and Algorithms."
+  },
+  {
+    question: "Which data structure follows LIFO?",
+    options: ["Queue", "Stack", "Tree", "Graph"],
+    answer: 1,
+    explanation: "A stack follows Last In, First Out."
+  },
+  {
+    question: "Which data structure follows FIFO?",
+    options: ["Stack", "Tree", "Queue", "Heap"],
+    answer: 2,
+    explanation: "A queue follows First In, First Out."
+  },
+  {
+    question: "Which data structure stores elements in sequential positions?",
+    options: ["Array", "Graph", "Tree", "Hash table"],
+    answer: 0,
+    explanation: "Arrays store elements in indexed positions."
+  },
+  {
+    question: "Which algorithm is commonly used to find an item in a sorted array efficiently?",
+    options: ["Linear search", "Binary search", "Bubble sort", "Selection sort"],
+    answer: 1,
+    explanation: "Binary search repeatedly halves the search range."
+  },
+  {
+    question: "Which sorting algorithm repeatedly compares adjacent elements?",
+    options: ["Merge sort", "Quick sort", "Bubble sort", "Heap sort"],
+    answer: 2,
+    explanation: "Bubble sort compares adjacent elements and swaps them when necessary."
+  },
+  {
+    question: "What is the time complexity of accessing an array element by index?",
+    options: ["O(n)", "O(log n)", "O(1)", "O(n²)"],
+    answer: 2,
+    explanation: "Array index access takes constant time, O(1)."
+  },
+  {
+    question: "Which data structure represents hierarchical relationships?",
+    options: ["Queue", "Tree", "Stack", "Array"],
+    answer: 1,
+    explanation: "Trees represent hierarchical relationships using nodes."
+  },
+  {
+    question: "Which traversal visits the root between the left and right subtrees?",
+    options: ["Preorder", "Inorder", "Postorder", "Level order"],
+    answer: 1,
+    explanation: "Inorder traversal visits left subtree, root, then right subtree."
+  },
+  {
+    question: "Which data structure is commonly used in BFS?",
+    options: ["Stack", "Queue", "Heap", "Array only"],
+    answer: 1,
+    explanation: "Breadth-First Search commonly uses a queue."
+  }
+],
+
+aiml: [
+  {
+    question: "What does AI stand for?",
+    options: ["Automated Internet", "Artificial Intelligence", "Advanced Information", "Algorithm Integration"],
+    answer: 1,
+    explanation: "AI stands for Artificial Intelligence."
+  },
+  {
+    question: "What does ML stand for?",
+    options: ["Machine Learning", "Manual Logic", "Modern Language", "Memory Link"],
+    answer: 0,
+    explanation: "ML stands for Machine Learning."
+  },
+  {
+    question: "Which is an example of supervised learning?",
+    options: ["Clustering", "Classification using labeled data", "Random guessing", "Data deletion"],
+    answer: 1,
+    explanation: "Supervised learning trains models using labeled examples."
+  },
+  {
+    question: "Which language is widely used in machine learning?",
+    options: ["Python", "HTML", "CSS", "XML"],
+    answer: 0,
+    explanation: "Python is widely used because of its ML libraries."
+  },
+  {
+    question: "What is a dataset?",
+    options: ["A collection of data", "A programming language", "A computer processor", "A web browser"],
+    answer: 0,
+    explanation: "A dataset is an organized collection of data."
+  },
+  {
+    question: "Which task predicts continuous numerical values?",
+    options: ["Classification", "Regression", "Clustering", "Sorting"],
+    answer: 1,
+    explanation: "Regression predicts continuous numerical values."
+  },
+  {
+    question: "What is overfitting?",
+    options: ["Model performs well only on training data", "Model has no data", "Model cannot be trained", "Model deletes features"],
+    answer: 0,
+    explanation: "Overfitting occurs when a model learns training data too closely and generalizes poorly."
+  },
+  {
+    question: "Which is an example of an AI application?",
+    options: ["Voice assistant", "Simple text file", "Basic calculator only", "Keyboard cable"],
+    answer: 0,
+    explanation: "Voice assistants use AI techniques to understand and respond to users."
+  },
+  {
+    question: "What is the purpose of training data?",
+    options: ["To teach a model patterns", "To shut down a model", "To format a webpage", "To delete predictions"],
+    answer: 0,
+    explanation: "Training data helps a model learn patterns."
+  },
+  {
+    question: "What does NLP stand for?",
+    options: ["Natural Language Processing", "Network Learning Program", "Numeric Logic Process", "New Language Protocol"],
+    answer: 0,
+    explanation: "NLP stands for Natural Language Processing."
+  }
+],
+
+cloud: [
+  {
+    question: "What is cloud computing?",
+    options: ["Using only local storage", "Delivering computing services over the internet", "Writing computer programs", "Designing websites"],
+    answer: 1,
+    explanation: "Cloud computing provides computing resources over the internet."
+  },
+  {
+    question: "Which is a cloud service provider?",
+    options: ["Amazon Web Services", "Microsoft Word", "Notepad", "VLC"],
+    answer: 0,
+    explanation: "Amazon Web Services is a major cloud service provider."
+  },
+  {
+    question: "What does SaaS stand for?",
+    options: ["Software as a Service", "Storage as a System", "Security as a Server", "System and Software"],
+    answer: 0,
+    explanation: "SaaS stands for Software as a Service."
+  },
+  {
+    question: "Which cloud model provides virtual machines and storage?",
+    options: ["SaaS", "IaaS", "PaaS", "DaaS"],
+    answer: 1,
+    explanation: "IaaS provides infrastructure resources such as virtual machines and storage."
+  },
+  {
+    question: "What does PaaS stand for?",
+    options: ["Platform as a Service", "Program as a System", "Process as a Server", "Private Application Storage"],
+    answer: 0,
+    explanation: "PaaS stands for Platform as a Service."
+  },
+  {
+    question: "What is scalability in cloud computing?",
+    options: ["Changing the screen color", "Adjusting resources to meet demand", "Deleting user accounts", "Removing network access"],
+    answer: 1,
+    explanation: "Scalability allows resources to increase or decrease according to demand."
+  },
+  {
+    question: "Which deployment model is dedicated to one organization?",
+    options: ["Public cloud", "Private cloud", "Community website", "Open network"],
+    answer: 1,
+    explanation: "A private cloud is dedicated to a single organization."
+  },
+  {
+    question: "What is virtualization?",
+    options: ["Creating virtual versions of computing resources", "Printing documents", "Writing HTML", "Deleting applications"],
+    answer: 0,
+    explanation: "Virtualization creates virtual computing resources from physical hardware."
+  },
+  {
+    question: "What is cloud storage used for?",
+    options: ["Storing data remotely", "Increasing monitor brightness", "Editing keyboard settings", "Replacing programming languages"],
+    answer: 0,
+    explanation: "Cloud storage stores data on remote infrastructure accessible over a network."
+  },
+  {
+    question: "Which practice helps protect cloud accounts?",
+    options: ["Sharing passwords", "Using multi-factor authentication", "Disabling security", "Using public passwords"],
+    answer: 1,
+    explanation: "Multi-factor authentication adds another layer of account security."
+  }
+],
+cybersecurity: [
+  {
+    question: "What is cybersecurity?",
+    options: ["Protecting systems and data from digital attacks", "Creating animations", "Designing websites", "Managing spreadsheets"],
+    answer: 0,
+    explanation: "Cybersecurity protects computers, networks and data from digital threats."
+  },
+  {
+    question: "What is phishing?",
+    options: ["A programming method", "A fraudulent attempt to steal sensitive information", "A database operation", "A backup process"],
+    answer: 1,
+    explanation: "Phishing tricks people into revealing passwords or other sensitive information."
+  },
+  {
+    question: "Which is the strongest password?",
+    options: ["123456", "password", "Kavya123", "T9#mQ2!vLp8@"],
+    answer: 3,
+    explanation: "A long, unique password with varied characters is generally stronger."
+  },
+  {
+    question: "What does a firewall do?",
+    options: ["Filters network traffic", "Creates presentations", "Edits images", "Stores passwords in plain text"],
+    answer: 0,
+    explanation: "A firewall monitors and controls incoming and outgoing network traffic."
+  },
+  {
+    question: "What is malware?",
+    options: ["Useful software", "Malicious software", "A programming language", "A search engine"],
+    answer: 1,
+    explanation: "Malware is software designed to harm, disrupt or gain unauthorized access."
+  },
+  {
+    question: "What does HTTPS help provide?",
+    options: ["Encrypted communication", "Free internet access", "Unlimited storage", "Faster typing"],
+    answer: 0,
+    explanation: "HTTPS uses encryption to help protect data exchanged with a website."
+  },
+  {
+    question: "What is two-factor authentication?",
+    options: ["Using two usernames", "Using two verification methods", "Sharing two passwords", "Installing two browsers"],
+    answer: 1,
+    explanation: "Two-factor authentication requires two different forms of verification."
+  },
+  {
+    question: "What is ransomware?",
+    options: ["Software that encrypts or locks data and demands payment", "A search tool", "A backup application", "A coding framework"],
+    answer: 0,
+    explanation: "Ransomware blocks access to data, often by encrypting it, and demands a ransom."
+  },
+  {
+    question: "Why are software updates important?",
+    options: ["They always delete files", "They can fix security vulnerabilities", "They disable security", "They remove the operating system"],
+    answer: 1,
+    explanation: "Updates often include security patches and bug fixes."
+  },
+  {
+    question: "What should you do with a suspicious email attachment?",
+    options: ["Open it immediately", "Forward it to everyone", "Avoid opening it and report it", "Download it repeatedly"],
+    answer: 2,
+    explanation: "Suspicious attachments may contain malware, so avoid opening them."
+  }
+],
+
+git: [
+  {
+    question: "What is Git?",
+    options: ["A database", "A version control system", "A programming language", "A web browser"],
+    answer: 1,
+    explanation: "Git tracks changes in files and helps developers manage versions."
+  },
+  {
+    question: "What is GitHub?",
+    options: ["A code hosting and collaboration platform", "An operating system", "A compiler", "A database language"],
+    answer: 0,
+    explanation: "GitHub hosts Git repositories and supports collaboration."
+  },
+  {
+    question: "Which command initializes a Git repository?",
+    options: ["git start", "git init", "git create", "git open"],
+    answer: 1,
+    explanation: "git init creates a new local Git repository."
+  },
+  {
+    question: "Which command checks the current repository status?",
+    options: ["git status", "git check", "git view", "git inspect"],
+    answer: 0,
+    explanation: "git status displays changed, staged and untracked files."
+  },
+  {
+    question: "Which command stages changes?",
+    options: ["git push", "git add", "git pull", "git clone"],
+    answer: 1,
+    explanation: "git add stages changes for the next commit."
+  },
+  {
+    question: "Which command saves a snapshot of staged changes?",
+    options: ["git commit", "git upload", "git save", "git stage"],
+    answer: 0,
+    explanation: "git commit records staged changes in the repository history."
+  },
+  {
+    question: "Which command uploads local commits to a remote repository?",
+    options: ["git pull", "git push", "git init", "git status"],
+    answer: 1,
+    explanation: "git push sends local commits to a remote repository."
+  },
+  {
+    question: "Which command downloads and integrates remote changes?",
+    options: ["git add", "git commit", "git pull", "git branch"],
+    answer: 2,
+    explanation: "git pull fetches remote changes and integrates them into the current branch."
+  },
+  {
+    question: "What is a Git branch?",
+    options: ["A separate line of development", "A computer folder only", "A database table", "A programming error"],
+    answer: 0,
+    explanation: "Branches allow developers to work on different changes independently."
+  },
+  {
+    question: "Which command copies a remote repository locally?",
+    options: ["git copy", "git clone", "git download", "git fork"],
+    answer: 1,
+    explanation: "git clone creates a local copy of a remote repository."
+  }
+],
+
+accounting: [
+  {
+    question: "What is accounting?",
+    options: ["Recording and analyzing financial transactions", "Designing websites", "Managing networks", "Creating animations"],
+    answer: 0,
+    explanation: "Accounting records, classifies and summarizes financial transactions."
+  },
+  {
+    question: "What is an asset?",
+    options: ["Money owed by a business", "A resource owned or controlled by a business", "An employee expense only", "A business loss"],
+    answer: 1,
+    explanation: "Assets are resources expected to provide future economic benefits."
+  },
+  {
+    question: "What is a liability?",
+    options: ["A business resource", "An amount owed by a business", "A sales discount", "Owner's personal skill"],
+    answer: 1,
+    explanation: "Liabilities are financial obligations owed by a business."
+  },
+  {
+    question: "What is the basic accounting equation?",
+    options: ["Assets = Liabilities + Equity", "Assets = Revenue - Expenses", "Profit = Assets + Liabilities", "Equity = Expenses + Revenue"],
+    answer: 0,
+    explanation: "The accounting equation is Assets = Liabilities + Owner's Equity."
+  },
+  {
+    question: "What is revenue?",
+    options: ["Income earned from business activities", "Money borrowed only", "An unpaid bill", "A business expense"],
+    answer: 0,
+    explanation: "Revenue is income generated through normal business activities."
+  },
+  {
+    question: "What is an expense?",
+    options: ["Income received", "Cost incurred to operate a business", "Owner's investment only", "A business asset"],
+    answer: 1,
+    explanation: "Expenses are costs incurred while running a business."
+  },
+  {
+    question: "What is a balance sheet?",
+    options: ["A report of assets, liabilities and equity", "A list of employees", "A marketing plan", "A sales advertisement"],
+    answer: 0,
+    explanation: "A balance sheet presents a company's financial position at a particular date."
+  },
+  {
+    question: "What does profit mean?",
+    options: ["Expenses exceed revenue", "Revenue exceeds expenses", "Assets equal zero", "Liabilities increase"],
+    answer: 1,
+    explanation: "Profit is generally the amount remaining when expenses are deducted from revenue."
+  },
+  {
+    question: "What is a budget?",
+    options: ["A plan for expected income and expenses", "A tax receipt", "A bank password", "A sales invoice"],
+    answer: 0,
+    explanation: "A budget helps plan and control expected income and spending."
+  },
+  {
+    question: "What is cash flow?",
+    options: ["Movement of cash into and out of a business", "Number of employees", "Total products manufactured", "Customer satisfaction"],
+    answer: 0,
+    explanation: "Cash flow tracks cash received and cash paid by a business."
+  }
+],
+
+business: [
+  {
+    question: "What is business management?",
+    options: ["Planning and coordinating business resources", "Only selling products", "Writing computer programs", "Designing logos"],
+    answer: 0,
+    explanation: "Business management involves planning, organizing, leading and controlling resources."
+  },
+  {
+    question: "What is the main purpose of planning?",
+    options: ["Setting goals and deciding how to achieve them", "Avoiding all decisions", "Increasing confusion", "Stopping communication"],
+    answer: 0,
+    explanation: "Planning establishes objectives and identifies actions to achieve them."
+  },
+  {
+    question: "What is leadership?",
+    options: ["Guiding and motivating people toward goals", "Avoiding responsibility", "Working without communication", "Only assigning salaries"],
+    answer: 0,
+    explanation: "Leadership involves influencing and guiding people toward shared objectives."
+  },
+  {
+    question: "What is SWOT analysis?",
+    options: ["Sales, Work, Output, Time", "Strengths, Weaknesses, Opportunities, Threats", "Strategy, Wealth, Organization, Training", "Systems, Workflows, Operations, Technology"],
+    answer: 1,
+    explanation: "SWOT evaluates internal strengths and weaknesses and external opportunities and threats."
+  },
+  {
+    question: "What is a target market?",
+    options: ["A specific group of customers a business aims to serve", "All competitors", "A company's employees", "A list of suppliers"],
+    answer: 0,
+    explanation: "A target market is the customer group a business focuses its products or services on."
+  },
+  {
+    question: "What is delegation?",
+    options: ["Assigning responsibility and authority to others", "Avoiding teamwork", "Cancelling tasks", "Ignoring employees"],
+    answer: 0,
+    explanation: "Delegation involves assigning tasks and appropriate authority to team members."
+  },
+  {
+    question: "What is a business objective?",
+    options: ["A measurable goal a business wants to achieve", "A random activity", "A personal hobby", "An office decoration"],
+    answer: 0,
+    explanation: "Business objectives define desired outcomes for an organization."
+  },
+  {
+    question: "What is customer satisfaction?",
+    options: ["How well a product or service meets customer expectations", "Number of office computers", "Employee attendance only", "Company building size"],
+    answer: 0,
+    explanation: "Customer satisfaction reflects how well customer expectations are fulfilled."
+  },
+  {
+    question: "Why is teamwork important?",
+    options: ["It supports collaboration toward shared goals", "It prevents communication", "It removes accountability", "It discourages ideas"],
+    answer: 0,
+    explanation: "Teamwork combines different skills and perspectives to achieve shared goals."
+  },
+  {
+    question: "What is risk management?",
+    options: ["Identifying and handling potential risks", "Ignoring possible problems", "Increasing expenses without planning", "Avoiding all business goals"],
+    answer: 0,
+    explanation: "Risk management identifies, assesses and responds to potential threats."
+  }
+],
+
+marketing: [
+  {
+    question: "What is digital marketing?",
+    options: ["Promoting products through digital channels", "Only printing posters", "Manufacturing products", "Managing office furniture"],
+    answer: 0,
+    explanation: "Digital marketing uses online platforms and digital technologies to promote products or services."
+  },
+  {
+    question: "What does SEO stand for?",
+    options: ["Search Engine Optimization", "Social Email Operation", "System Entry Output", "Search Experience Order"],
+    answer: 0,
+    explanation: "SEO improves a website's visibility in search engine results."
+  },
+  {
+    question: "What is social media marketing?",
+    options: ["Promoting brands through social platforms", "Repairing computers", "Writing database queries", "Managing inventory only"],
+    answer: 0,
+    explanation: "Social media marketing uses platforms to reach and engage audiences."
+  },
+  {
+    question: "What is a target audience?",
+    options: ["The intended group of people for a campaign", "A company's competitors", "Only company employees", "A list of suppliers"],
+    answer: 0,
+    explanation: "A target audience is the group a marketing message is designed to reach."
+  },
+  {
+    question: "What does PPC stand for?",
+    options: ["Pay Per Click", "Post Page Content", "Public Promotion Channel", "Personal Product Code"],
+    answer: 0,
+    explanation: "PPC is an advertising model where advertisers pay when users click an ad."
+  },
+  {
+    question: "What is content marketing?",
+    options: ["Creating useful content to attract an audience", "Sending random messages", "Deleting website pages", "Only selling through phone calls"],
+    answer: 0,
+    explanation: "Content marketing attracts and engages audiences through useful and relevant content."
+  },
+  {
+    question: "What is an email marketing campaign?",
+    options: ["Sending targeted promotional or informational emails", "Building computer hardware", "Creating spreadsheets", "Managing a database server"],
+    answer: 0,
+    explanation: "Email campaigns communicate with audiences through planned email messages."
+  },
+  {
+    question: "What is a conversion in digital marketing?",
+    options: ["A desired action completed by a user", "A website color change", "A computer restart", "A deleted advertisement"],
+    answer: 0,
+    explanation: "A conversion occurs when a user completes a desired action, such as a purchase or signup."
+  },
+  {
+    question: "What is a marketing analytics tool used for?",
+    options: ["Measuring and analyzing campaign performance", "Designing computer processors", "Repairing networks", "Writing operating systems"],
+    answer: 0,
+    explanation: "Marketing analytics helps measure traffic, engagement and campaign results."
+  },
+  {
+    question: "What is brand awareness?",
+    options: ["How familiar people are with a brand", "A company's monthly expenses", "The number of office computers", "A product's manufacturing cost"],
+    answer: 0,
+    explanation: "Brand awareness measures how recognizable or familiar a brand is to an audience."
+  }
+],
+communication: [
+  {
+    question: "What is effective communication?",
+    options: ["Sharing information clearly and accurately", "Speaking without listening", "Using complicated words", "Avoiding feedback"],
+    answer: 0,
+    explanation: "Effective communication ensures information is understood correctly."
+  },
+  {
+    question: "Which is an example of non-verbal communication?",
+    options: ["Email", "Body language", "Text message", "Written report"],
+    answer: 1,
+    explanation: "Body language communicates through gestures, posture and facial expressions."
+  },
+  {
+    question: "What is active listening?",
+    options: ["Interrupting frequently", "Paying attention and understanding the speaker", "Ignoring the speaker", "Preparing a reply without listening"],
+    answer: 1,
+    explanation: "Active listening involves focusing on and understanding the speaker."
+  },
+  {
+    question: "Which skill is important during a presentation?",
+    options: ["Speaking clearly", "Avoiding eye contact", "Reading too quickly", "Ignoring the audience"],
+    answer: 0,
+    explanation: "Clear speech helps the audience understand the presentation."
+  },
+  {
+    question: "What is constructive feedback?",
+    options: ["Insulting someone", "Giving helpful suggestions for improvement", "Ignoring mistakes", "Blaming others"],
+    answer: 1,
+    explanation: "Constructive feedback helps people improve through useful suggestions."
+  },
+  {
+    question: "Which is a formal communication method?",
+    options: ["Professional email", "Casual gossip", "Personal joke", "Informal chat"],
+    answer: 0,
+    explanation: "Professional emails are commonly used for formal workplace communication."
+  },
+  {
+    question: "What should you do when you do not understand an instruction?",
+    options: ["Guess without asking", "Ask politely for clarification", "Ignore it", "Blame the speaker"],
+    answer: 1,
+    explanation: "Asking for clarification prevents misunderstandings."
+  },
+  {
+    question: "What is the purpose of eye contact during communication?",
+    options: ["Show attention and engagement", "Distract everyone", "Avoid listening", "End the conversation"],
+    answer: 0,
+    explanation: "Appropriate eye contact can demonstrate confidence and attention."
+  },
+  {
+    question: "Which is important in professional communication?",
+    options: ["Respectful language", "Aggressive behavior", "Constant interruption", "Unclear messages"],
+    answer: 0,
+    explanation: "Respectful language supports professional relationships."
+  },
+  {
+    question: "What is written communication?",
+    options: ["Sharing information through written words", "Using only gestures", "Speaking on stage", "Facial expressions"],
+    answer: 0,
+    explanation: "Written communication includes emails, reports and messages."
+  }
+],
+
+leadership: [
+  {
+    question: "What is leadership?",
+    options: ["Guiding and motivating a team", "Avoiding responsibility", "Controlling every small action", "Working without goals"],
+    answer: 0,
+    explanation: "Leadership involves guiding people toward shared objectives."
+  },
+  {
+    question: "Which quality is important for a good leader?",
+    options: ["Honesty", "Arrogance", "Unfairness", "Irresponsibility"],
+    answer: 0,
+    explanation: "Honesty builds trust between leaders and team members."
+  },
+  {
+    question: "What is teamwork?",
+    options: ["Working together toward a common goal", "Competing with every teammate", "Avoiding cooperation", "Working without communication"],
+    answer: 0,
+    explanation: "Teamwork combines individual contributions to achieve shared goals."
+  },
+  {
+    question: "How should a leader handle disagreement?",
+    options: ["Listen to different opinions and find a solution", "Ignore everyone", "Blame one person", "Stop all discussion"],
+    answer: 0,
+    explanation: "Respectful discussion helps resolve disagreements constructively."
+  },
+  {
+    question: "What is delegation?",
+    options: ["Assigning tasks and responsibility to team members", "Avoiding all tasks", "Doing everything alone", "Cancelling team activities"],
+    answer: 0,
+    explanation: "Delegation distributes responsibilities among team members."
+  },
+  {
+    question: "What does accountability mean?",
+    options: ["Taking responsibility for actions and results", "Blaming others", "Avoiding decisions", "Ignoring mistakes"],
+    answer: 0,
+    explanation: "Accountability means accepting responsibility for one's actions."
+  },
+  {
+    question: "Which action improves team motivation?",
+    options: ["Recognizing contributions", "Ignoring achievements", "Creating unnecessary conflicts", "Discouraging ideas"],
+    answer: 0,
+    explanation: "Recognizing contributions encourages team members."
+  },
+  {
+    question: "What is collaboration?",
+    options: ["Working jointly by sharing ideas and effort", "Working against teammates", "Avoiding communication", "Refusing assistance"],
+    answer: 0,
+    explanation: "Collaboration involves working together to achieve an outcome."
+  },
+  {
+    question: "Which skill helps leaders make good decisions?",
+    options: ["Critical thinking", "Carelessness", "Guessing every time", "Avoiding information"],
+    answer: 0,
+    explanation: "Critical thinking helps evaluate information before making decisions."
+  },
+  {
+    question: "What is conflict resolution?",
+    options: ["Finding constructive ways to settle disagreements", "Increasing arguments", "Ignoring all problems", "Removing teamwork"],
+    answer: 0,
+    explanation: "Conflict resolution addresses disagreements and works toward acceptable solutions."
+  }
+],
+
+design: [
+  {
+    question: "What is graphic design?",
+    options: ["Visual communication using images and text", "Database management", "Network configuration", "Financial auditing"],
+    answer: 0,
+    explanation: "Graphic design communicates ideas through visual elements."
+  },
+  {
+    question: "Which tool is commonly used for graphic design?",
+    options: ["Adobe Photoshop", "MySQL", "Git", "Terminal"],
+    answer: 0,
+    explanation: "Adobe Photoshop is widely used for image editing and graphic design."
+  },
+  {
+    question: "What is typography?",
+    options: ["The art of arranging text and fonts", "A database query", "A programming technique", "A network protocol"],
+    answer: 0,
+    explanation: "Typography deals with the style and arrangement of written text."
+  },
+  {
+    question: "What are complementary colors?",
+    options: ["Colors opposite each other on the color wheel", "Colors with identical values", "Only black and white", "Random colors"],
+    answer: 0,
+    explanation: "Complementary colors are positioned opposite each other on the color wheel."
+  },
+  {
+    question: "What is the purpose of white space in design?",
+    options: ["Improve clarity and visual balance", "Fill every empty area", "Reduce readability", "Hide important information"],
+    answer: 0,
+    explanation: "White space improves readability and creates visual breathing room."
+  },
+  {
+    question: "Which file format commonly supports transparent backgrounds?",
+    options: ["PNG", "TXT", "MP3", "CSV"],
+    answer: 0,
+    explanation: "PNG supports transparency through an alpha channel."
+  },
+  {
+    question: "What does UI stand for?",
+    options: ["User Interface", "Universal Internet", "User Information", "Unified Installation"],
+    answer: 0,
+    explanation: "UI stands for User Interface."
+  },
+  {
+    question: "What does UX stand for?",
+    options: ["User Experience", "Universal Extension", "User Execution", "Unified Exchange"],
+    answer: 0,
+    explanation: "UX stands for User Experience."
+  },
+  {
+    question: "What is visual hierarchy?",
+    options: ["Arranging elements to show their importance", "Using only one font", "Removing all images", "Making every element identical"],
+    answer: 0,
+    explanation: "Visual hierarchy guides attention toward the most important elements."
+  },
+  {
+    question: "What is a vector graphic?",
+    options: ["A graphic made using mathematical paths", "A photograph only", "A plain text document", "An audio recording"],
+    answer: 0,
+    explanation: "Vector graphics use paths and shapes and can scale without losing quality."
+  }
+],
+
+entrepreneurship: [
+  {
+    question: "Who is an entrepreneur?",
+    options: ["A person who starts and develops a business venture", "Only a government employee", "A person who avoids opportunities", "A person who never takes decisions"],
+    answer: 0,
+    explanation: "An entrepreneur identifies opportunities and builds a business or venture."
+  },
+  {
+    question: "What is a startup?",
+    options: ["A young business developed around an idea or opportunity", "An established government department", "A personal hobby only", "A type of computer hardware"],
+    answer: 0,
+    explanation: "A startup is an early-stage business working to develop a product or service."
+  },
+  {
+    question: "What is a business plan?",
+    options: ["A document describing business goals and strategies", "A list of personal hobbies", "A social media password", "A computer repair guide"],
+    answer: 0,
+    explanation: "A business plan outlines goals, strategies, operations and financial expectations."
+  },
+  {
+    question: "What is innovation?",
+    options: ["Introducing useful new ideas or improvements", "Repeating mistakes", "Avoiding change", "Copying without understanding"],
+    answer: 0,
+    explanation: "Innovation involves creating or improving ideas, products or processes."
+  },
+  {
+    question: "What is market research?",
+    options: ["Collecting information about customers and competitors", "Guessing customer needs", "Ignoring market trends", "Preparing employee salaries"],
+    answer: 0,
+    explanation: "Market research helps understand customers, competitors and market conditions."
+  },
+  {
+    question: "What is a minimum viable product (MVP)?",
+    options: ["An early product with essential features for testing", "A completely finished product with every feature", "A company registration form", "A marketing slogan"],
+    answer: 0,
+    explanation: "An MVP tests a product idea using its essential features."
+  },
+  {
+    question: "What is bootstrapping in entrepreneurship?",
+    options: ["Building a business using personal or internally generated resources", "Closing a business", "Hiring only external investors", "Avoiding financial planning"],
+    answer: 0,
+    explanation: "Bootstrapping means developing a business with limited external funding."
+  },
+  {
+    question: "What is a revenue model?",
+    options: ["How a business earns money", "How employees take leave", "How a product is packaged", "How an office is decorated"],
+    answer: 0,
+    explanation: "A revenue model explains how a business generates income."
+  },
+  {
+    question: "What is networking in business?",
+    options: ["Building professional relationships and connections", "Connecting only computer cables", "Avoiding other businesses", "Deleting contacts"],
+    answer: 0,
+    explanation: "Business networking helps build relationships and discover opportunities."
+  },
+  {
+    question: "Why is customer feedback valuable to a startup?",
+    options: ["It helps improve products and services", "It always increases expenses", "It removes the need for research", "It prevents innovation"],
+    answer: 0,
+    explanation: "Customer feedback helps identify problems and improve offerings."
+  }
+],
+
+aptitude: [
+  {
+    question: "What is 15% of 200?",
+    options: ["20", "25", "30", "35"],
+    answer: 2,
+    explanation: "15% of 200 = (15/100) × 200 = 30."
+  },
+  {
+    question: "Find the next number: 2, 4, 8, 16, __",
+    options: ["20", "24", "30", "32"],
+    answer: 3,
+    explanation: "Each number is multiplied by 2. The next number is 32."
+  },
+  {
+    question: "If 5 pens cost ₹50, what is the cost of 8 pens?",
+    options: ["₹60", "₹70", "₹80", "₹90"],
+    answer: 2,
+    explanation: "One pen costs ₹10, so 8 pens cost ₹80."
+  },
+  {
+    question: "A person travels 120 km in 2 hours. What is the average speed?",
+    options: ["40 km/h", "50 km/h", "60 km/h", "70 km/h"],
+    answer: 2,
+    explanation: "Speed = Distance / Time = 120 / 2 = 60 km/h."
+  },
+  {
+    question: "Choose the odd one out.",
+    options: ["Apple", "Mango", "Carrot", "Banana"],
+    answer: 2,
+    explanation: "Carrot is commonly classified as a vegetable; the others are fruits."
+  },
+  {
+    question: "If today is Monday, what day will it be after 10 days?",
+    options: ["Wednesday", "Thursday", "Friday", "Saturday"],
+    answer: 1,
+    explanation: "10 days after Monday is Thursday."
+  },
+  {
+    question: "Find the missing number: 3, 6, 9, 12, __",
+    options: ["13", "14", "15", "18"],
+    answer: 2,
+    explanation: "The sequence increases by 3. The next number is 15."
+  },
+  {
+    question: "A shirt costs ₹800 and has a 10% discount. What is the selling price?",
+    options: ["₹700", "₹720", "₹740", "₹760"],
+    answer: 1,
+    explanation: "10% of ₹800 is ₹80. Selling price = ₹800 - ₹80 = ₹720."
+  },
+  {
+    question: "Which number is divisible by 3?",
+    options: ["124", "125", "126", "127"],
+    answer: 2,
+    explanation: "The digit sum of 126 is 9, which is divisible by 3."
+  },
+  {
+    question: "Complete the analogy: Book : Reading :: Fork : __",
+    options: ["Writing", "Eating", "Drawing", "Running"],
+    answer: 1,
+    explanation: "A book is used for reading; a fork is used for eating."
+  }
+],
+
+analytical: [
+  {
+    question: "What is analytical thinking?",
+    options: ["Breaking information into parts to understand it", "Making decisions without information", "Ignoring evidence", "Memorizing without understanding"],
+    answer: 0,
+    explanation: "Analytical thinking examines information systematically."
+  },
+  {
+    question: "What should you do first when solving a complex problem?",
+    options: ["Understand and define the problem", "Immediately guess an answer", "Ignore the details", "Blame someone"],
+    answer: 0,
+    explanation: "Clearly defining a problem helps identify the right solution."
+  },
+  {
+    question: "What is root cause analysis?",
+    options: ["Finding the underlying reason for a problem", "Hiding a problem", "Treating only visible symptoms", "Creating unrelated tasks"],
+    answer: 0,
+    explanation: "Root cause analysis identifies the fundamental reason a problem occurred."
+  },
+  {
+    question: "Which approach helps compare possible solutions?",
+    options: ["Evaluating their advantages and disadvantages", "Choosing randomly", "Ignoring available evidence", "Avoiding discussion"],
+    answer: 0,
+    explanation: "Comparing strengths and weaknesses supports informed decisions."
+  },
+  {
+    question: "What is critical thinking?",
+    options: ["Evaluating information using logic and evidence", "Accepting every claim without question", "Making assumptions only", "Avoiding decisions"],
+    answer: 0,
+    explanation: "Critical thinking assesses claims and evidence before reaching conclusions."
+  },
+  {
+    question: "If a process repeatedly fails, what is a useful response?",
+    options: ["Investigate the cause and test improvements", "Repeat it without changes forever", "Ignore the failure", "Stop collecting information"],
+    answer: 0,
+    explanation: "Investigating failures helps identify improvements."
+  },
+  {
+    question: "What is data-driven decision-making?",
+    options: ["Using relevant data to guide decisions", "Making decisions based only on rumors", "Ignoring measurements", "Choosing randomly"],
+    answer: 0,
+    explanation: "Data-driven decisions use evidence and analysis."
+  },
+  {
+    question: "What is brainstorming?",
+    options: ["Generating multiple ideas to address a problem", "Rejecting every suggestion", "Avoiding creative thinking", "Repeating one solution"],
+    answer: 0,
+    explanation: "Brainstorming encourages the generation of different possible ideas."
+  },
+  {
+    question: "Why is prioritization important?",
+    options: ["It helps focus on the most important tasks", "It makes every task equally urgent", "It removes deadlines", "It prevents planning"],
+    answer: 0,
+    explanation: "Prioritization helps allocate time and effort effectively."
+  },
+  {
+    question: "What should you do after implementing a solution?",
+    options: ["Evaluate whether it solved the problem", "Assume it worked without checking", "Delete all records", "Ignore the results"],
+    answer: 0,
+    explanation: "Evaluating results helps confirm whether the solution was effective."
+  }
+]
+
+};
+
+console.log(
+  "C++ practice questions:",
+  jobReadyAssessmentQuestions.cpp.length
+);
+// ==========================================
+// JOB-READY PRACTICE TEST NAVIGATION
+// ==========================================
+
+let activeJobReadyCourseKey = null;
+
+// Open selected subject
+document.addEventListener("click", function (event) {
+
+  const courseButton = event.target.closest("[data-job-course]");
+
+  if (!courseButton) return;
+
+  const courseKey = courseButton.dataset.jobCourse;
+  const course = jobReadyCourseCatalog[courseKey];
+  const questions = jobReadyAssessmentQuestions[courseKey];
+
+  if (!course || !questions || questions.length !== 10) {
+    console.error("Practice questions missing:", courseKey);
+    alert("Practice test is not available yet.");
+    return;
+  }
+
+  activeJobReadyCourseKey = courseKey;
+
+  document.getElementById("technicalCoursesHeading").hidden = true;
+  document.getElementById("technicalCoursesGrid").hidden = true;
+  document.getElementById("nonTechnicalCoursesHeading").hidden = true;
+  document.getElementById("nonTechnicalCoursesGrid").hidden = true;
+  document.getElementById("backFromCJobReady").hidden = true;
+
+  document.getElementById("jobReadyCourseTitle").textContent = course.title;
+  document.getElementById("jobReadyCourseDescription").textContent =
+    course.description;
+
+  document.getElementById("jobReadyPracticeIntro").hidden = false;
+  document.getElementById("jobReadyTestArea").hidden = true;
+  document.getElementById("jobReadyTestResult").hidden = true;
+
+  document.getElementById("jobReadyCourseView").hidden = false;
+
+  document.getElementById("jobReadyCourseView")
+    .scrollIntoView({ behavior: "smooth" });
+
+  console.log("Opened practice subject:", course.title);
+});
+
+
+// ==========================================
+// START PRACTICE TEST
+// ==========================================
+
+document.getElementById("startJobReadyTestBtn")
+  .addEventListener("click", function () {
+
+    const questions =
+      jobReadyAssessmentQuestions[activeJobReadyCourseKey];
+
+    if (!questions || questions.length !== 10) {
+      alert("Practice questions are unavailable.");
+      return;
+    }
+
+    document.getElementById("jobReadyPracticeIntro").hidden = true;
+    document.getElementById("submitJobReadyTestBtn").disabled = false;
+    document.getElementById("jobReadyTestResult").hidden = true;
+    document.getElementById("jobReadyTestArea").hidden = false;
+
+    document.getElementById("jobReadyQuestionProgress").textContent =
+      "10 Questions | 10 Marks | 1 Mark Each";
+
+    const container =
+      document.getElementById("jobReadyQuestionsContainer");
+
+    container.innerHTML = questions.map((question, index) => `
       <article class="community-card">
-        <h3>📘 Level ${level} Learning Content</h3>
-        <p>Professional lessons and practical exercises will be added here.</p>
+
+        <h3>Question ${index + 1} of 10</h3>
+
+        <p>${question.question}</p>
+
+        ${question.options.map((option, optionIndex) => `
+          <label style="display:block; margin:12px 0;">
+            <input
+              type="radio"
+              name="jobReadyQuestion${index}"
+              value="${optionIndex}"
+            >
+            ${option.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+          </label>
+        `).join("")}
+
       </article>
-    `;
+    `).join("");
 
-    document.getElementById("jobReadyAssessment").innerHTML = `
-      <article class="community-card">
-        <h3>📝 Level ${level} Assessment</h3>
-        <p>Assessment questions will be added here.</p>
-      </article>
-    `;
-
-    document.getElementById("backToJobReadyLevels").hidden = false;
-
-    document.getElementById("jobReadyLevelContent").scrollIntoView({
-      behavior: "smooth"
-    });
+    document.getElementById("jobReadyTestArea")
+      .scrollIntoView({ behavior: "smooth" });
 
   });
 
-});
+
+// ==========================================
+// SUBMIT PRACTICE TEST
+// ==========================================
+
+document.getElementById("submitJobReadyTestBtn")
+  .addEventListener("click", function () {
+
+    const questions =
+      jobReadyAssessmentQuestions[activeJobReadyCourseKey];
+
+    if (!questions || questions.length !== 10) return;
+
+    let score = 0;
+    let reviewHTML = "";
+
+    const answers = [];
+
+    for (let index = 0; index < 10; index++) {
+
+      const selected = document.querySelector(
+        `input[name="jobReadyQuestion${index}"]:checked`
+      );
+
+      if (!selected) {
+        alert(`Please answer Question ${index + 1}.`);
+        return;
+      }
+
+      answers.push(Number(selected.value));
+    }
+
+    questions.forEach((question, index) => {
+
+      const correct = answers[index] === question.answer;
+
+      if (correct) score++;
+
+      reviewHTML += `
+        <article class="community-card">
+
+          <h3>Question ${index + 1}</h3>
+
+          <p>${question.question}</p>
+
+          <p>
+            ${correct ? "✅ Correct!" : "❌ Incorrect"}
+          </p>
+
+          <p>
+            Your answer: ${question.options[answers[index]].replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+          </p>
+
+          <p>
+            Correct answer: ${question.options[question.answer]
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")}
+          </p>
+
+          <p><strong>Explanation:</strong> ${question.explanation}</p>
+
+        </article>
+      `;
+
+    });
+
+    const percentage = score * 10;
+
+    document.getElementById("jobReadyTestArea").hidden = true;
+
+    document.getElementById("jobReadyTestResult").hidden = false;
+
+    document.getElementById("jobReadyTestScore").textContent =
+      `Your Score: ${score}/10`;
+
+    document.getElementById("jobReadyTestPercentage").textContent =
+      `Percentage: ${percentage}%`;
+
+    document.getElementById("jobReadyAnswerReview").innerHTML =
+      reviewHTML;
+
+    this.disabled = true;
+
+    document.getElementById("jobReadyTestResult")
+      .scrollIntoView({ behavior: "smooth" });
+
+    console.log(
+      "Practice test completed:",
+      activeJobReadyCourseKey,
+      score,
+      percentage + "%"
+    );
+
   });
 
-});
+
+// ==========================================
+// RETAKE PRACTICE TEST
+// ==========================================
+
+document.getElementById("retakeJobReadyTestBtn")
+  .addEventListener("click", function () {
+
+    document.getElementById("submitJobReadyTestBtn").disabled = false;
+
+    document.getElementById("jobReadyTestResult").hidden = true;
+    document.getElementById("jobReadyPracticeIntro").hidden = false;
+
+    document.getElementById("jobReadyPracticeIntro")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
 
 // Back to all courses
 document.getElementById("backToJobReadyCourses")
@@ -11313,32 +13533,14 @@ document.getElementById("backToJobReadyCourses")
 
     document.getElementById("technicalCoursesHeading").hidden = false;
     document.getElementById("technicalCoursesGrid").hidden = false;
-
     document.getElementById("nonTechnicalCoursesHeading").hidden = false;
     document.getElementById("nonTechnicalCoursesGrid").hidden = false;
-
     document.getElementById("backFromCJobReady").hidden = false;
 
-    document.getElementById("cJobReadySection").scrollIntoView({
-      behavior: "smooth"
-    });
-
+    document.getElementById("cJobReadySection")
+      .scrollIntoView({ behavior: "smooth" });
   });
-  // Back to Job-Ready Levels
-document.getElementById("backToJobReadyLevels")
-  .addEventListener("click", () => {
 
-    document.getElementById("jobReadyLevelContent").hidden = true;
-
-    document.getElementById("jobReadyLevelsGrid").hidden = false;
-
-    document.getElementById("backToJobReadyLevels").hidden = true;
-
-    document.getElementById("jobReadyLevelsGrid").scrollIntoView({
-      behavior: "smooth"
-    });
-
-  });
 // ==========================================
 // C PROGRAMMING - STUDENT DEVELOPMENT JOURNEY
 // ==========================================
@@ -12152,3 +14354,3645 @@ async function restoreCJobProgress() {
   console.log("C Job-Ready progress restored:", cJobProgress);
 }
 
+
+  // =====================================
+// GROUP CHAT NAVIGATION
+// =====================================
+
+// Open Group Chat
+document.getElementById("openGroupChatBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById("communitySection").hidden = true;
+
+    document.getElementById("groupChatSection").hidden = false;
+
+    document.getElementById("groupChatSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+
+
+// Back to Student Community
+document.getElementById("backFromGroupChatBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById("groupChatSection").hidden = true;
+
+    document.getElementById("communitySection").hidden = false;
+
+    document.getElementById("communitySection")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+
+
+// Back to Group List
+document.getElementById("backToGroupsBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById("groupChatWindow").hidden = true;
+
+    document.getElementById("chatGroupsContainer").hidden = false;
+
+    document.getElementById("backToGroupsBtn").hidden = true;
+
+  });
+  // =====================================
+// LOAD AND JOIN GROUPS
+// =====================================
+
+async function loadChatGroups() {
+
+  const container = document.getElementById("chatGroupsContainer");
+
+  container.innerHTML = "<p>Loading discussion groups...</p>";
+
+  const { data: { user }, error: authError } =
+    await supabaseClient.auth.getUser();
+
+  if (authError || !user) {
+    container.textContent = "Please log in first.";
+    return;
+  }
+
+  const { data: groups, error } = await supabaseClient
+    .from("chat_groups")
+    .select("*")
+    .order("group_name");
+
+  if (error) {
+    console.error(error);
+    container.textContent = "Unable to load groups.";
+    return;
+  }
+
+  const { data: memberships, error: memberError } =
+    await supabaseClient
+      .from("chat_group_members")
+      .select("group_id")
+      .eq("user_id", user.id);
+
+  if (memberError) {
+    console.error(memberError);
+    container.textContent = "Unable to load memberships.";
+    return;
+  }
+
+  const joinedGroups = memberships.map(item => item.group_id);
+
+  container.innerHTML = "";
+
+  groups.forEach(group => {
+
+    const card = document.createElement("div");
+    card.className = "community-card";
+
+    const title = document.createElement("h3");
+    title.textContent = "💬 " + group.group_name;
+
+    const description = document.createElement("p");
+    description.textContent = group.description || "";
+
+    const button = document.createElement("button");
+    button.className = "primary-btn";
+
+    const alreadyJoined = joinedGroups.includes(group.id);
+
+    button.textContent = alreadyJoined
+      ? "Open Chat →"
+      : "Join Group →";
+
+    button.addEventListener("click", async () => {
+
+      if (!joinedGroups.includes(group.id)) {
+
+        const { error } = await supabaseClient
+          .from("chat_group_members")
+          .insert({
+            group_id: group.id,
+            user_id: user.id
+          });
+
+        if (error) {
+          console.error("Join error:", error);
+          alert("Unable to join group.");
+          return;
+        }
+
+        joinedGroups.push(group.id);
+      }
+
+      // Open selected group
+      document.getElementById("chatGroupsContainer").hidden = true;
+
+      document.getElementById("groupChatWindow").hidden = false;
+
+activeChatGroupId = group.id;
+await loadGroupMessages(group.id);
+subscribeToGroupMessages(group.id);
+
+      document.getElementById("backToGroupsBtn").hidden = false;
+
+      document.getElementById("groupMessagesContainer").textContent =
+        "Welcome to " + group.group_name +
+        "! Messages will appear here.";
+
+    });
+
+    card.appendChild(title);
+    card.appendChild(description);
+    card.appendChild(button);
+
+    container.appendChild(card);
+
+  });
+
+}
+document.getElementById("openGroupChatBtn")
+  .addEventListener("click", loadChatGroups);
+// =====================================
+// GROUP CHAT MESSAGE SENDING
+// =====================================
+
+let activeChatGroupId = null;
+
+async function sendGroupMessage() {
+
+  const input = document.getElementById("groupMessageInput");
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  if (!activeChatGroupId) {
+    alert("Please open a discussion group first.");
+    return;
+  }
+
+  const { data: { user }, error: authError } =
+    await supabaseClient.auth.getUser();
+
+  if (authError || !user) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const { error: sendError } = await supabaseClient
+    .from("chat_messages")
+    .insert({
+      group_id: activeChatGroupId,
+      user_id: user.id,
+      message: message
+    });
+
+  if (sendError) {
+    console.error("Message sending error:", sendError);
+    alert("Message could not be sent.");
+    return;
+  }
+
+ input.value = "";
+}
+
+
+// Send button
+document.getElementById("sendGroupMessageBtn")
+  .addEventListener("click", sendGroupMessage);
+
+
+// Press Enter to send
+document.getElementById("groupMessageInput")
+  .addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      sendGroupMessage();
+    }
+  });
+
+  // =====================================
+// LOAD GROUP CHAT MESSAGES
+// =====================================
+
+async function loadGroupMessages(groupId) {
+
+  const container = document.getElementById("groupMessagesContainer");
+
+  container.innerHTML = "<p>Loading messages...</p>";
+
+  const { data: messages, error } = await supabaseClient
+    .from("chat_messages")
+    .select("id, user_id, message, created_at")
+    .eq("group_id", groupId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Message loading error:", error);
+    container.textContent = "Unable to load messages.";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (messages.length === 0) {
+    container.textContent = "No messages yet. Start the conversation!";
+    return;
+  }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  messages.forEach(msg => {
+
+    const messageCard = document.createElement("div");
+    messageCard.className = "community-card";
+
+    const sender = document.createElement("strong");
+    sender.textContent =
+      msg.user_id === user.id ? "You" : "Student";
+
+    const messageText = document.createElement("p");
+    messageText.textContent = msg.message;
+
+    const time = document.createElement("small");
+    time.textContent = new Date(msg.created_at).toLocaleString();
+
+    messageCard.appendChild(sender);
+    messageCard.appendChild(messageText);
+    messageCard.appendChild(time);
+
+    container.appendChild(messageCard);
+
+  });
+
+  container.scrollTop = container.scrollHeight;
+}
+// =====================================
+// REAL-TIME GROUP CHAT
+// =====================================
+
+let activeChatChannel = null;
+
+function subscribeToGroupMessages(groupId) {
+
+  // Remove previous subscription
+  if (activeChatChannel) {
+    supabaseClient.removeChannel(activeChatChannel);
+  }
+
+  activeChatChannel = supabaseClient
+    .channel("group-chat-" + groupId)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "chat_messages",
+        filter: "group_id=eq." + groupId
+      },
+      async () => {
+        await loadGroupMessages(groupId);
+      }
+    )
+    .subscribe();
+
+}
+// =====================================
+// WEEKLY & MONTHLY LEADERBOARD
+// =====================================
+
+async function loadLeaderboard(period) {
+
+  const container = document.getElementById("leaderboardContainer");
+  const title = document.getElementById("leaderboardPeriodTitle");
+  const myRank = document.getElementById("myLeaderboardRank");
+
+  container.innerHTML = "<p>Loading leaderboard...</p>";
+  myRank.innerHTML = "";
+
+  title.innerHTML = period === "weekly"
+    ? "<h3>🏆 Weekly Top Performers</h3>"
+    : "<h3>🏆 Monthly Top Performers</h3>";
+
+  const { data: { user }, error: authError } =
+    await supabaseClient.auth.getUser();
+
+  if (authError || !user) {
+    container.textContent = "Please log in to view the leaderboard.";
+    return;
+  }
+
+  const { data, error } = await supabaseClient.rpc(
+    "get_leaderboard",
+    { period_type: period }
+  );
+
+  if (error) {
+    console.error("Leaderboard error:", error);
+    container.textContent = "Unable to load leaderboard.";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    container.textContent = "No leaderboard results available yet.";
+    return;
+  }
+
+  data.forEach(student => {
+
+    const card = document.createElement("div");
+    card.className = "community-card";
+
+    const medal = student.rank === 1 ? "🥇"
+      : student.rank === 2 ? "🥈"
+      : student.rank === 3 ? "🥉"
+      : "🏅";
+
+    const heading = document.createElement("h3");
+    heading.textContent =
+      `${medal} Rank ${student.rank} - ${student.student_name}`;
+
+    const quizzes = document.createElement("p");
+    quizzes.textContent =
+      `Quizzes Completed: ${student.total_quizzes}`;
+
+    const score = document.createElement("p");
+    score.textContent =
+      `Total Score: ${student.total_score}`;
+
+    const percentage = document.createElement("p");
+    percentage.textContent =
+      `Average Performance: ${student.average_percentage}%`;
+
+    card.append(heading, quizzes, score, percentage);
+    container.appendChild(card);
+
+    if (student.user_id === user.id) {
+      myRank.textContent =
+        `🌟 Your Current Rank: ${student.rank}`;
+    }
+
+  });
+
+  if (!myRank.textContent) {
+    myRank.textContent =
+      "You don't have a ranking for this period yet. Keep practising!";
+  }
+}
+
+
+// Weekly leaderboard
+document.getElementById("weeklyLeaderboardBtn")
+  .addEventListener("click", () => {
+    loadLeaderboard("weekly");
+  });
+
+
+// Monthly leaderboard
+document.getElementById("monthlyLeaderboardBtn")
+  .addEventListener("click", () => {
+    loadLeaderboard("monthly");
+  });
+
+
+// Load weekly leaderboard initially
+loadLeaderboard("weekly");
+// =====================================
+// CODING PLAYGROUND NAVIGATION
+// =====================================
+
+// Open Coding Playground
+document.getElementById("codingPlaygroundBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById("codingPlaygroundSection").hidden = false;
+
+    document.getElementById("codingPlaygroundSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+
+
+// Back to Home
+document.getElementById("backFromCodingPlayground")
+  .addEventListener("click", () => {
+
+    document.getElementById("codingPlaygroundSection").hidden = true;
+
+    document.getElementById("codingPlaygroundSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+  // =====================================
+// FEATURE 43 - QUESTION OF THE DAY
+// =====================================
+
+const dailyQuestions = [
+  {
+    category: "JavaScript",
+    question: "Which keyword is used to declare a constant in JavaScript?",
+    options: ["var", "let", "const", "static"],
+    answer: 2,
+    explanation: "The const keyword declares a variable whose binding cannot be reassigned."
+  },
+  {
+    category: "Python",
+    question: "Which function is used to display output in Python?",
+    options: ["echo()", "print()", "display()", "write()"],
+    answer: 1,
+    explanation: "The print() function displays output in Python."
+  },
+  {
+    category: "C Programming",
+    question: "Which symbol is used to end a statement in C?",
+    options: [".", ":", ";", ","],
+    answer: 2,
+    explanation: "A semicolon (;) terminates most statements in C."
+  },
+  {
+    category: "Java",
+    question: "Which keyword is used to inherit a class in Java?",
+    options: ["implements", "extends", "inherits", "super"],
+    answer: 1,
+    explanation: "The extends keyword is used for class inheritance in Java."
+  },
+  {
+    category: "DBMS",
+    question: "Which SQL command is used to retrieve data?",
+    options: ["INSERT", "UPDATE", "SELECT", "DELETE"],
+    answer: 2,
+    explanation: "SELECT retrieves records from a database table."
+  },
+  {
+    category: "Data Structures",
+    question: "Which data structure follows LIFO?",
+    options: ["Queue", "Stack", "Array", "Linked List"],
+    answer: 1,
+    explanation: "Stack follows Last In, First Out (LIFO)."
+  },
+  {
+    category: "HTML",
+    question: "Which HTML tag is used to create a hyperlink?",
+    options: ["<link>", "<a>", "<href>", "<url>"],
+    answer: 1,
+    explanation: "The <a> tag creates hyperlinks in HTML."
+  },
+  {
+    category: "CSS",
+    question: "Which property changes the text color?",
+    options: ["background", "font-style", "color", "text-align"],
+    answer: 2,
+    explanation: "The color property changes the text color in CSS."
+  },
+  {
+    category: "Operating Systems",
+    question: "Which component manages computer processes?",
+    options: ["Compiler", "Operating System", "Browser", "Database"],
+    answer: 1,
+    explanation: "The operating system manages processes and system resources."
+  },
+  {
+    category: "Computer Networks",
+    question: "What does HTTP stand for?",
+    options: [
+      "HyperText Transfer Protocol",
+      "HighText Transfer Program",
+      "Hyper Transfer Text Process",
+      "HyperText Transmission Program"
+    ],
+    answer: 0,
+    explanation: "HTTP stands for HyperText Transfer Protocol."
+  }
+];
+
+// Select a question based on the current Indian date
+const questionToday = new Date().toLocaleDateString("en-CA", {
+  timeZone: "Asia/Kolkata"
+});
+
+const dailyQuestionIndex = Math.floor(
+  new Date(questionToday).getTime() / 86400000
+) % dailyQuestions.length;
+
+const todaysQuestion = dailyQuestions[dailyQuestionIndex];
+
+const questionOfTheDaySection =
+  document.getElementById("questionOfTheDaySection");
+
+let selectedDailyAnswer = null;
+let dailyAnswerSubmitted = false;
+
+// OPEN QUESTION OF THE DAY
+document.getElementById("questionOfTheDayBtn")
+  .addEventListener("click", () => {
+
+    questionOfTheDaySection.hidden = false;
+
+    document.getElementById("dailyQuestionCategory").textContent =
+      "📚 " + todaysQuestion.category;
+
+    document.getElementById("dailyQuestionText").textContent =
+      todaysQuestion.question;
+
+    const optionsContainer =
+      document.getElementById("dailyQuestionOptions");
+
+    optionsContainer.innerHTML = "";
+
+    selectedDailyAnswer = null;
+    dailyAnswerSubmitted = false;
+
+    todaysQuestion.options.forEach((option, index) => {
+
+      const label = document.createElement("label");
+
+      label.style.display = "block";
+      label.style.padding = "12px";
+      label.style.margin = "10px 0";
+      label.style.cursor = "pointer";
+
+      const radio = document.createElement("input");
+
+      radio.type = "radio";
+      radio.name = "dailyQuestionAnswer";
+      radio.value = index;
+
+      radio.addEventListener("change", () => {
+        selectedDailyAnswer = index;
+      });
+
+      label.appendChild(radio);
+      label.appendChild(
+        document.createTextNode(" " + option)
+      );
+
+      optionsContainer.appendChild(label);
+
+    });
+
+    document.getElementById("dailyQuestionFeedback").textContent = "";
+
+    document.getElementById("submitDailyAnswer").disabled = false;
+
+    questionOfTheDaySection.scrollIntoView({
+      behavior: "smooth"
+    });
+
+  });
+
+// SUBMIT DAILY ANSWER AND SAVE TO SUPABASE
+
+document.getElementById("submitDailyAnswer")
+  .addEventListener("click", async () => {
+
+    if (dailyAnswerSubmitted) return;
+
+    if (selectedDailyAnswer === null) {
+      alert("Please select an answer first!");
+      return;
+    }
+
+    const feedback =
+      document.getElementById("dailyQuestionFeedback");
+
+    const submitButton =
+      document.getElementById("submitDailyAnswer");
+
+    submitButton.disabled = true;
+
+    try {
+
+      // GET LOGGED-IN USER
+      const {
+        data: { user },
+        error: userError
+      } = await supabaseClient.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("Please log in first!");
+      }
+
+      // CHECK PREVIOUS ATTEMPT
+      const { data: existing, error: checkError } =
+        await supabaseClient
+          .from("daily_question_attempts")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("question_date", questionToday)
+          .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existing) {
+
+        dailyAnswerSubmitted = true;
+
+        feedback.textContent =
+          "You have already attempted today's question!" +
+          "\n\n💡 Explanation: " +
+          todaysQuestion.explanation;
+
+        return;
+      }
+
+      // CHECK ANSWER
+      const isCorrect =
+        selectedDailyAnswer === todaysQuestion.answer;
+
+      const points = isCorrect ? 1 : 0;
+
+      // SAVE ATTEMPT
+      const { error: saveError } = await supabaseClient
+        .from("daily_question_attempts")
+        .insert({
+          user_id: user.id,
+          question_date: questionToday,
+          question_text: todaysQuestion.question,
+          selected_answer: selectedDailyAnswer,
+          correct_answer: todaysQuestion.answer,
+          is_correct: isCorrect,
+          points: points
+        });
+
+      if (saveError) throw saveError;
+
+      dailyAnswerSubmitted = true;
+
+      if (isCorrect) {
+        feedback.textContent =
+          "🎉 Correct Answer! Excellent work!" +
+          "\n🏆 You earned 1 point!";
+      } else {
+        feedback.textContent =
+          "❌ Incorrect! Correct answer: " +
+          todaysQuestion.options[todaysQuestion.answer];
+      }
+
+      feedback.textContent +=
+        "\n\n💡 Explanation: " + todaysQuestion.explanation;
+
+    } catch (error) {
+
+      feedback.textContent = "Error: " + error.message;
+      submitButton.disabled = false;
+
+    }
+
+  });
+
+// BACK TO HOME
+document.getElementById("backFromQuestionOfDay")
+  .addEventListener("click", () => {
+
+    questionOfTheDaySection.hidden = true;
+
+    document.getElementById("questionOfTheDayBtn")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+  // =====================================
+// FEATURE 42 - DAILY CODING CHALLENGE
+// =====================================
+
+const dailyChallenges = [
+  {
+    title: "Find the Sum of Two Numbers",
+    expectedOutput: "12",
+    difficulty: "Easy",
+    description: "Write a program that takes two numbers and prints their sum.",
+    example: "Input: 5, 7\nOutput: 12",
+    hint: "Use the + operator to add the two numbers.",
+    solution: {
+      javascript: `const a = 5;\nconst b = 7;\nconsole.log(a + b);`,
+      python: `a = 5\nb = 7\nprint(a + b)`,
+      c: `#include <stdio.h>\nint main() {\n    int a = 5, b = 7;\n    printf("%d", a + b);\n    return 0;\n}`,
+      cpp: `#include <iostream>\nusing namespace std;\nint main() {\n    int a = 5, b = 7;\n    cout << a + b;\n    return 0;\n}`,
+      java: `public class Main {\n    public static void main(String[] args) {\n        int a = 5, b = 7;\n        System.out.println(a + b);\n    }\n}`
+    }
+  },
+  {
+    title: "Check Even or Odd",
+    expectedOutput: "Even",
+    difficulty: "Easy",
+    description: "Write a program to check whether a number is even or odd.",
+    example: "Input: 8\nOutput: Even",
+    hint: "Use the modulo operator (%) to check the remainder.",
+    solution: {
+      javascript: `let n = 8;\nconsole.log(n % 2 === 0 ? "Even" : "Odd");`,
+      python: `n = 8\nprint("Even" if n % 2 == 0 else "Odd")`,
+      c: `#include <stdio.h>\nint main() {\n    int n = 8;\n    if (n % 2 == 0) printf("Even");\n    else printf("Odd");\n    return 0;\n}`,
+      cpp: `#include <iostream>\nusing namespace std;\nint main() {\n    int n = 8;\n    cout << (n % 2 == 0 ? "Even" : "Odd");\n    return 0;\n}`,
+      java: `public class Main {\n    public static void main(String[] args) {\n        int n = 8;\n        System.out.println(n % 2 == 0 ? "Even" : "Odd");\n    }\n}`
+    }
+  },
+  {
+    title: "Find the Largest of Two Numbers",
+    expectedOutput: "20",
+    difficulty: "Easy",
+    description: "Write a program to find the largest among two numbers.",
+    example: "Input: 15, 20\nOutput: 20",
+    hint: "Compare the two numbers using an if-else statement.",
+    solution: {
+      javascript: `let a = 15, b = 20;\nconsole.log(a > b ? a : b);`,
+      python: `a, b = 15, 20\nprint(max(a, b))`,
+      c: `#include <stdio.h>\nint main() {\n    int a = 15, b = 20;\n    printf("%d", a > b ? a : b);\n    return 0;\n}`,
+      cpp: `#include <iostream>\nusing namespace std;\nint main() {\n    int a = 15, b = 20;\n    cout << (a > b ? a : b);\n    return 0;\n}`,
+      java: `public class Main {\n    public static void main(String[] args) {\n        int a = 15, b = 20;\n        System.out.println(a > b ? a : b);\n    }\n}`
+    }
+  },
+  {
+    title: "Reverse a String",
+    expectedOutput: "olleh",
+    difficulty: "Medium",
+    description: "Write a program to reverse the given string.",
+    example: "Input: hello\nOutput: olleh",
+    hint: "Think about reading the characters from the last position to the first.",
+    solution: {
+      javascript: `let str = "hello";\nconsole.log(str.split("").reverse().join(""));`,
+      python: `text = "hello"\nprint(text[::-1])`,
+      c: `#include <stdio.h>\n#include <string.h>\nint main() {\n    char str[] = "hello";\n    for (int i = strlen(str) - 1; i >= 0; i--)\n        printf("%c", str[i]);\n    return 0;\n}`,
+      cpp: `#include <iostream>\n#include <algorithm>\nusing namespace std;\nint main() {\n    string s = "hello";\n    reverse(s.begin(), s.end());\n    cout << s;\n    return 0;\n}`,
+      java: `public class Main {\n    public static void main(String[] args) {\n        String s = "hello";\n        System.out.println(new StringBuilder(s).reverse());\n    }\n}`
+    }
+  },
+  {
+    title: "Calculate Factorial",
+    expectedOutput: "120",
+    difficulty: "Medium",
+    description: "Write a program to calculate the factorial of a positive number.",
+    example: "Input: 5\nOutput: 120",
+    hint: "Multiply all integers from 1 up to the given number.",
+    solution: {
+      javascript: `let n = 5, fact = 1;\nfor (let i = 1; i <= n; i++) fact *= i;\nconsole.log(fact);`,
+      python: `n = 5\nfact = 1\nfor i in range(1, n + 1):\n    fact *= i\nprint(fact)`,
+      c: `#include <stdio.h>\nint main() {\n    int n = 5, fact = 1;\n    for (int i = 1; i <= n; i++) fact *= i;\n    printf("%d", fact);\n    return 0;\n}`,
+      cpp: `#include <iostream>\nusing namespace std;\nint main() {\n    int n = 5, fact = 1;\n    for (int i = 1; i <= n; i++) fact *= i;\n    cout << fact;\n    return 0;\n}`,
+      java: `public class Main {\n    public static void main(String[] args) {\n        int n = 5, fact = 1;\n        for (int i = 1; i <= n; i++) fact *= i;\n        System.out.println(fact);\n    }\n}`
+    }
+  }
+];
+
+const dailyChallengeDate = new Date().toLocaleDateString("en-CA", {
+  timeZone: "Asia/Kolkata"
+});
+
+const dailyChallengeIndex = Math.floor(
+  new Date(dailyChallengeDate).getTime() / 86400000
+) % dailyChallenges.length;
+
+const todayChallenge = dailyChallenges[dailyChallengeIndex];
+
+const dailyChallengeSection =
+  document.getElementById("dailyCodingChallengeSection");
+
+document.getElementById("dailyCodingChallengeBtn")
+  .addEventListener("click", () => {
+
+    dailyChallengeSection.hidden = false;
+
+    document.getElementById("dailyChallengeTitle").textContent =
+      todayChallenge.title;
+
+    document.getElementById("dailyChallengeDifficulty").textContent =
+      "Difficulty: " + todayChallenge.difficulty;
+
+    document.getElementById("dailyChallengeDescription").textContent =
+      todayChallenge.description;
+
+    document.getElementById("dailyChallengeExample").textContent =
+      todayChallenge.example;
+
+    document.getElementById("dailyChallengeCode").value =
+      todayChallenge.solution.javascript;
+
+    document.getElementById("dailyChallengeOutput").textContent = "";
+
+    document.getElementById("dailyChallengeHint").hidden = true;
+    document.getElementById("dailyChallengeSolution").hidden = true;
+
+    dailyChallengeSection.scrollIntoView({ behavior: "smooth" });
+
+  });
+
+document.getElementById("dailyChallengeLanguage")
+  .addEventListener("change", event => {
+
+    const language = event.target.value;
+
+    document.getElementById("dailyChallengeCode").value =
+      todayChallenge.solution[language];
+
+  });
+
+document.getElementById("showDailyChallengeHint")
+  .addEventListener("click", () => {
+
+    const hint = document.getElementById("dailyChallengeHint");
+
+    hint.textContent = "💡 Hint: " + todayChallenge.hint;
+    hint.hidden = !hint.hidden;
+
+  });
+
+document.getElementById("showDailyChallengeSolution")
+  .addEventListener("click", () => {
+
+    const language =
+      document.getElementById("dailyChallengeLanguage").value;
+
+    const solution =
+      document.getElementById("dailyChallengeSolution");
+
+    solution.textContent =
+      "Sample Solution:\n" + todayChallenge.solution[language];
+
+    solution.hidden = !solution.hidden;
+
+  });
+
+// Run Daily Challenge Code and Check Answer
+document.getElementById("runDailyChallengeBtn")
+  .addEventListener("click", async () => {
+
+    const language =
+      document.getElementById("dailyChallengeLanguage").value;
+
+    const code =
+      document.getElementById("dailyChallengeCode").value;
+
+    const output =
+      document.getElementById("dailyChallengeOutput");
+
+    const runButton =
+      document.getElementById("runDailyChallengeBtn");
+
+    output.textContent = "Running code...";
+    runButton.disabled = true;
+
+    try {
+
+      let actualOutput = "";
+
+      // JAVASCRIPT EXECUTION
+      if (language === "javascript") {
+
+        const logs = [];
+        const originalLog = console.log;
+
+        try {
+          console.log = (...args) => logs.push(args.join(" "));
+          new Function(code)();
+        } finally {
+          console.log = originalLog;
+        }
+
+        actualOutput = logs.join("\n").trim();
+
+      }
+
+      // OTHER PROGRAMMING LANGUAGES
+      else {
+
+        const response = await fetch("https://quizconnect-code-runner.onrender.com/run", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ language, code })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.error) {
+          throw new Error(result.error || "Code execution failed.");
+        }
+
+        actualOutput = (result.output || "").trim();
+
+      }
+
+      // CHECK EXPECTED OUTPUT
+      output.textContent = "Your Output:\n" + actualOutput;
+
+      if (actualOutput !== todayChallenge.expectedOutput) {
+
+        output.textContent +=
+          "\n\n❌ Incorrect answer! Try again.";
+
+        return;
+      }
+
+      // GET LOGGED-IN USER
+      const {
+        data: { user },
+        error: userError
+      } = await supabaseClient.auth.getUser();
+
+      if (userError || !user) {
+        output.textContent +=
+          "\n\nPlease log in to save your challenge completion.";
+        return;
+      }
+
+      // CHECK EXISTING COMPLETION
+      const { data: existing, error: checkError } =
+        await supabaseClient
+          .from("daily_coding_completions")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("challenge_date", dailyChallengeDate)
+          .maybeSingle();
+
+      if (checkError) {
+        throw checkError;
+      }
+
+      if (existing) {
+
+        output.textContent +=
+          "\n\n🏆 Correct! Today's challenge is already completed.";
+
+        return;
+      }
+
+      // SAVE COMPLETION TO SUPABASE
+      const { error: saveError } = await supabaseClient
+        .from("daily_coding_completions")
+        .insert({
+          user_id: user.id,
+          challenge_date: dailyChallengeDate,
+          challenge_title: todayChallenge.title,
+          language: language,
+          output: actualOutput
+        });
+
+      if (saveError) {
+        throw saveError;
+      }
+
+      output.textContent +=
+        "\n\n🎉 Correct Answer! Daily Challenge Completed! 🏆";
+
+    } catch (error) {
+
+      output.textContent +=
+        "\n\nError: " + error.message;
+
+    } finally {
+
+      runButton.disabled = false;
+
+    }
+
+  });
+// Back to Home
+document.getElementById("backFromDailyChallenge")
+  .addEventListener("click", () => {
+
+    dailyChallengeSection.hidden = true;
+
+    document.getElementById("dailyCodingChallengeBtn")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+  // =====================================
+// CODING PLAYGROUND - SAMPLE PROGRAMS
+// =====================================
+
+const codingSamples = {
+
+  javascript: `// JavaScript Program
+console.log("Hello, QuizConnect!");
+console.log("Welcome to Coding Playground!");`,
+
+  python: `# Python Program
+print("Hello, QuizConnect!")
+print("Welcome to Coding Playground!")`,
+
+  c: `// C Program
+#include <stdio.h>
+
+int main() {
+    printf("Hello, QuizConnect!\\n");
+    return 0;
+}`,
+
+  cpp: `// C++ Program
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, QuizConnect!" << endl;
+    return 0;
+}`,
+
+  java: `// Java Program
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, QuizConnect!");
+    }
+}`,
+
+  html: `<!DOCTYPE html>
+<html>
+<head>
+    <title>QuizConnect</title>
+</head>
+<body>
+    <h1>Hello, QuizConnect!</h1>
+    <p>Welcome to Coding Playground!</p>
+</body>
+</html>`,
+
+  css: `/* CSS Sample */
+body {
+    background-color: #eef2ff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    color: #4338ca;
+}`
+};
+
+
+// Set initial sample
+document.getElementById("codeEditor").value =
+  codingSamples.javascript;
+
+
+// Change sample when language changes
+document.getElementById("codingLanguage")
+  .addEventListener("change", function () {
+
+    const selectedLanguage = this.value;
+
+    document.getElementById("codeEditor").value =
+      codingSamples[selectedLanguage];
+
+    document.getElementById("codeOutput").textContent =
+      "Your output will appear here...";
+
+  });
+
+
+// Clear editor
+document.getElementById("clearCodeBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById("codeEditor").value = "";
+
+    document.getElementById("codeOutput").textContent =
+      "Editor cleared.";
+
+  });
+  console.log("Coding Playground script loaded!");
+
+console.log("Editor:", document.getElementById("codeEditor"));
+console.log("Language:", document.getElementById("codingLanguage"));
+console.log("Samples:", codingSamples);
+  console.log("Coding Playground loaded!");
+  // =====================================
+// CODING PLAYGROUND - RUN CODE
+// =====================================
+
+document.getElementById("runCodeBtn").addEventListener("click", async () => {
+
+  const language = document.getElementById("codingLanguage").value;
+  const code = document.getElementById("codeEditor").value;
+  const output = document.getElementById("codeOutput");
+  const preview = document.getElementById("codingPreview");
+
+  output.textContent = "";
+  preview.srcdoc = "";
+
+  // JAVASCRIPT
+  if (language === "javascript") {
+
+    const safeCode = JSON.stringify(code);
+
+    preview.srcdoc = `
+      <!DOCTYPE html>
+      <html>
+      <body>
+        <pre id="result"></pre>
+
+        <script>
+          const result = document.getElementById("result");
+
+          console.log = (...args) => {
+            result.textContent += args.join(" ") + "\\n";
+          };
+
+          try {
+            new Function(${safeCode})();
+          } catch (error) {
+            result.textContent += "Error: " + error.message;
+          }
+        <\/script>
+      </body>
+      </html>
+    `;
+
+    output.textContent = "JavaScript executed successfully.";
+
+  }
+
+  // HTML
+  else if (language === "html") {
+
+    preview.srcdoc = code;
+    output.textContent = "HTML preview loaded.";
+
+  }
+
+  // CSS
+  else if (language === "css") {
+
+    preview.srcdoc = `
+      <html>
+        <head>
+          <style>${code}</style>
+        </head>
+        <body>
+          <h1>Hello, QuizConnect!</h1>
+          <p>CSS preview is working.</p>
+        </body>
+      </html>
+    `;
+
+    output.textContent = "CSS preview loaded.";
+
+  }
+
+  // PYTHON, C, C++ AND JAVA
+  else if (["python", "c", "cpp", "java"].includes(language)) {
+
+    output.textContent = "Running your program...";
+    preview.srcdoc = "";
+
+    try {
+
+      const response = await fetch("https://quizconnect-code-runner.onrender.com/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          language: language,
+          code: code
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Execution failed.");
+      }
+
+      output.textContent =
+        result.output || result.error || "Program executed with no output.";
+
+    } catch (error) {
+
+      output.textContent = "Execution Error: " + error.message;
+
+    }
+
+  }
+
+});
+// =====================================
+// INTERVIEW PREPARATION
+// =====================================
+
+const interviewSubjects = [
+  ["C Programming", "Programming fundamentals, pointers, functions and memory."],
+  ["C++", "OOP concepts, inheritance, polymorphism and STL."],
+  ["Java", "Core Java, OOP, collections and exception handling."],
+  ["Python", "Python basics, functions, OOP and data handling."],
+  ["HTML", "HTML elements, forms, semantic tags and web structure."],
+  ["CSS", "Selectors, Flexbox, Grid, responsive design and styling."],
+  ["JavaScript", "Functions, arrays, DOM, events and ES6."],
+  ["Full Stack Development", "Frontend, backend, APIs and web development."],
+  ["SQL & DBMS", "Queries, joins, normalization and database concepts."],
+  ["Data Structures & Algorithms", "Arrays, linked lists, stacks, queues and sorting."],
+  ["Operating Systems", "Processes, threads, scheduling and memory management."],
+  ["Computer Networks", "OSI model, TCP/IP, DNS and networking protocols."],
+  ["Software Engineering", "SDLC, testing, Agile and software development."],
+  ["Cloud Computing", "Cloud services, deployment and virtualization."],
+  ["Cybersecurity", "Encryption, authentication and security fundamentals."],
+  ["Artificial Intelligence & ML", "AI fundamentals, machine learning and applications."],
+  ["Git & GitHub", "Version control, commits, branches and collaboration."],
+    ["Aptitude & Logical Reasoning", "Numerical ability, reasoning and problem-solving."]
+];
+
+// TECHNICAL INTERVIEW QUESTION BANK
+const technicalInterviewQA = {
+
+  "C Programming": [
+    { q: "What is C programming?", a: "C is a general-purpose procedural programming language used for system and application development." },
+    { q: "Who developed C?", a: "Dennis Ritchie developed C at Bell Labs in the early 1970s." },
+    { q: "What is a variable?", a: "A variable is a named memory location used to store a value." },
+    { q: "What are data types in C?", a: "Data types specify the type of data a variable can store, such as int, char, float and double." },
+    { q: "What is a pointer?", a: "A pointer is a variable that stores the memory address of another variable." },
+    { q: "What is an array?", a: "An array stores multiple elements of the same data type in contiguous memory locations." },
+    { q: "What is a function?", a: "A function is a reusable block of code designed to perform a particular task." },
+    { q: "What is recursion?", a: "Recursion occurs when a function calls itself to solve a problem." },
+    { q: "What is a structure?", a: "A structure is a user-defined data type that groups variables of different data types." },
+    { q: "What is a union?", a: "A union is a user-defined data type in which all members share the same memory location." },
+    { q: "What is the difference between malloc() and calloc()?", a: "malloc() allocates uninitialized memory, while calloc() allocates memory initialized to zero." },
+    { q: "What is a NULL pointer?", a: "A NULL pointer is a pointer that does not point to a valid object or function." },
+    { q: "What is a dangling pointer?", a: "A dangling pointer refers to memory that has already been freed or is no longer valid." },
+    { q: "What is a memory leak?", a: "A memory leak occurs when dynamically allocated memory is no longer needed but is not released." },
+    { q: "What is the difference between break and continue?", a: "break terminates a loop or switch, while continue skips the current loop iteration." },
+    { q: "What is a header file?", a: "A header file contains declarations and macros that can be included using #include." },
+    { q: "What is the difference between ++i and i++?", a: "++i increments before its value is used, while i++ uses the current value before incrementing." },
+    { q: "What is a storage class?", a: "A storage class determines a variable's scope, lifetime and linkage." },
+    { q: "What is file handling in C?", a: "File handling allows programs to create, read, write and close files using functions such as fopen() and fclose()." },
+    { q: "What is the difference between call by value and passing a pointer?", a: "Call by value passes a copy of a value. Passing a pointer allows a function to access the original object through its address." }
+  ],
+
+  "C++": [
+    { q: "What is C++?", a: "C++ is a general-purpose programming language supporting procedural, object-oriented and generic programming." },
+    { q: "What is a class?", a: "A class is a user-defined blueprint containing data members and member functions." },
+    { q: "What is an object?", a: "An object is an instance of a class." },
+    { q: "What is encapsulation?", a: "Encapsulation combines data and methods in a class and controls access to them." },
+    { q: "What is inheritance?", a: "Inheritance allows a derived class to acquire accessible properties and methods of a base class." },
+    { q: "What is polymorphism?", a: "Polymorphism allows the same interface to represent different behaviours." },
+    { q: "What is abstraction?", a: "Abstraction hides implementation details and exposes essential functionality." },
+    { q: "What is a constructor?", a: "A constructor is a special member function automatically called when an object is created." },
+    { q: "What is a destructor?", a: "A destructor is a special member function called when an object is destroyed." },
+    { q: "What is function overloading?", a: "Function overloading allows multiple functions with the same name but different parameter lists." },
+    { q: "What is operator overloading?", a: "Operator overloading gives an existing operator a specific meaning for a user-defined type." },
+    { q: "What is a virtual function?", a: "A virtual function supports runtime polymorphism through dynamic dispatch." },
+    { q: "What is a pure virtual function?", a: "A pure virtual function is declared with = 0 and makes its class abstract." },
+    { q: "What is multiple inheritance?", a: "Multiple inheritance allows a derived class to inherit from more than one base class." },
+    { q: "What is the difference between public, private and protected?", a: "They are access specifiers that control where class members can be accessed." },
+    { q: "What is the this pointer?", a: "The this pointer refers to the current object inside a non-static member function." },
+    { q: "What is a template?", a: "A template allows functions and classes to work with different data types." },
+    { q: "What is STL?", a: "STL stands for Standard Template Library. It provides containers, algorithms and iterators." },
+    { q: "What is the difference between a pointer and a reference?", a: "A pointer stores an address and can be reassigned; a reference is an alias for an existing object and must be initialized." },
+    { q: "What is exception handling in C++?", a: "Exception handling manages runtime errors using try, throw and catch." }
+  ],
+
+  "Java": [
+    { q: "What is Java?", a: "Java is a high-level, object-oriented programming language designed to run on different platforms through the JVM." },
+    { q: "Who developed Java?", a: "Java was developed by James Gosling and his team at Sun Microsystems." },
+    { q: "What is JVM?", a: "JVM stands for Java Virtual Machine. It executes Java bytecode." },
+    { q: "What is JDK?", a: "JDK stands for Java Development Kit. It includes tools needed to develop Java applications." },
+    { q: "What is JRE?", a: "JRE stands for Java Runtime Environment. It provides the components needed to run Java applications." },
+    { q: "Why is Java platform-independent?", a: "Java source code is compiled into bytecode that can run on compatible JVM implementations." },
+    { q: "What is a class?", a: "A class is a blueprint that defines the data and behaviour of objects." },
+    { q: "What is an object?", a: "An object is an instance of a class with state and behaviour." },
+    { q: "What is inheritance in Java?", a: "Inheritance allows a class to acquire accessible members of another class using extends." },
+    { q: "What is polymorphism?", a: "Polymorphism allows one interface or reference type to represent different object behaviours." },
+    { q: "What is encapsulation?", a: "Encapsulation protects data by combining fields and methods and controlling access." },
+    { q: "What is abstraction?", a: "Abstraction exposes essential operations while hiding implementation details." },
+    { q: "What is method overloading?", a: "Method overloading defines multiple methods with the same name but different parameter lists." },
+    { q: "What is method overriding?", a: "Method overriding occurs when a subclass provides its own implementation of an inherited method." },
+    { q: "What is an interface?", a: "An interface defines a contract that implementing classes agree to follow." },
+    { q: "What is an abstract class?", a: "An abstract class cannot be instantiated directly and can contain abstract and concrete methods." },
+    { q: "What is a constructor?", a: "A constructor initializes an object when it is created." },
+    { q: "What is exception handling?", a: "Exception handling manages errors using try, catch, finally, throw and throws." },
+    { q: "What is the difference between == and equals()?", a: "For objects, == compares references, while equals() can compare logical content when appropriately implemented." },
+    { q: "What is garbage collection?", a: "Garbage collection automatically reclaims heap memory occupied by objects that are no longer reachable." }
+  ],
+
+  "Python": [
+    { q: "What is Python?", a: "Python is a high-level, interpreted, general-purpose programming language known for readable syntax." },
+    { q: "Who created Python?", a: "Python was created by Guido van Rossum." },
+    { q: "What are Python's main features?", a: "Python offers readable syntax, dynamic typing, automatic memory management and a large standard library." },
+    { q: "What is a list?", a: "A list is an ordered, mutable collection that can store multiple values." },
+    { q: "What is a tuple?", a: "A tuple is an ordered, immutable collection of elements." },
+    { q: "What is a dictionary?", a: "A dictionary stores data as key-value pairs." },
+    { q: "What is a set?", a: "A set is an unordered collection of unique elements." },
+    { q: "What is indentation?", a: "Indentation defines code blocks in Python and is required by its syntax." },
+    { q: "What is a function?", a: "A function is a reusable block of code defined using the def keyword." },
+    { q: "What is a lambda function?", a: "A lambda function is a small anonymous function created using the lambda keyword." },
+    { q: "What is a module?", a: "A module is a Python file containing reusable code such as functions, classes and variables." },
+    { q: "What is a package?", a: "A package organizes related Python modules into a directory structure." },
+    { q: "What is list comprehension?", a: "List comprehension is a concise way to create lists from an iterable." },
+    { q: "What is slicing?", a: "Slicing extracts a portion of a sequence using start, stop and step values." },
+    { q: "What is exception handling?", a: "Exception handling manages runtime errors using try, except, else and finally." },
+    { q: "What is OOP in Python?", a: "Object-oriented programming organizes code using classes and objects." },
+    { q: "What is inheritance in Python?", a: "Inheritance allows a class to reuse or extend the behaviour of another class." },
+    { q: "What is the difference between is and ==?", a: "== compares values, while is checks whether two references point to the same object." },
+    { q: "What is PEP 8?", a: "PEP 8 is the style guide for writing readable Python code." },
+    { q: "What is a generator?", a: "A generator produces values lazily, usually using the yield keyword." }
+  ],
+
+  "HTML": [
+    { q: "What is HTML?", a: "HTML stands for HyperText Markup Language. It structures content on web pages." },
+    { q: "What is an HTML element?", a: "An HTML element generally consists of a start tag, content and an end tag." },
+    { q: "What is an HTML attribute?", a: "An attribute provides additional information or configuration for an HTML element." },
+    { q: "What is semantic HTML?", a: "Semantic HTML uses meaningful elements such as header, nav, main and footer." },
+    { q: "What is the purpose of the DOCTYPE declaration?", a: "DOCTYPE tells the browser which HTML standard the document uses and helps enable standards mode." },
+    { q: "What is the difference between div and span?", a: "div is a generic block-level container, while span is a generic inline container." },
+    { q: "What is the anchor tag?", a: "The a element creates hyperlinks to pages, files or locations." },
+    { q: "What is the image tag?", a: "The img element embeds an image in a webpage. Its alt attribute provides alternative text." },
+    { q: "What is the difference between id and class?", a: "An id identifies a particular element, while a class can be shared by multiple elements." },
+    { q: "What are HTML forms?", a: "Forms collect user input using elements such as input, textarea, select and button." },
+    { q: "What is the purpose of the label tag?", a: "The label element provides a caption for a form control and improves accessibility." },
+    { q: "What is the difference between GET and POST?", a: "GET requests retrieve resources and commonly send parameters in the URL; POST submits data in the request body." },
+    { q: "What are HTML5 semantic elements?", a: "Examples include header, footer, nav, main, article, section and aside." },
+    { q: "What is an iframe?", a: "An iframe embeds another HTML page or browsing context within the current page." },
+    { q: "What is the purpose of the alt attribute?", a: "The alt attribute provides alternative text for an image." },
+    { q: "What is the difference between ordered and unordered lists?", a: "An ordered list uses a sequence, while an unordered list uses bullets." },
+    { q: "What is the viewport meta tag?", a: "It helps control page dimensions and scaling on mobile devices." },
+    { q: "What is the difference between localStorage and sessionStorage?", a: "localStorage persists across browser sessions, while sessionStorage normally lasts for the page session." },
+    { q: "What is the purpose of the script tag?", a: "The script element embeds or references JavaScript code." },
+    { q: "What is accessibility in HTML?", a: "HTML accessibility means structuring content so people using different devices and assistive technologies can use it." }
+  ],
+
+  "CSS": [
+    { q: "What is CSS?", a: "CSS stands for Cascading Style Sheets. It controls the appearance and layout of web pages." },
+    { q: "What are the types of CSS?", a: "The common types are inline CSS, internal CSS and external CSS." },
+    { q: "What is a CSS selector?", a: "A selector identifies the HTML elements to which CSS rules apply." },
+    { q: "What is the CSS box model?", a: "The box model consists of content, padding, border and margin." },
+    { q: "What is the difference between margin and padding?", a: "Margin creates space outside an element's border, while padding creates space inside it." },
+    { q: "What is Flexbox?", a: "Flexbox is a CSS layout system used to arrange and align items in one dimension." },
+    { q: "What is CSS Grid?", a: "CSS Grid is a two-dimensional layout system for arranging rows and columns." },
+    { q: "What is a media query?", a: "A media query applies CSS rules based on device or viewport characteristics." },
+    { q: "What is responsive web design?", a: "Responsive design adapts a webpage layout to different screen sizes and devices." },
+    { q: "What is the difference between class and ID selectors?", a: "A class selector starts with a dot and can match multiple elements; an ID selector starts with # and targets an ID." },
+    { q: "What is CSS specificity?", a: "Specificity is the rule used to determine which competing CSS selector has higher priority." },
+    { q: "What is the cascade in CSS?", a: "The cascade determines which styles apply based on origin, importance, specificity and source order." },
+    { q: "What is the position property?", a: "The position property controls how an element is positioned, using values such as static, relative, absolute, fixed and sticky." },
+    { q: "What is z-index?", a: "z-index controls the stacking order of positioned elements within the relevant stacking context." },
+    { q: "What is the difference between display: none and visibility: hidden?", a: "display: none removes the element from layout, while visibility: hidden hides it but keeps its layout space." },
+    { q: "What is a pseudo-class?", a: "A pseudo-class selects an element in a particular state, such as :hover or :focus." },
+    { q: "What is a pseudo-element?", a: "A pseudo-element styles a specific part of an element, such as ::before or ::first-line." },
+    { q: "What is the difference between em and rem?", a: "em is relative to the relevant font size, while rem is relative to the root element's font size." },
+    { q: "What are CSS transitions?", a: "Transitions animate changes in CSS property values over a specified duration." },
+     { q: "What are CSS variables?", a: "CSS custom properties store reusable values and are commonly declared using names beginning with --." }
+  ]
+};
+    // Additional Interview Questions – Part 2
+
+const additionalInterviewQA = {
+
+  "JavaScript": [
+    { q: "What is JavaScript?", a: "JavaScript is a programming language used to create interactive and dynamic web applications." },
+    { q: "What is the difference between var, let and const?", a: "var is function-scoped, while let and const are block-scoped. const prevents reassignment." },
+    { q: "What is the DOM?", a: "The Document Object Model represents an HTML document as a tree of objects." },
+    { q: "What is an event?", a: "An event is an action such as a click, keypress or page load that JavaScript can respond to." },
+    { q: "What is an arrow function?", a: "An arrow function is a shorter syntax for writing function expressions." },
+    { q: "What is hoisting?", a: "Hoisting describes how JavaScript processes declarations before executing code. The behaviour differs for var, let, const and functions." },
+    { q: "What is a closure?", a: "A closure is a function that retains access to variables from its surrounding lexical scope." },
+    { q: "What is a callback function?", a: "A callback is a function passed to another function to be executed later." },
+    { q: "What is a Promise?", a: "A Promise represents the eventual success or failure of an asynchronous operation." },
+    { q: "What is async and await?", a: "async and await provide syntax for working with Promises in a more readable way." },
+    { q: "What is the difference between == and ===?", a: "== compares values after type conversion when needed, while === compares without type conversion." },
+    { q: "What is an array method?", a: "Array methods are built-in functions such as map(), filter(), reduce() and forEach() used to process arrays." },
+    { q: "What is event bubbling?", a: "Event bubbling is the process in which an event propagates from its target element up through its ancestors." },
+    { q: "What is event delegation?", a: "Event delegation handles events on child elements by attaching one listener to a common parent." },
+    { q: "What is JSON?", a: "JSON stands for JavaScript Object Notation. It is a text format used to exchange structured data." },
+    { q: "What is localStorage?", a: "localStorage stores key-value data in the browser and generally keeps it after the browser is closed." },
+    { q: "What is sessionStorage?", a: "sessionStorage stores data for a page session and is cleared when that session ends." },
+    { q: "What is the spread operator?", a: "The spread operator (...) expands elements of an iterable or properties of an object." },
+    { q: "What is destructuring?", a: "Destructuring extracts values from arrays or properties from objects into variables." },
+    { q: "What is the difference between null and undefined?", a: "undefined usually indicates an unassigned or missing value, while null represents an intentional absence of value." }
+  ],
+
+  "Full Stack Development": [
+    { q: "What is full stack development?", a: "Full stack development involves working on both frontend and backend parts of an application." },
+    { q: "What is frontend development?", a: "Frontend development focuses on the user interface and user experience." },
+    { q: "What is backend development?", a: "Backend development handles server-side logic, databases and application processing." },
+    { q: "What is an API?", a: "An API allows different software applications to communicate with each other." },
+    { q: "What is REST?", a: "REST is an architectural style for designing network-based APIs." },
+    { q: "What is a database?", a: "A database is an organized collection of data that can be stored, accessed and managed." },
+    { q: "What is client-server architecture?", a: "It is a model in which clients request services or resources from servers." },
+    { q: "What is HTTP?", a: "HTTP is a protocol used for communication between web clients and servers." },
+    { q: "What is HTTPS?", a: "HTTPS is HTTP secured using TLS encryption." },
+    { q: "What is the difference between frontend and backend?", a: "Frontend handles the user-facing interface, while backend handles server-side processing and data." },
+    { q: "What is responsive design?", a: "Responsive design allows websites to adapt to different screen sizes and devices." },
+    { q: "What is authentication?", a: "Authentication verifies the identity of a user." },
+    { q: "What is authorization?", a: "Authorization determines what an authenticated user is allowed to access." },
+    { q: "What is middleware?", a: "Middleware is software that processes requests between the client and the final application handler." },
+    { q: "What is JSON used for?", a: "JSON is commonly used to exchange structured data between frontend and backend applications." },
+    { q: "What is deployment?", a: "Deployment is the process of making an application available in a target environment." },
+    { q: "What is hosting?", a: "Hosting provides the server resources needed to make a website or application accessible." },
+    { q: "What is a single-page application?", a: "A single-page application updates content dynamically without loading a completely new page for every navigation." },
+    { q: "What is CRUD?", a: "CRUD stands for Create, Read, Update and Delete, the four basic data operations." },
+    { q: "What is the role of a web server?", a: "A web server receives HTTP requests and returns responses such as web pages or API data." }
+  ],
+
+  "SQL & DBMS": [
+    { q: "What is DBMS?", a: "DBMS stands for Database Management System. It is software used to store, manage and retrieve data." },
+    { q: "What is RDBMS?", a: "RDBMS is a database management system that organizes data into related tables." },
+    { q: "What is a primary key?", a: "A primary key uniquely identifies each record in a table." },
+    { q: "What is a foreign key?", a: "A foreign key is a column or set of columns that references a key in another table or the same table." },
+    { q: "What is normalization?", a: "Normalization organizes database tables to reduce redundancy and improve data integrity." },
+    { q: "What is denormalization?", a: "Denormalization intentionally introduces some redundancy to improve certain query performance." },
+    { q: "What is a JOIN?", a: "A JOIN combines rows from two or more tables based on a related column." },
+    { q: "What are the types of JOINs?", a: "Common JOIN types include INNER JOIN, LEFT JOIN, RIGHT JOIN and FULL OUTER JOIN." },
+    { q: "What is a view?", a: "A view is a virtual table based on the result of a stored SQL query." },
+    { q: "What is an index?", a: "An index is a database structure that can speed up data retrieval." },
+    { q: "What is a subquery?", a: "A subquery is a query nested inside another SQL query." },
+    { q: "What is the difference between DELETE, DROP and TRUNCATE?", a: "DELETE removes selected rows, TRUNCATE removes all rows while retaining the table, and DROP removes the table itself." },
+    { q: "What is a constraint?", a: "A constraint enforces rules on table data, such as NOT NULL, UNIQUE and CHECK." },
+    { q: "What is a stored procedure?", a: "A stored procedure is a named set of SQL statements stored in the database." },
+    { q: "What is a trigger?", a: "A trigger is a database operation that automatically executes in response to specified events." },
+    { q: "What is a transaction?", a: "A transaction is a logical unit of database work that is treated as one operation." },
+    { q: "What are ACID properties?", a: "ACID stands for Atomicity, Consistency, Isolation and Durability." },
+    { q: "What is the difference between WHERE and HAVING?", a: "WHERE filters rows before grouping, while HAVING filters groups after aggregation." },
+    { q: "What is GROUP BY?", a: "GROUP BY groups rows with matching values so aggregate functions can be applied." },
+    { q: "What is the difference between UNION and UNION ALL?", a: "UNION removes duplicate rows, while UNION ALL retains duplicates." }
+  ],
+
+  "Data Structures & Algorithms": [
+    { q: "What is a data structure?", a: "A data structure organizes and stores data for efficient access and modification." },
+    { q: "What is an algorithm?", a: "An algorithm is a finite sequence of steps used to solve a problem." },
+    { q: "What is a stack?", a: "A stack is a linear data structure that follows Last In, First Out (LIFO)." },
+    { q: "What is a queue?", a: "A queue is a linear data structure that follows First In, First Out (FIFO)." },
+    { q: "What is a linked list?", a: "A linked list is a collection of nodes where each node stores data and a link to another node." },
+    { q: "What is a circular linked list?", a: "A circular linked list is a linked list in which the last node points back to the first node." },
+    { q: "What is a tree?", a: "A tree is a hierarchical data structure made up of nodes connected by edges." },
+    { q: "What is a binary tree?", a: "A binary tree is a tree in which each node has at most two children." },
+    { q: "What is a binary search tree?", a: "A binary search tree organizes values so that left-subtree values are smaller and right-subtree values are larger than the node, according to its ordering rule." },
+    { q: "What is a graph?", a: "A graph consists of vertices and edges connecting them." },
+    { q: "What is linear search?", a: "Linear search checks elements one by one until the target is found or the collection ends." },
+    { q: "What is binary search?", a: "Binary search finds an element in sorted data by repeatedly halving the search range." },
+    { q: "What is bubble sort?", a: "Bubble sort repeatedly compares adjacent elements and swaps them when they are in the wrong order." },
+    { q: "What is selection sort?", a: "Selection sort repeatedly selects the smallest remaining element and places it in its correct position." },
+    { q: "What is insertion sort?", a: "Insertion sort builds a sorted portion by inserting each new element into its correct position." },
+    { q: "What is merge sort?", a: "Merge sort uses divide and conquer to split data, sort the parts and merge them." },
+    { q: "What is quicksort?", a: "Quicksort partitions elements around a pivot and recursively sorts the resulting sections." },
+    { q: "What is time complexity?", a: "Time complexity describes how an algorithm's running time grows with input size." },
+    { q: "What is space complexity?", a: "Space complexity describes how an algorithm's memory usage grows with input size." },
+    { q: "What is Big O notation?", a: "Big O notation describes an upper-bound growth rate of an algorithm's resource usage." }
+  ],
+
+  "Operating Systems": [
+    { q: "What is an operating system?", a: "An operating system manages computer hardware, software resources and application execution." },
+    { q: "What are the main functions of an OS?", a: "Its functions include process management, memory management, file management and device management." },
+    { q: "What is a process?", a: "A process is a program currently in execution." },
+    { q: "What is a thread?", a: "A thread is the smallest unit of execution scheduled within a process." },
+    { q: "What is multitasking?", a: "Multitasking allows an operating system to manage multiple tasks during overlapping periods." },
+    { q: "What is multiprocessing?", a: "Multiprocessing uses two or more processing units to execute tasks." },
+    { q: "What is context switching?", a: "Context switching saves the state of one process or thread and restores another so execution can switch." },
+    { q: "What is CPU scheduling?", a: "CPU scheduling selects which ready process or thread should run next." },
+    { q: "What is FCFS scheduling?", a: "First Come First Served executes processes in the order they arrive." },
+    { q: "What is Round Robin scheduling?", a: "Round Robin assigns each ready process a fixed time slice in turn." },
+    { q: "What is deadlock?", a: "Deadlock occurs when processes wait indefinitely for resources held by one another." },
+    { q: "What are the four conditions for deadlock?", a: "They are mutual exclusion, hold and wait, no preemption and circular wait." },
+    { q: "What is virtual memory?", a: "Virtual memory gives processes a virtual address space and uses memory-management techniques to map it to physical memory." },
+    { q: "What is paging?", a: "Paging divides virtual memory into fixed-size pages and physical memory into frames." },
+    { q: "What is segmentation?", a: "Segmentation divides memory into variable-sized logical sections." },
+    { q: "What is a page fault?", a: "A page fault occurs when a process accesses a virtual memory page that is not currently mapped in physical memory." },
+    { q: "What is a semaphore?", a: "A semaphore is a synchronization mechanism used to control access to shared resources." },
+    { q: "What is a critical section?", a: "A critical section is code that accesses shared data and must be protected from unsafe concurrent access." },
+    { q: "What is fragmentation?", a: "Fragmentation is wasted memory space caused by how memory is allocated and freed." },
+    { q: "What is the difference between kernel and shell?", a: "The kernel manages hardware and system resources, while the shell provides an interface for users to interact with the system." }
+  ],
+
+  "Computer Networks": [
+    { q: "What is a computer network?", a: "A computer network connects devices so they can communicate and share resources." },
+    { q: "What are the types of networks?", a: "Common types include PAN, LAN, MAN and WAN." },
+    { q: "What is the OSI model?", a: "The OSI model is a seven-layer framework describing network communication." },
+    { q: "Name the seven layers of the OSI model.", a: "Physical, Data Link, Network, Transport, Session, Presentation and Application." },
+    { q: "What is TCP/IP?", a: "TCP/IP is a suite of communication protocols used for networking and internet communication." },
+    { q: "What is an IP address?", a: "An IP address identifies a device or network interface using the Internet Protocol." },
+    { q: "What is the difference between IPv4 and IPv6?", a: "IPv4 uses 32-bit addresses, while IPv6 uses 128-bit addresses." },
+    { q: "What is a MAC address?", a: "A MAC address is a link-layer address used to identify a network interface on a local network." },
+    { q: "What is DNS?", a: "DNS translates domain names into IP addresses and provides other naming information." },
+    { q: "What is DHCP?", a: "DHCP automatically provides network configuration, such as IP addresses, to devices." },
+    { q: "What is HTTP?", a: "HTTP is a protocol used for transferring web resources between clients and servers." },
+    { q: "What is HTTPS?", a: "HTTPS is HTTP secured using TLS encryption." },
+    { q: "What is the difference between TCP and UDP?", a: "TCP provides a reliable, ordered byte stream, while UDP provides connectionless datagrams without guaranteed delivery." },
+    { q: "What is a router?", a: "A router forwards packets between different networks." },
+    { q: "What is a switch?", a: "A network switch connects devices within a LAN and forwards frames using MAC addresses." },
+    { q: "What is a firewall?", a: "A firewall filters network traffic according to security rules." },
+    { q: "What is bandwidth?", a: "Bandwidth is the maximum data-carrying capacity of a communication link over a given time." },
+    { q: "What is latency?", a: "Latency is the time taken for data to travel from source to destination." },
+    { q: "What is a subnet mask?", a: "A subnet mask identifies which portion of an IPv4 address represents the network and which portion represents the host." },
+    { q: "What is packet switching?", a: "Packet switching divides data into packets that are transmitted across a network and reassembled at the destination." }
+  ]
+};
+// Add Part 2 questions to the existing question bank
+Object.assign(technicalInterviewQA, additionalInterviewQA);
+// =====================================
+// ADDITIONAL INTERVIEW QUESTIONS – PART 3
+// =====================================
+
+const finalInterviewQA = {
+
+  "Software Engineering": [
+    { q: "What is software engineering?", a: "Software engineering is the systematic approach to designing, developing, testing and maintaining software." },
+    { q: "What is SDLC?", a: "SDLC stands for Software Development Life Cycle. It defines the stages involved in software development." },
+    { q: "What are the phases of SDLC?", a: "The main phases are planning, requirement analysis, design, development, testing, deployment and maintenance." },
+    { q: "What is a software requirement?", a: "A software requirement describes a feature, function or constraint that a system must satisfy." },
+    { q: "What is a feasibility study?", a: "A feasibility study evaluates whether a proposed software project is practical and achievable." },
+    { q: "What is the Waterfall model?", a: "The Waterfall model is a sequential development model in which each phase is completed before the next begins." },
+    { q: "What is the Agile model?", a: "Agile is an iterative approach that delivers software in small increments and welcomes changing requirements." },
+    { q: "What is Scrum?", a: "Scrum is an Agile framework that organizes work into short iterations called sprints." },
+    { q: "What is a sprint?", a: "A sprint is a fixed-length period during which a Scrum team works toward a defined goal." },
+    { q: "What is a software prototype?", a: "A prototype is an early model of software used to understand requirements and collect feedback." },
+    { q: "What is software testing?", a: "Software testing checks whether an application works correctly and meets its requirements." },
+    { q: "What is unit testing?", a: "Unit testing checks individual functions, methods or components independently." },
+    { q: "What is integration testing?", a: "Integration testing checks whether combined software modules work correctly together." },
+    { q: "What is system testing?", a: "System testing evaluates the complete integrated application against its requirements." },
+    { q: "What is acceptance testing?", a: "Acceptance testing determines whether software meets user or business requirements." },
+    { q: "What is debugging?", a: "Debugging is the process of finding, analyzing and fixing errors in software." },
+    { q: "What is software maintenance?", a: "Software maintenance involves modifying software after delivery to fix issues or improve functionality." },
+    { q: "What is version control?", a: "Version control tracks changes to source code and helps developers collaborate." },
+    { q: "What is software documentation?", a: "Software documentation describes the design, functionality, usage and maintenance of a software system." },
+    { q: "What is the difference between verification and validation?", a: "Verification checks whether the product is being built correctly, while validation checks whether the correct product is being built." }
+  ],
+
+  "Cloud Computing": [
+    { q: "What is cloud computing?", a: "Cloud computing provides computing services such as storage, servers and databases over the internet." },
+    { q: "What are the benefits of cloud computing?", a: "Benefits include scalability, flexibility, cost efficiency, accessibility and reduced infrastructure management." },
+    { q: "What are the main cloud service models?", a: "The main service models are IaaS, PaaS and SaaS." },
+    { q: "What is IaaS?", a: "Infrastructure as a Service provides virtualized computing resources such as servers, storage and networking." },
+    { q: "What is PaaS?", a: "Platform as a Service provides an environment for developing, running and managing applications." },
+    { q: "What is SaaS?", a: "Software as a Service delivers software applications over the internet, usually through a browser or app." },
+    { q: "What are the types of cloud deployment models?", a: "Common deployment models are public cloud, private cloud, hybrid cloud and community cloud." },
+    { q: "What is a public cloud?", a: "A public cloud provides computing resources to multiple customers through a cloud provider." },
+    { q: "What is a private cloud?", a: "A private cloud is dedicated to a single organization." },
+    { q: "What is a hybrid cloud?", a: "A hybrid cloud combines private cloud infrastructure with public cloud services." },
+    { q: "What is virtualization?", a: "Virtualization creates virtual versions of computing resources, such as servers or operating systems." },
+    { q: "What is a virtual machine?", a: "A virtual machine is a software-based computer that runs its own operating system and applications." },
+    { q: "What is scalability?", a: "Scalability is the ability of a system to handle increasing or decreasing workloads." },
+    { q: "What is elasticity in cloud computing?", a: "Elasticity is the ability to automatically increase or decrease resources based on demand." },
+    { q: "What is cloud storage?", a: "Cloud storage stores data on remote servers that can be accessed through a network." },
+    { q: "What is serverless computing?", a: "Serverless computing allows developers to run code without directly managing the underlying servers." },
+    { q: "What is load balancing?", a: "Load balancing distributes incoming requests across multiple servers to improve performance and availability." },
+    { q: "What is cloud security?", a: "Cloud security includes technologies and practices used to protect cloud data, applications and infrastructure." },
+    { q: "What is a cloud region?", a: "A cloud region is a geographical area containing cloud provider data centers." },
+    { q: "Name some popular cloud platforms.", a: "Popular cloud platforms include Amazon Web Services, Microsoft Azure and Google Cloud." }
+  ],
+
+  "Cybersecurity": [
+    { q: "What is cybersecurity?", a: "Cybersecurity is the practice of protecting computers, networks, applications and data from digital attacks." },
+    { q: "What are the three principles of the CIA triad?", a: "The CIA triad consists of Confidentiality, Integrity and Availability." },
+    { q: "What is confidentiality?", a: "Confidentiality ensures that information is accessible only to authorized people." },
+    { q: "What is integrity?", a: "Integrity ensures that information remains accurate and is not modified without authorization." },
+    { q: "What is availability?", a: "Availability ensures that systems and data remain accessible when authorized users need them." },
+    { q: "What is malware?", a: "Malware is malicious software designed to damage, disrupt or gain unauthorized access to systems." },
+    { q: "What is a computer virus?", a: "A computer virus is malicious code that attaches to files or programs and spreads when they execute." },
+    { q: "What is a worm?", a: "A worm is malware that can self-replicate and spread across systems or networks." },
+    { q: "What is a Trojan horse?", a: "A Trojan horse is malicious software disguised as legitimate or useful software." },
+    { q: "What is phishing?", a: "Phishing is a social engineering attack that tricks people into revealing sensitive information." },
+    { q: "What is encryption?", a: "Encryption converts readable information into ciphertext using an algorithm and a key." },
+    { q: "What is decryption?", a: "Decryption converts encrypted information back into readable form." },
+    { q: "What is hashing?", a: "Hashing converts input data into a fixed-length value using a hash function." },
+    { q: "What is the difference between encryption and hashing?", a: "Encryption is reversible with the appropriate key, while cryptographic hashing is designed to be one-way." },
+    { q: "What is authentication?", a: "Authentication verifies the identity of a user or system." },
+    { q: "What is multi-factor authentication?", a: "Multi-factor authentication requires two or more different types of evidence to verify identity." },
+    { q: "What is a firewall?", a: "A firewall monitors and controls network traffic according to defined security rules." },
+    { q: "What is a vulnerability?", a: "A vulnerability is a weakness in software, hardware or configuration that could be exploited." },
+    { q: "What is a security patch?", a: "A security patch is a software update that fixes known security vulnerabilities." },
+    { q: "What is ethical hacking?", a: "Ethical hacking is authorized security testing performed to identify and help fix vulnerabilities." }
+  ],
+
+  "Artificial Intelligence & ML": [
+    { q: "What is Artificial Intelligence?", a: "Artificial Intelligence is the field of creating systems that perform tasks commonly associated with human intelligence." },
+    { q: "What is Machine Learning?", a: "Machine Learning is a branch of AI that enables systems to learn patterns from data." },
+    { q: "What is the difference between AI and ML?", a: "AI is the broader field of intelligent systems, while ML is an approach that learns from data." },
+    { q: "What is Deep Learning?", a: "Deep Learning is a branch of machine learning that uses neural networks with multiple layers." },
+    { q: "What is supervised learning?", a: "Supervised learning trains a model using labeled examples containing inputs and expected outputs." },
+    { q: "What is unsupervised learning?", a: "Unsupervised learning finds patterns or structures in data without labeled target outputs." },
+    { q: "What is reinforcement learning?", a: "Reinforcement learning trains an agent through rewards and penalties received while interacting with an environment." },
+    { q: "What is a dataset?", a: "A dataset is a collection of data used for analysis or model training." },
+    { q: "What is a feature in machine learning?", a: "A feature is an input variable or measurable property used by a machine learning model." },
+    { q: "What is a label?", a: "A label is the target value that a supervised learning model is trained to predict." },
+    { q: "What is classification?", a: "Classification is a machine learning task that predicts a category or class." },
+    { q: "What is regression?", a: "Regression is a machine learning task that predicts a numerical value." },
+    { q: "What is clustering?", a: "Clustering groups similar data points together without predefined labels." },
+    { q: "What is overfitting?", a: "Overfitting occurs when a model learns training data too closely and performs poorly on new data." },
+    { q: "What is underfitting?", a: "Underfitting occurs when a model is too simple to learn important patterns in the data." },
+    { q: "What is a neural network?", a: "A neural network is a computational model made of connected units called neurons, arranged in layers." },
+    { q: "What is natural language processing?", a: "Natural Language Processing enables computers to process, understand and generate human language." },
+    { q: "What is computer vision?", a: "Computer vision enables computers to interpret information from images and videos." },
+    { q: "What is model training?", a: "Model training is the process of adjusting a model's parameters using data to improve its predictions." },
+    { q: "What is generative AI?", a: "Generative AI creates new content such as text, images, audio or code based on learned patterns." }
+  ],
+
+  "Git & GitHub": [
+    { q: "What is Git?", a: "Git is a distributed version control system used to track changes in source code." },
+    { q: "What is GitHub?", a: "GitHub is a platform for hosting Git repositories and collaborating on software projects." },
+    { q: "What is a repository?", a: "A repository is a storage location containing project files and their version history." },
+    { q: "What is a commit?", a: "A commit is a recorded snapshot of changes in a Git repository." },
+    { q: "What is a branch?", a: "A branch is an independent line of development within a Git repository." },
+    { q: "What is the main branch?", a: "The main branch is commonly used as the primary development or stable branch of a project." },
+    { q: "What is git clone?", a: "git clone creates a local copy of an existing remote repository." },
+    { q: "What is git pull?", a: "git pull fetches remote changes and integrates them into the current local branch." },
+    { q: "What is git push?", a: "git push uploads local commits to a remote repository." },
+    { q: "What is git fetch?", a: "git fetch downloads updates from a remote repository without integrating them into the current branch." },
+    { q: "What is git add?", a: "git add stages changes so they can be included in the next commit." },
+    { q: "What is git status?", a: "git status displays the state of the working directory and staging area." },
+    { q: "What is git log?", a: "git log displays the commit history of a repository." },
+    { q: "What is a merge conflict?", a: "A merge conflict occurs when Git cannot automatically combine competing changes." },
+    { q: "What is merging in Git?", a: "Merging combines changes from different branches into one branch." },
+    { q: "What is a pull request?", a: "A pull request proposes changes from one branch or repository so they can be reviewed and merged." },
+    { q: "What is forking?", a: "Forking creates a separate copy of another user's repository under your account." },
+    { q: "What is a .gitignore file?", a: "A .gitignore file specifies files and directories that Git should not track." },
+    { q: "What is the difference between Git and GitHub?", a: "Git is a version control tool, while GitHub is an online platform that hosts Git repositories and collaboration features." },
+    { q: "Why is version control important in team projects?", a: "It helps track changes, coordinate contributions, review code and recover earlier versions." }
+  ],
+
+  "Aptitude & Logical Reasoning": [
+    { q: "What is quantitative aptitude?", a: "Quantitative aptitude is the ability to solve numerical problems using mathematical concepts." },
+    { q: "What is logical reasoning?", a: "Logical reasoning is the ability to analyze information and draw valid conclusions." },
+    { q: "What is a percentage?", a: "A percentage expresses a value as a fraction of 100." },
+    { q: "What is the formula for calculating percentage?", a: "Percentage = (Part / Whole) × 100." },
+    { q: "What is the formula for simple interest?", a: "Simple Interest = (Principal × Rate × Time) / 100." },
+    { q: "What is compound interest?", a: "Compound interest is interest calculated on the original principal and previously accumulated interest." },
+    { q: "What is the average formula?", a: "Average = Sum of all values / Number of values." },
+    { q: "What is a ratio?", a: "A ratio compares two quantities by division." },
+    { q: "What is a proportion?", a: "A proportion states that two ratios are equal." },
+    { q: "What is the formula for speed?", a: "Speed = Distance / Time." },
+    { q: "What is the formula for time and work?", a: "Work done = Rate of work × Time." },
+    { q: "What is a prime number?", a: "A prime number is a natural number greater than 1 with exactly two positive divisors: 1 and itself." },
+    { q: "What is a probability?", a: "Probability measures the likelihood of an event, from 0 to 1." },
+    { q: "What is a permutation?", a: "A permutation is an arrangement of objects in which order matters." },
+    { q: "What is a combination?", a: "A combination is a selection of objects in which order does not matter." },
+    { q: "What is a number series?", a: "A number series is a sequence of numbers that follows a particular pattern or rule." },
+    { q: "What is an analogy in reasoning?", a: "An analogy identifies a relationship between one pair of items and applies a similar relationship to another pair." },
+    { q: "What is a syllogism?", a: "A syllogism is a logical argument in which a conclusion is drawn from two or more premises." },
+    { q: "What is a coding-decoding question?", a: "A coding-decoding question asks you to identify the rule used to transform letters, numbers or words." },
+    { q: "How can you improve aptitude problem-solving speed?", a: "Practise regularly, learn calculation shortcuts, understand basic concepts and manage time during tests." }
+  ]
+
+};
+
+// Add Part 3 questions to the existing question bank
+Object.assign(technicalInterviewQA, finalInterviewQA);
+
+const interviewContainer =
+  document.getElementById("interviewQuestionsContainer");
+
+// Open Interview Preparation
+document.getElementById("interviewPrepBtn")
+  .addEventListener("click", () => {
+
+    document.getElementById("interviewPrepSection").hidden = false;
+
+    document.getElementById("interviewPrepSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+
+// HR INTERVIEW QUESTIONS – 30 QUESTIONS
+
+const hrInterviewQA = [
+  {
+    q: "Tell me about yourself.",
+    a: "I am a motivated student with an interest in technology and problem-solving. I enjoy learning new skills, working on projects and improving my knowledge. I am looking for an opportunity to begin my career and contribute to an organization."
+  },
+  {
+    q: "What are your strengths?",
+    a: "My strengths include adaptability, teamwork, problem-solving, time management and willingness to learn."
+  },
+  {
+    q: "What are your weaknesses?",
+    a: "Sometimes I spend extra time checking my work. I am improving by setting time limits and prioritizing tasks."
+  },
+  {
+    q: "Why should we hire you?",
+    a: "I am eager to learn, adaptable and committed to completing responsibilities. I can contribute fresh ideas and a positive attitude."
+  },
+  {
+    q: "Where do you see yourself in five years?",
+    a: "I see myself as a skilled professional with strong technical knowledge, greater responsibilities and meaningful contributions to the organization."
+  },
+  {
+    q: "Why do you want to join our company?",
+    a: "I want to join because of the opportunity to learn, work with experienced professionals and contribute to meaningful projects."
+  },
+  {
+    q: "How do you handle pressure?",
+    a: "I remain calm, identify priorities, divide the work into smaller tasks and complete them systematically."
+  },
+  {
+    q: "Are you comfortable working in a team?",
+    a: "Yes. I enjoy sharing ideas, listening to others and working together to achieve common goals."
+  },
+  {
+    q: "Describe a problem you solved.",
+    a: "During a project, I faced a technical issue. I analysed the problem, researched possible solutions, tested them and successfully resolved it."
+  },
+  {
+    q: "What motivates you?",
+    a: "Learning new things, achieving goals and seeing improvements in my skills motivate me."
+  },
+  {
+    q: "How do you handle criticism?",
+    a: "I listen carefully, understand the feedback and use it to improve my performance."
+  },
+  {
+    q: "Are you willing to relocate?",
+    a: "I am open to relocation depending on the job role, learning opportunities and organizational requirements."
+  },
+  {
+    q: "What are your salary expectations?",
+    a: "As a fresher, my priority is learning and gaining experience. I am comfortable with the company's standard compensation for this role."
+  },
+  {
+    q: "Why did you choose this career?",
+    a: "I chose this career because I enjoy technology, solving problems and creating useful solutions."
+  },
+  {
+    q: "How do you manage your time?",
+    a: "I prepare a task list, prioritize important work and set deadlines to complete my responsibilities."
+  },
+  {
+    q: "What is your biggest achievement?",
+    a: "One of my achievements is completing an academic project that helped me improve my technical, teamwork and problem-solving skills."
+  },
+  {
+    q: "How do you handle disagreements in a team?",
+    a: "I listen to everyone's perspective, communicate respectfully and work towards a solution that benefits the team."
+  },
+  {
+    q: "What do you know about our company?",
+    a: "I research the company's products, services, mission and recent developments before attending an interview."
+  },
+  {
+    q: "Are you comfortable learning new technologies?",
+    a: "Yes. I enjoy learning new technologies and regularly practise to improve my technical knowledge."
+  },
+  {
+    q: "What makes you different from other candidates?",
+    a: "My willingness to learn, positive attitude, adaptability and commitment to continuous improvement make me a strong candidate."
+  },
+  {
+    q: "How do you react when you fail?",
+    a: "I analyse what went wrong, learn from my mistakes and make improvements instead of giving up."
+  },
+  {
+    q: "Do you prefer working independently or in a team?",
+    a: "I am comfortable with both. Independent work improves responsibility, while teamwork encourages collaboration and different perspectives."
+  },
+  {
+    q: "What are your career goals?",
+    a: "My goal is to develop strong professional skills, gain industry experience and grow into a responsible position."
+  },
+  {
+    q: "How would your friends describe you?",
+    a: "They would describe me as helpful, responsible, friendly and willing to support others."
+  },
+  {
+    q: "What would you do if you disagreed with your manager?",
+    a: "I would respectfully explain my viewpoint, listen to the manager's reasoning and follow the final professional decision."
+  },
+  {
+    q: "How do you adapt to changes?",
+    a: "I stay open-minded, understand the new requirements and learn the skills needed to adapt."
+  },
+  {
+    q: "What do you expect from your first job?",
+    a: "I expect opportunities to learn, work on real projects, receive constructive feedback and develop professionally."
+  },
+  {
+    q: "Can you work under tight deadlines?",
+    a: "Yes. I prioritize tasks, plan my work carefully and communicate early if I encounter difficulties."
+  },
+  {
+    q: "What does success mean to you?",
+    a: "Success means achieving meaningful goals, continuously improving and making a positive contribution."
+  },
+  {
+    q: "Do you have any questions for us?",
+    a: "Yes. I would like to know about the training opportunities, team structure and technologies used in this role."
+  }
+];
+// Handle interview category buttons
+
+document.querySelectorAll("[data-interview-category]")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const category = button.dataset.interviewCategory;
+
+      interviewContainer.innerHTML = "";
+
+      // TECHNICAL INTERVIEWS
+      if (category === "technical") {
+
+        interviewContainer.innerHTML = `
+          <h2>💻 Technical Interview Subjects</h2>
+          <p>Select a subject to practise interview questions.</p>
+          <div id="technicalSubjectList" class="community-grid"></div>
+        `;
+
+        const subjectList =
+          document.getElementById("technicalSubjectList");
+
+        interviewSubjects.forEach(subject => {
+
+          const card = document.createElement("article");
+          card.className = "community-card";
+
+          const heading = document.createElement("h3");
+          heading.textContent = subject[0];
+
+          const description = document.createElement("p");
+          description.textContent = subject[1];
+
+          const viewButton = document.createElement("button");
+          viewButton.className = "primary-btn";
+          viewButton.textContent = "View Interview Questions →";
+
+          viewButton.addEventListener("click", () => {
+
+            const questions = technicalInterviewQA[subject[0]];
+
+            if (!questions) {
+              alert("Questions are not available.");
+              return;
+            }
+
+            interviewContainer.innerHTML =
+              `<h2>${subject[0]} – Interview Questions</h2>`;
+
+            questions.forEach((item, index) => {
+
+              const questionCard = document.createElement("div");
+              questionCard.className = "community-card";
+
+              const question = document.createElement("h3");
+              question.textContent = `Q${index + 1}. ${item.q}`;
+
+              const answerButton = document.createElement("button");
+              answerButton.className = "secondary-btn";
+              answerButton.textContent = "Show Answer";
+
+              const answer = document.createElement("p");
+              answer.textContent = item.a;
+              answer.hidden = true;
+
+              answerButton.addEventListener("click", () => {
+
+                answer.hidden = !answer.hidden;
+
+                answerButton.textContent = answer.hidden
+                  ? "Show Answer"
+                  : "Hide Answer";
+
+              });
+
+              questionCard.append(question, answerButton, answer);
+              interviewContainer.appendChild(questionCard);
+
+            });
+
+            const backButton = document.createElement("button");
+            backButton.className = "secondary-btn";
+            backButton.textContent = "← Back to Subjects";
+
+            backButton.addEventListener("click", () => {
+              document.querySelector(
+                '[data-interview-category="technical"]'
+              ).click();
+            });
+
+            interviewContainer.appendChild(backButton);
+
+          });
+
+          card.append(heading, description, viewButton);
+          subjectList.appendChild(card);
+
+        });
+
+      }
+// HR INTERVIEWS
+else if (category === "hr") {
+
+  interviewContainer.innerHTML = `
+    <h2>🤝 HR Interview Preparation</h2>
+    <p>Practise 30 commonly asked HR interview questions.</p>
+    <div id="hrQuestionList"></div>
+  `;
+
+  const hrList = document.getElementById("hrQuestionList");
+
+  hrInterviewQA.forEach((item, index) => {
+
+    const card = document.createElement("article");
+    card.className = "community-card";
+
+    const question = document.createElement("h3");
+    question.textContent = `Q${index + 1}. ${item.q}`;
+
+    const button = document.createElement("button");
+    button.className = "secondary-btn";
+    button.textContent = "Show Sample Answer";
+
+    const answer = document.createElement("p");
+    answer.textContent = item.a;
+    answer.hidden = true;
+
+    button.addEventListener("click", () => {
+      answer.hidden = !answer.hidden;
+      button.textContent = answer.hidden
+        ? "Show Sample Answer"
+        : "Hide Sample Answer";
+    });
+
+    card.append(question, button, answer);
+    hrList.appendChild(card);
+
+  });
+
+}
+
+// MOCK INTERVIEWS
+else if (category === "mock") {
+
+  // Collect all technical questions
+  const allTechnicalQuestions = Object.entries(
+    technicalInterviewQA
+  ).flatMap(([subject, questions]) =>
+    questions.map(item => ({
+      q: item.q,
+      a: item.a,
+      type: "Technical",
+      subject: subject
+    }))
+  );
+
+  // Select 5 random technical questions
+  const technicalQuestions = [...allTechnicalQuestions]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 5);
+
+  // Select 5 random HR questions
+  const selectedHR = [...hrInterviewQA]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 5)
+    .map(item => ({
+      q: item.q,
+      a: item.a,
+      type: "HR",
+      subject: "HR Interview"
+    }));
+
+  // Combine and shuffle 10 questions
+  const mockQuestions = [
+    ...technicalQuestions,
+    ...selectedHR
+  ].sort(() => Math.random() - 0.5);
+
+  let currentQuestion = 0;
+  let totalScore = 0;
+  let userRatings = [];
+
+  function showMockQuestion() {
+
+    const item = mockQuestions[currentQuestion];
+
+    interviewContainer.innerHTML = `
+      <h2>🎤 Mock Interview</h2>
+
+      <div class="community-card">
+
+        <p>Question ${currentQuestion + 1} of 10</p>
+
+        <p><strong>${item.type} | ${item.subject}</strong></p>
+
+        <h3>${item.q}</h3>
+
+        <textarea
+          id="mockAnswer"
+          rows="5"
+          placeholder="Type your answer here..."
+          style="width:100%; padding:12px; margin:10px 0;"
+        ></textarea>
+
+        <button class="secondary-btn" id="showMockAnswer">
+          Show Sample Answer
+        </button>
+
+        <p id="mockSampleAnswer" hidden>
+          ${item.a}
+        </p>
+
+        <h4>Rate your answer:</h4>
+
+        <p>0 = Need Improvement | 1 = Good | 2 = Excellent</p>
+
+        <div>
+          <button class="secondary-btn" data-rating="0">0</button>
+          <button class="secondary-btn" data-rating="1">1</button>
+          <button class="secondary-btn" data-rating="2">2</button>
+        </div>
+
+        <p id="selectedRating">Select your rating.</p>
+
+        <button class="primary-btn" id="nextMockQuestion" disabled>
+          ${currentQuestion === 9 ? "Finish Interview" : "Next Question →"}
+        </button>
+
+      </div>
+    `;
+
+    let selectedRating = null;
+
+    document.getElementById("showMockAnswer")
+      .addEventListener("click", () => {
+
+        const answer = document.getElementById("mockSampleAnswer");
+
+        answer.hidden = !answer.hidden;
+
+        document.getElementById("showMockAnswer").textContent =
+          answer.hidden ? "Show Sample Answer" : "Hide Sample Answer";
+
+      });
+
+    document.querySelectorAll("[data-rating]")
+      .forEach(button => {
+
+        button.addEventListener("click", () => {
+
+          selectedRating = Number(button.dataset.rating);
+
+          document.getElementById("selectedRating").textContent =
+            `Your rating: ${selectedRating}/2`;
+
+          document.getElementById("nextMockQuestion").disabled = false;
+
+        });
+
+      });
+
+    document.getElementById("nextMockQuestion")
+      .addEventListener("click", () => {
+
+        userRatings.push({
+          question: item.q,
+          answer: document.getElementById("mockAnswer").value,
+          rating: selectedRating
+        });
+
+        totalScore += selectedRating;
+
+        currentQuestion++;
+
+        if (currentQuestion < 10) {
+          showMockQuestion();
+          
+        } else {
+          showMockResult();
+        }
+
+      });
+
+  }
+
+  function showMockResult() {
+
+    let feedback = "";
+
+    if (totalScore >= 17) {
+      feedback = "Excellent! You are showing strong interview preparation.";
+    } else if (totalScore >= 12) {
+      feedback = "Good job! Practise more to improve your confidence.";
+    } else if (totalScore >= 7) {
+      feedback = "Keep practising. Focus on improving your answers.";
+    } else {
+      feedback = "You need more preparation. Review the sample answers and try again.";
+    }
+
+    interviewContainer.innerHTML = `
+      <h2>🏆 Mock Interview Results</h2>
+
+      <div class="community-card">
+
+        <h3>Your Final Score</h3>
+
+        <h1>${totalScore}/20</h1>
+
+        <p>${feedback}</p>
+
+        <h3>Question Review</h3>
+
+        <div id="mockReview"></div>
+
+        <button class="primary-btn" id="retryMock">
+          🔄 Try Another Mock Interview
+        </button>
+
+      </div>
+    `;
+
+    const review = document.getElementById("mockReview");
+
+    userRatings.forEach((item, index) => {
+
+      const card = document.createElement("div");
+      card.className = "community-card";
+
+      const question = document.createElement("p");
+      question.textContent = `Q${index + 1}. ${item.question}`;
+
+      const answer = document.createElement("p");
+      answer.textContent = `Your answer: ${item.answer || "No answer entered"}`;
+
+      const rating = document.createElement("p");
+      rating.textContent = `Self-rating: ${item.rating}/2`;
+
+      card.append(question, answer, rating);
+      review.appendChild(card);
+
+    });
+
+    document.getElementById("retryMock")
+      .addEventListener("click", () => {
+
+        document.querySelector(
+          '[data-interview-category="mock"]'
+        ).click();
+
+      });
+
+  }
+
+  showMockQuestion();
+
+}
+      interviewContainer.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    });
+
+  });
+  // INTERVIEW PREPARATION - BACK TO HOME
+document.getElementById("backFromInterviewPrep")
+  .addEventListener("click", () => {
+
+    document.getElementById("interviewPrepSection").hidden = true;
+
+    interviewContainer.innerHTML = "";
+
+    document.getElementById("interviewPrepBtn").scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  });
+  // BOOKMARKED QUESTIONS - OPEN SECTION
+
+document.getElementById("bookmarkedQuestionsBtn")
+  .addEventListener("click", async () => {
+
+    document.getElementById("bookmarkedQuestionsSection").hidden = false;
+
+    document.getElementById("bookmarkedQuestionsSection")
+      .scrollIntoView({ behavior: "smooth" });
+
+    loadBookmarkedQuestions();
+
+  });
+
+
+// BACK TO HOME FROM BOOKMARKS
+
+document.getElementById("backFromBookmarks")
+  .addEventListener("click", () => {
+
+    document.getElementById("bookmarkedQuestionsSection").hidden = true;
+
+    document.getElementById("bookmarkedQuestionsBtn")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+  // LOAD BOOKMARKED QUESTIONS FROM SUPABASE
+
+async function loadBookmarkedQuestions() {
+
+  const container =
+    document.getElementById("bookmarkedQuestionsList");
+
+  container.textContent = "Loading bookmarks...";
+
+  try {
+
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error("Please log in first!");
+    }
+
+    const { data, error } = await supabaseClient
+      .from("bookmarked_questions")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    container.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      container.textContent =
+        "No bookmarked questions yet. Save questions while practising!";
+      return;
+    }
+
+    data.forEach((item, index) => {
+
+      const card = document.createElement("div");
+      card.className = "community-card";
+
+      const title = document.createElement("h3");
+      title.textContent = `Question ${index + 1}`;
+
+      const category = document.createElement("p");
+      category.textContent = "Category: " + (item.category || "General");
+
+      const question = document.createElement("p");
+      question.textContent = item.question_text;
+
+      card.append(title, category, question);
+
+      if (Array.isArray(item.options)) {
+
+        const optionsList = document.createElement("ol");
+
+        item.options.forEach(option => {
+          const li = document.createElement("li");
+          li.textContent = option;
+          optionsList.appendChild(li);
+        });
+
+        card.appendChild(optionsList);
+      }
+
+      if (item.correct_answer !== null) {
+        const answer = document.createElement("p");
+        answer.textContent =
+          "Correct Answer: " +
+          (Array.isArray(item.options)
+            ? item.options[item.correct_answer]
+            : item.correct_answer);
+
+        card.appendChild(answer);
+      }
+
+      if (item.explanation) {
+        const explanation = document.createElement("p");
+        explanation.textContent = "💡 " + item.explanation;
+        card.appendChild(explanation);
+      }
+
+      const removeButton = document.createElement("button");
+      removeButton.className = "secondary-btn";
+      removeButton.textContent = "❌ Remove Bookmark";
+
+      removeButton.addEventListener("click", async () => {
+
+        const { error: deleteError } = await supabaseClient
+          .from("bookmarked_questions")
+          .delete()
+          .eq("id", item.id);
+
+        if (deleteError) {
+          alert(deleteError.message);
+          return;
+        }
+
+        loadBookmarkedQuestions();
+
+      });
+
+      card.appendChild(removeButton);
+      container.appendChild(card);
+
+    });
+
+  } catch (error) {
+
+    container.textContent = "Error: " + error.message;
+
+  }
+
+}
+// DAILY LEARNING GOALS - OPEN SECTION
+
+document.getElementById("dailyLearningGoalsBtn")
+  .addEventListener("click", async () => {
+
+    const section = document.getElementById("dailyLearningGoalsSection");
+
+    section.hidden = false;
+
+    section.scrollIntoView({
+      behavior: "smooth"
+    });
+
+    await loadDailyLearningGoal();
+
+  });
+
+
+// BACK TO HOME FROM DAILY GOALS
+
+document.getElementById("backFromDailyGoals")
+  .addEventListener("click", () => {
+
+    document.getElementById("dailyLearningGoalsSection").hidden = true;
+
+    document.getElementById("dailyLearningGoalsBtn")
+      .scrollIntoView({
+        behavior: "smooth"
+      });
+
+  });
+  // LOAD DAILY LEARNING GOAL
+
+async function loadDailyLearningGoal() {
+
+  const progressText = document.getElementById("dailyGoalProgress");
+  const progressBar = document.getElementById("dailyGoalBar");
+  const message = document.getElementById("dailyGoalMessage");
+  const targetSelect = document.getElementById("dailyQuizTarget");
+
+  try {
+
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error("Please log in first!");
+    }
+
+    const today = new Date().toLocaleDateString("en-CA", {
+      timeZone: "Asia/Kolkata"
+    });
+
+    const startDate = new Date(`${today}T00:00:00+05:30`);
+    const endDate = new Date(startDate.getTime() + 86400000);
+
+    const { data: goal, error: goalError } = await supabaseClient
+      .from("daily_learning_goals")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("goal_date", today)
+      .maybeSingle();
+
+    if (goalError) throw goalError;
+
+    const target = goal ? goal.target_quizzes : 3;
+
+    targetSelect.value = String(target);
+
+    const { count, error: countError } = await supabaseClient
+      .from("quiz_results")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("completed_at", startDate.toISOString())
+.lt("completed_at", endDate.toISOString());
+
+    if (countError) throw countError;
+
+    const completed = count || 0;
+
+    progressBar.max = target;
+    progressBar.value = Math.min(completed, target);
+
+    progressText.textContent =
+      `${completed} / ${target} quizzes completed today`;
+
+    if (completed >= target) {
+      message.textContent = "🎉 Amazing! You achieved your daily goal!";
+    } else {
+      message.textContent =
+        `💪 Only ${target - completed} more quizzes to reach your goal!`;
+    }
+
+} catch (error) {
+
+    console.error("DAILY GOAL ERROR:", error);
+
+    progressText.textContent =
+      "Error: " + JSON.stringify(error);
+
+}
+
+}
+
+
+// SAVE DAILY LEARNING GOAL
+
+document.getElementById("saveDailyGoalBtn")
+  .addEventListener("click", async () => {
+
+    try {
+
+      const {
+        data: { user },
+        error: userError
+      } = await supabaseClient.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("Please log in first!");
+      }
+
+      const today = new Date().toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata"
+      });
+
+      const target = Number(
+        document.getElementById("dailyQuizTarget").value
+      );
+
+      const { error } = await supabaseClient
+        .from("daily_learning_goals")
+        .upsert({
+          user_id: user.id,
+          goal_date: today,
+          target_quizzes: target
+        }, {
+          onConflict: "user_id,goal_date"
+        });
+
+      if (error) throw error;
+
+      alert("🎯 Your daily learning goal has been saved!");
+
+      await loadDailyLearningGoal();
+
+    } catch (error) {
+
+      alert("Error: " + error.message);
+
+    }
+
+  });
+  // NOTIFICATIONS - OPEN SECTION
+document.getElementById("notificationsBtn")
+  .addEventListener("click", async () => {
+    const section = document.getElementById("notificationsSection");
+
+    section.hidden = false;
+    section.scrollIntoView({ behavior: "smooth" });
+
+    await loadNotifications();
+  });
+
+// BACK TO HOME FROM NOTIFICATIONS
+document.getElementById("backFromNotifications")
+  .addEventListener("click", () => {
+    document.getElementById("notificationsSection").hidden = true;
+
+    document.getElementById("notificationsBtn")
+      .scrollIntoView({ behavior: "smooth" });
+  });
+  // LOAD NOTIFICATIONS
+async function loadNotifications() {
+  const list = document.getElementById("notificationsList");
+  const countText = document.getElementById("notificationCount");
+
+  list.textContent = "Loading...";
+
+  try {
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error("Please log in first!");
+    }
+
+    const { data, error } = await supabaseClient
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    list.innerHTML = "";
+
+    const notifications = data || [];
+    const unread = notifications.filter(n => !n.is_read).length;
+
+    countText.textContent =
+      `${notifications.length} notifications (${unread} unread)`;
+
+    if (notifications.length === 0) {
+      list.textContent = "🎉 No notifications yet!";
+      return;
+    }
+
+    notifications.forEach(notification => {
+      const card = document.createElement("div");
+      card.className = "community-card";
+      card.style.marginBottom = "15px";
+
+      const title = document.createElement("h3");
+      title.textContent =
+        `${notification.is_read ? "📩" : "🔔"} ${notification.title}`;
+
+      const message = document.createElement("p");
+      message.textContent = notification.message;
+
+      const date = document.createElement("small");
+      date.textContent =
+        new Date(notification.created_at).toLocaleString("en-IN");
+
+      card.append(title, message, date);
+
+      if (!notification.is_read) {
+        const readBtn = document.createElement("button");
+        readBtn.className = "secondary-btn";
+        readBtn.textContent = "✓ Mark as Read";
+
+        readBtn.addEventListener("click", async () => {
+          const { error } = await supabaseClient
+            .from("notifications")
+            .update({ is_read: true })
+            .eq("id", notification.id);
+
+          if (error) {
+            alert(error.message);
+            return;
+          }
+
+          await loadNotifications();
+        });
+
+        card.appendChild(readBtn);
+      }
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "secondary-btn";
+      deleteBtn.textContent = "🗑️ Delete";
+
+      deleteBtn.addEventListener("click", async () => {
+        const { error } = await supabaseClient
+          .from("notifications")
+          .delete()
+          .eq("id", notification.id);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        await loadNotifications();
+      });
+
+      card.appendChild(deleteBtn);
+      list.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("NOTIFICATION ERROR:", error);
+    countText.textContent = "Error: " + error.message;
+    list.textContent = "Unable to load notifications.";
+  }
+}
+// MONTHLY REPORTS - OPEN SECTION
+document.getElementById("monthlyReportsBtn")
+  .addEventListener("click", () => {
+    const section = document.getElementById("monthlyReportsSection");
+
+    section.hidden = false;
+    section.scrollIntoView({ behavior: "smooth" });
+
+    // Set current month by default
+    const today = new Date();
+    document.getElementById("reportMonth").value =
+      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+// BACK TO HOME FROM MONTHLY REPORTS
+document.getElementById("backFromMonthlyReports")
+  .addEventListener("click", () => {
+    document.getElementById("monthlyReportsSection").hidden = true;
+
+    document.getElementById("monthlyReportsBtn")
+      .scrollIntoView({ behavior: "smooth" });
+  });
+  // GENERATE MONTHLY PROGRESS REPORT
+async function generateMonthlyReport() {
+  const result = document.getElementById("monthlyReportResult");
+  const selectedMonth = document.getElementById("reportMonth").value;
+
+  if (!selectedMonth) {
+    alert("Please select a month!");
+    return;
+  }
+
+  result.textContent = "Generating your monthly report...";
+
+  try {
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error("Please log in first!");
+    }
+
+    const [year, month] = selectedMonth.split("-").map(Number);
+
+    const startDate =
+      new Date(`${selectedMonth}-01T00:00:00+05:30`);
+
+    const nextYear = month === 12 ? year + 1 : year;
+    const nextMonth = month === 12 ? 1 : month + 1;
+
+    const endDate = new Date(
+      `${nextYear}-${String(nextMonth).padStart(2, "0")}-01T00:00:00+05:30`
+    );
+
+    const { data, error } = await supabaseClient
+      .from("quiz_results")
+      .select("quiz_name, score, total_questions, percentage, completed_at")
+      .eq("user_id", user.id)
+      .gte("completed_at", startDate.toISOString())
+      .lt("completed_at", endDate.toISOString())
+      .order("completed_at", { ascending: true });
+
+    if (error) throw error;
+
+    const quizzes = data || [];
+
+    result.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = `📊 Report for ${selectedMonth}`;
+    result.appendChild(heading);
+
+    if (quizzes.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "No quiz activity found for this month.";
+      result.appendChild(empty);
+      return;
+    }
+
+    const totalQuizzes = quizzes.length;
+
+    const average = Math.round(
+      quizzes.reduce((sum, q) => sum + Number(q.percentage || 0), 0)
+      / totalQuizzes
+    );
+
+    const totalCorrect = quizzes.reduce(
+      (sum, q) => sum + Number(q.score || 0), 0
+    );
+
+    const totalQuestions = quizzes.reduce(
+      (sum, q) => sum + Number(q.total_questions || 0), 0
+    );
+
+    const subjectStats = {};
+
+    quizzes.forEach(q => {
+      const name = q.quiz_name || "Other";
+
+      if (!subjectStats[name]) {
+        subjectStats[name] = { total: 0, count: 0 };
+      }
+
+      subjectStats[name].total += Number(q.percentage || 0);
+      subjectStats[name].count++;
+    });
+
+    const bestSubject = Object.entries(subjectStats)
+      .map(([name, stats]) => ({
+        name,
+        average: stats.total / stats.count
+      }))
+      .sort((a, b) => b.average - a.average)[0];
+
+    const activeDays = new Set(
+      quizzes.map(q =>
+        new Date(q.completed_at).toLocaleDateString("en-IN", {
+          timeZone: "Asia/Kolkata"
+        })
+      )
+    ).size;
+
+    const details = [
+      `📝 Total Quizzes Attempted: ${totalQuizzes}`,
+      `📈 Average Score: ${average}%`,
+      `🏆 Best Performing Quiz: ${bestSubject.name}`,
+      `⭐ Best Quiz Average: ${Math.round(bestSubject.average)}%`,
+      `✅ Correct Answers: ${totalCorrect}/${totalQuestions}`,
+      `📅 Active Learning Days: ${activeDays}`
+    ];
+
+    details.forEach(item => {
+      const p = document.createElement("p");
+      p.textContent = item;
+      result.appendChild(p);
+    });
+
+    const message = document.createElement("h3");
+    message.textContent = "🎉 Keep learning and improving!";
+    result.appendChild(message);
+
+  } catch (error) {
+    console.error("MONTHLY REPORT ERROR:", error);
+    result.textContent = "Error: " + error.message;
+  }
+}
+
+// GENERATE REPORT BUTTON
+document.getElementById("generateMonthlyReportBtn")
+  .addEventListener("click", generateMonthlyReport);
+  // RESUME SCORE CHECKER - OPEN SECTION
+document.getElementById("resumeScoreCheckerBtn")
+  .addEventListener("click", () => {
+    const section = document.getElementById("resumeScoreCheckerSection");
+
+    section.hidden = false;
+    section.scrollIntoView({ behavior: "smooth" });
+  });
+
+// BACK TO HOME FROM RESUME CHECKER
+document.getElementById("backFromResumeChecker")
+  .addEventListener("click", () => {
+    document.getElementById("resumeScoreCheckerSection").hidden = true;
+
+    document.getElementById("resumeScoreCheckerBtn")
+      .scrollIntoView({ behavior: "smooth" });
+  });
+  // RESUME SCORE CHECKER
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+document.getElementById("analyzeResumeBtn")
+  .addEventListener("click", async () => {
+
+    const fileInput = document.getElementById("resumeUpload");
+    const resultBox = document.getElementById("resumeAnalysisResult");
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert("Please upload your resume PDF first!");
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      alert("Please upload a valid PDF file!");
+      return;
+    }
+
+    if (!window.pdfjsLib) {
+      resultBox.textContent = "PDF reader could not load. Please refresh and try again.";
+      return;
+    }
+
+    resultBox.textContent = "Analysing your resume... Please wait.";
+
+    try {
+      const buffer = await file.arrayBuffer();
+
+      const pdf = await pdfjsLib.getDocument({
+        data: new Uint8Array(buffer)
+      }).promise;
+
+      let resumeText = "";
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+
+        resumeText += content.items
+          .map(item => item.str)
+          .join(" ") + " ";
+      }
+
+      resumeText = resumeText.toLowerCase();
+
+      if (resumeText.trim().length < 30) {
+        resultBox.textContent =
+          "Very little readable text was found. Your PDF may be scanned. Please upload a text-based PDF.";
+        return;
+      }
+
+      const sections = [
+        { name: "Contact Information", keywords: ["email", "phone", "mobile", "linkedin"] },
+        { name: "Career Objective / Summary", keywords: ["objective", "summary", "profile"] },
+        { name: "Education", keywords: ["education", "degree", "bachelor", "university", "college"] },
+        { name: "Technical Skills", keywords: ["skills", "javascript", "python", "java", "html", "sql"] },
+        { name: "Projects", keywords: ["projects", "project", "developed", "implemented"] },
+        { name: "Experience", keywords: ["experience", "internship", "employment", "worked"] },
+        { name: "Certifications", keywords: ["certification", "certified", "certificate"] },
+        { name: "Achievements", keywords: ["achievements", "awards", "accomplishments"] }
+      ];
+
+      let score = 0;
+      let found = [];
+      let missing = [];
+
+      sections.forEach(section => {
+        const present = section.keywords.some(keyword =>
+          resumeText.includes(keyword)
+        );
+
+        if (present) {
+          score += 12.5;
+          found.push(section.name);
+        } else {
+          missing.push(section.name);
+        }
+      });
+
+      const suggestions = [];
+
+      if (missing.length > 0) {
+        suggestions.push("Consider adding: " + missing.join(", "));
+      }
+
+      if (!resumeText.includes("github")) {
+        suggestions.push("Add your GitHub profile if you have coding projects.");
+      }
+
+      if (!resumeText.includes("linkedin")) {
+        suggestions.push("Consider adding your LinkedIn profile.");
+      }
+
+      if (!resumeText.includes("internship") &&
+          !resumeText.includes("experience")) {
+        suggestions.push("Include relevant internship or practical experience.");
+      }
+
+      resultBox.innerHTML = `
+        <h3>📊 Your Resume Analysis</h3>
+        <h2>Resume Score: ${score}/100</h2>
+
+        <p>📄 Pages analysed: ${pdf.numPages}</p>
+
+        <h3>✅ Sections Detected</h3>
+        <p>${found.length ? found.join(", ") : "No major sections detected."}</p>
+
+        <h3>❌ Sections to Improve</h3>
+        <p>${missing.length ? missing.join(", ") : "All checked sections detected!"}</p>
+
+        <h3>💡 Suggestions</h3>
+        <ul>
+          ${suggestions.map(item => `<li>${item}</li>`).join("")}
+        </ul>
+
+        <p><small>This is an automated keyword-based checklist, not an AI or professional recruitment evaluation. Review the suggestions before making changes.</small></p>
+      `;
+
+    } catch (error) {
+      console.error("Resume analysis error:", error);
+      resultBox.textContent =
+        "Unable to analyse this PDF. Please try another text-based PDF.";
+    }
+  });
+  // INTERNSHIP APPLICATION TRACKER NAVIGATION
+
+document.getElementById("internshipTrackerBtn")
+  .addEventListener("click", async () => {
+
+    const section = document.getElementById("internshipTrackerSection");
+
+    section.hidden = false;
+    section.scrollIntoView({ behavior: "smooth" });
+
+    await loadInternshipApplications();
+  });
+
+// BACK TO HOME
+
+document.getElementById("backFromInternshipTracker")
+  .addEventListener("click", () => {
+
+    document.getElementById("internshipTrackerSection").hidden = true;
+
+    document.getElementById("internshipTrackerBtn")
+      .scrollIntoView({ behavior: "smooth" });
+  });
+  // LOAD INTERNSHIP APPLICATIONS
+
+async function loadInternshipApplications() {
+
+  const { data, error } = await supabaseClient
+    .from("internship_applications")
+    .select("*")
+    .eq("user_id", (await supabaseClient.auth.getUser()).data.user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  displayInternshipApplications(data);
+}
+
+
+// SAVE NEW APPLICATION
+
+document.getElementById("saveApplicationBtn")
+  .addEventListener("click", async () => {
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    const company = document.getElementById("applicationCompany").value.trim();
+    const role = document.getElementById("applicationRole").value.trim();
+
+    if (!company || !role) {
+      alert("Please enter company name and role.");
+      return;
+    }
+
+    const application = {
+      user_id: user.id,
+      company_name: company,
+      role: role,
+      application_type: document.getElementById("applicationType").value,
+      applied_date: document.getElementById("applicationDate").value || new Date().toISOString().split("T")[0],
+      application_link: document.getElementById("applicationLink").value.trim(),
+      status: document.getElementById("applicationStatus").value,
+      notes: document.getElementById("applicationNotes").value.trim()
+    };
+
+    const { error } = await supabaseClient
+      .from("internship_applications")
+      .insert([application]);
+
+    if (error) {
+      alert("Unable to save application: " + error.message);
+      return;
+    }
+
+    alert("Application saved successfully! 🎉");
+
+    document.getElementById("applicationCompany").value = "";
+    document.getElementById("applicationRole").value = "";
+    document.getElementById("applicationLink").value = "";
+    document.getElementById("applicationNotes").value = "";
+
+    await loadInternshipApplications();
+
+  });
+
+
+// DISPLAY APPLICATIONS
+
+function displayInternshipApplications(applications) {
+
+  const list = document.getElementById("applicationsList");
+
+  if (!applications.length) {
+    list.innerHTML = "<p>No applications added yet.</p>";
+    updateApplicationStatistics([]);
+    return;
+  }
+
+  list.innerHTML = applications.map(app => `
+    <div class="community-card">
+
+      <h3>${escapeHTML(app.company_name)}</h3>
+
+      <p>Role: ${escapeHTML(app.role)}</p>
+      <p>Type: ${escapeHTML(app.application_type)}</p>
+      <p>Date: ${escapeHTML(app.applied_date)}</p>
+     <p>
+  Status:
+  <select onchange="updateInternshipStatus(${app.id}, this.value)">
+    <option value="Applied" ${app.status === "Applied" ? "selected" : ""}>Applied</option>
+    <option value="Shortlisted" ${app.status === "Shortlisted" ? "selected" : ""}>Shortlisted</option>
+    <option value="Interview Scheduled" ${app.status === "Interview Scheduled" ? "selected" : ""}>Interview Scheduled</option>
+    <option value="Selected" ${app.status === "Selected" ? "selected" : ""}>Selected</option>
+    <option value="Rejected" ${app.status === "Rejected" ? "selected" : ""}>Rejected</option>
+  </select>
+</p>
+
+      ${app.application_link
+        ? `<p><a href="${safeApplicationURL(app.application_link)}" target="_blank" rel="noopener noreferrer">View Application</a></p>`
+        : ""}
+
+      ${app.notes
+        ? `<p>Notes: ${escapeHTML(app.notes)}</p>`
+        : ""}
+<button class="secondary-btn"
+  onclick="deleteInternshipApplication(${app.id})">
+  🗑️ Delete Application
+</button>
+    </div>
+  `).join("");
+
+  updateApplicationStatistics(applications);
+}
+
+
+// UPDATE APPLICATION STATISTICS
+
+function updateApplicationStatistics(applications) {
+
+  document.getElementById("totalApplications").textContent = applications.length;
+
+  document.getElementById("appliedCount").textContent =
+    applications.filter(a => a.status === "Applied").length;
+
+  document.getElementById("shortlistedCount").textContent =
+    applications.filter(a => a.status === "Shortlisted").length;
+
+  document.getElementById("interviewCount").textContent =
+    applications.filter(a => a.status === "Interview Scheduled").length;
+
+  document.getElementById("selectedCount").textContent =
+    applications.filter(a => a.status === "Selected").length;
+
+  document.getElementById("rejectedCount").textContent =
+    applications.filter(a => a.status === "Rejected").length;
+}
+
+
+// SAFE TEXT AND URL HELPERS
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
+
+function safeApplicationURL(value) {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? escapeHTML(url.href) : "#";
+  } catch {
+    return "#";
+  }
+}
+// UPDATE INTERNSHIP APPLICATION STATUS
+
+async function updateInternshipStatus(id, newStatus) {
+
+  const { error } = await supabaseClient
+    .from("internship_applications")
+    .update({ status: newStatus })
+    .eq("id", id)
+    .eq("user_id", (await supabaseClient.auth.getUser()).data.user.id);
+
+  if (error) {
+    alert("Unable to update status: " + error.message);
+    return;
+  }
+
+  alert("Application status updated! 🎉");
+
+  await loadInternshipApplications();
+}
+// DELETE INTERNSHIP APPLICATION
+
+async function deleteInternshipApplication(id) {
+
+  const confirmDelete = confirm(
+    "Are you sure you want to delete this application?"
+  );
+
+  if (!confirmDelete) return;
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  const { error } = await supabaseClient
+    .from("internship_applications")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    alert("Unable to delete application: " + error.message);
+    return;
+  }
+
+  alert("Application deleted successfully! 🎉");
+
+  await loadInternshipApplications();
+}
+// DIFFICULTY PRACTICE TEST NAVIGATION
+
+document.getElementById("difficultyPracticeBtn")
+  .addEventListener("click", () => {
+
+    const section = document.getElementById("difficultyPracticeSection");
+
+    section.hidden = false;
+    section.scrollIntoView({ behavior: "smooth" });
+
+  });
+
+
+// BACK TO HOME
+
+document.getElementById("backFromDifficultyPractice")
+  .addEventListener("click", () => {
+
+    document.getElementById("difficultyPracticeSection").hidden = true;
+
+    document.getElementById("difficultyPracticeBtn")
+      .scrollIntoView({ behavior: "smooth" });
+
+  });
+  // DIFFICULTY BASED QUESTION BANK
+
+const difficultyQuestions = {
+
+  Easy: [
+    {
+      question: "Which language is used to create the structure of web pages?",
+      options: ["CSS", "HTML", "Python", "Java"],
+      answer: 1,
+      explanation: "HTML defines the structure of web pages."
+    },
+    {
+      question: "Which keyword declares a variable in JavaScript?",
+      options: ["var", "define", "int", "string"],
+      answer: 0,
+      explanation: "var is a JavaScript variable declaration keyword."
+    },
+    {
+      question: "Which symbol is used for single-line comments in JavaScript?",
+      options: ["##", "//", "<!--", "**"],
+      answer: 1,
+      explanation: "// is used for single-line comments."
+    },
+    {
+      question: "Which data structure follows FIFO?",
+      options: ["Stack", "Queue", "Tree", "Graph"],
+      answer: 1,
+      explanation: "Queue follows First In First Out."
+    },
+    {
+      question: "Which SQL command retrieves data?",
+      options: ["INSERT", "UPDATE", "SELECT", "DELETE"],
+      answer: 2,
+      explanation: "SELECT retrieves records from a database."
+    },
+    {
+      question: "Which tag creates a hyperlink in HTML?",
+      options: ["<link>", "<a>", "<href>", "<url>"],
+      answer: 1,
+      explanation: "The anchor tag <a> creates hyperlinks."
+    },
+    {
+      question: "Which language is primarily used for styling web pages?",
+      options: ["HTML", "CSS", "SQL", "C"],
+      answer: 1,
+      explanation: "CSS controls the appearance of web pages."
+    },
+    {
+      question: "What is the index of the first array element in JavaScript?",
+      options: ["1", "-1", "0", "2"],
+      answer: 2,
+      explanation: "JavaScript arrays use zero-based indexing."
+    },
+    {
+      question: "Which keyword defines a function in Python?",
+      options: ["function", "def", "fun", "define"],
+      answer: 1,
+      explanation: "Python uses def to define functions."
+    },
+    {
+      question: "Which operator checks strict equality in JavaScript?",
+      options: ["=", "==", "===", "!="],
+      answer: 2,
+      explanation: "=== compares value and type."
+    }
+  ],
+
+  Medium: [
+    {
+      question: "What is the time complexity of binary search?",
+      options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
+      answer: 1,
+      explanation: "Binary search halves the search space each step."
+    },
+    {
+      question: "Which SQL clause filters grouped records?",
+      options: ["WHERE", "ORDER BY", "HAVING", "DISTINCT"],
+      answer: 2,
+      explanation: "HAVING filters groups after GROUP BY."
+    },
+    {
+      question: "Which JavaScript method creates a new array by transforming elements?",
+      options: ["filter()", "map()", "push()", "pop()"],
+      answer: 1,
+      explanation: "map() transforms each element into a new array."
+    },
+    {
+      question: "Which data structure is commonly used in recursion?",
+      options: ["Queue", "Stack", "Graph", "Hash table"],
+      answer: 1,
+      explanation: "Function calls are managed using the call stack."
+    },
+    {
+      question: "Which OOP concept hides internal implementation details?",
+      options: ["Inheritance", "Polymorphism", "Encapsulation", "Compilation"],
+      answer: 2,
+      explanation: "Encapsulation bundles data and methods while controlling access."
+    },
+    {
+      question: "What does a LEFT JOIN return?",
+      options: ["Only matching rows", "All left rows and matching right rows", "All right rows", "Only unmatched rows"],
+      answer: 1,
+      explanation: "LEFT JOIN preserves all rows from the left table."
+    },
+    {
+      question: "Which Python structure stores key-value pairs?",
+      options: ["List", "Tuple", "Dictionary", "Set"],
+      answer: 2,
+      explanation: "A dictionary stores key-value pairs."
+    },
+    {
+      question: "Which HTTP method is commonly used to update a resource?",
+      options: ["GET", "PUT", "TRACE", "OPTIONS"],
+      answer: 1,
+      explanation: "PUT is commonly used to replace or update a resource."
+    },
+    {
+      question: "Which algorithm uses divide and conquer?",
+      options: ["Bubble Sort", "Merge Sort", "Linear Search", "Selection Sort"],
+      answer: 1,
+      explanation: "Merge Sort divides the array and merges sorted parts."
+    },
+    {
+      question: "What is a primary key?",
+      options: ["A duplicate column", "A unique row identifier", "A foreign table", "An index only"],
+      answer: 1,
+      explanation: "A primary key uniquely identifies each row."
+    }
+  ],
+
+  Hard: [
+    {
+      question: "What is the worst-case time complexity of Quick Sort?",
+      options: ["O(n log n)", "O(n)", "O(n²)", "O(log n)"],
+      answer: 2,
+      explanation: "Poor pivot choices can produce O(n²) time."
+    },
+    {
+      question: "Which algorithm finds shortest paths from a single source with non-negative edge weights?",
+      options: ["Kruskal", "Dijkstra", "DFS", "Prim"],
+      answer: 1,
+      explanation: "Dijkstra's algorithm handles non-negative edge weights."
+    },
+    {
+      question: "Which normal form eliminates transitive dependencies?",
+      options: ["1NF", "2NF", "3NF", "BCNF only"],
+      answer: 2,
+      explanation: "Third Normal Form removes transitive dependencies of non-key attributes."
+    },
+    {
+      question: "What is the average-case lookup time of a hash table?",
+      options: ["O(n)", "O(log n)", "O(1)", "O(n²)"],
+      answer: 2,
+      explanation: "Hash tables provide average-case constant-time lookup."
+    },
+    {
+      question: "Which OS concept allows multiple processes to share CPU time?",
+      options: ["Paging", "Time-sharing", "Fragmentation", "Spooling"],
+      answer: 1,
+      explanation: "Time-sharing allocates CPU time among processes."
+    },
+    {
+      question: "Which data structure is used by a Binary Heap?",
+      options: ["Complete Binary Tree", "Linked List", "Graph", "Hash Table"],
+      answer: 0,
+      explanation: "A binary heap is a complete binary tree."
+    },
+    {
+      question: "Which scheduling algorithm can cause starvation?",
+      options: ["FCFS", "Round Robin", "Priority Scheduling", "FIFO only"],
+      answer: 2,
+      explanation: "Low-priority processes may wait indefinitely."
+    },
+    {
+      question: "What is the space complexity of recursive binary search?",
+      options: ["O(1)", "O(log n)", "O(n²)", "O(n log n)"],
+      answer: 1,
+      explanation: "The recursive call stack grows logarithmically."
+    },
+    {
+      question: "Which protocol provides reliable, connection-oriented transport?",
+      options: ["UDP", "IP", "TCP", "ICMP"],
+      answer: 2,
+      explanation: "TCP provides reliable, connection-oriented communication."
+    },
+    {
+      question: "Which graph algorithm finds a minimum spanning tree?",
+      options: ["Dijkstra", "Kruskal", "Binary Search", "Floyd-Warshall"],
+      answer: 1,
+      explanation: "Kruskal's algorithm builds a minimum spanning tree."
+    }
+  ]
+
+};
+// DIFFICULTY PRACTICE TEST ENGINE
+
+let currentDifficulty = "";
+let difficultyTestFinished = false;
+let difficultyQuestionIndex = 0;
+let difficultyScore = 0;
+let difficultyAnswers = [];
+let difficultyTimer = null;
+let difficultyTimeLeft = 15 * 60;
+
+
+function startDifficultyTest(level) {
+
+  currentDifficulty = level;
+  difficultyTestFinished = false;
+
+  difficultyQuestionIndex = 0;
+  difficultyScore = 0;
+  difficultyAnswers = [];
+  difficultyTimeLeft = 15 * 60;
+
+  clearInterval(difficultyTimer);
+
+  const area = document.getElementById("difficultyTestArea");
+
+  area.hidden = false;
+
+  area.scrollIntoView({ behavior: "smooth" });
+
+  renderDifficultyQuestion();
+
+  difficultyTimer = setInterval(() => {
+
+    difficultyTimeLeft--;
+
+    const timer = document.getElementById("difficultyTimer");
+
+    if (timer) {
+      const minutes = Math.floor(difficultyTimeLeft / 60);
+      const seconds = difficultyTimeLeft % 60;
+
+      timer.textContent =
+        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    if (difficultyTimeLeft <= 0) {
+      finishDifficultyTest();
+    }
+
+  }, 1000);
+
+}
+
+
+// DISPLAY QUESTION
+
+function renderDifficultyQuestion() {
+
+  const questions = difficultyQuestions[currentDifficulty];
+  const question = questions[difficultyQuestionIndex];
+
+  const area = document.getElementById("difficultyTestArea");
+
+  const minutes = Math.floor(difficultyTimeLeft / 60);
+  const seconds = difficultyTimeLeft % 60;
+
+  area.innerHTML = `
+
+    <h3>🎯 ${currentDifficulty} Practice Test</h3>
+
+    <p>
+      Question ${difficultyQuestionIndex + 1} of ${questions.length}
+    </p>
+
+    <h3>⏱️ Time Remaining:
+      <span id="difficultyTimer">
+        ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}
+      </span>
+    </h3>
+
+    <hr>
+
+    <h3>${question.question}</h3>
+
+    <div id="difficultyOptions">
+
+    ${question.options.map((option, index) => `
+  <button
+    class="secondary-btn"
+    style="display:block; width:100%; margin:10px 0; padding:14px; text-align:left;"
+    onclick="selectDifficultyAnswer(${index})">
+    ${String.fromCharCode(65 + index)}. ${escapeHTML(option)}
+  </button>
+`).join("")}
+
+    </div>
+
+    <div id="difficultyFeedback"></div>
+
+    <button class="primary-btn"
+      id="nextDifficultyQuestion"
+      onclick="nextDifficultyQuestion()"
+      disabled>
+      ${difficultyQuestionIndex === questions.length - 1
+        ? "Finish Test"
+        : "Next Question →"}
+    </button>
+
+  `;
+}
+
+
+// SELECT ANSWER
+
+function selectDifficultyAnswer(selectedIndex) {
+
+  if (difficultyAnswers[difficultyQuestionIndex] !== undefined) {
+    return;
+  }
+
+  const question =
+    difficultyQuestions[currentDifficulty][difficultyQuestionIndex];
+
+  difficultyAnswers[difficultyQuestionIndex] = selectedIndex;
+
+  const isCorrect = selectedIndex === question.answer;
+
+  if (isCorrect) {
+    difficultyScore++;
+  }
+
+  const buttons =
+    document.getElementById("difficultyOptions").querySelectorAll("button");
+
+  buttons.forEach((button, index) => {
+
+    button.disabled = true;
+
+    if (index === question.answer) {
+      button.style.border = "2px solid green";
+    }
+
+    if (index === selectedIndex && !isCorrect) {
+      button.style.border = "2px solid red";
+    }
+
+  });
+
+  document.getElementById("difficultyFeedback").innerHTML = `
+    <p>${isCorrect ? "✅ Correct Answer!" : "❌ Incorrect Answer!"}</p>
+    <p><strong>Explanation:</strong> ${question.explanation}</p>
+  `;
+
+  document.getElementById("nextDifficultyQuestion").disabled = false;
+
+}
+
+
+// NEXT QUESTION
+
+function nextDifficultyQuestion() {
+
+  if (difficultyAnswers[difficultyQuestionIndex] === undefined) {
+    alert("Please select an answer first!");
+    return;
+  }
+
+  difficultyQuestionIndex++;
+
+  if (difficultyQuestionIndex >=
+      difficultyQuestions[currentDifficulty].length) {
+
+    finishDifficultyTest();
+    return;
+
+  }
+
+  renderDifficultyQuestion();
+
+}
+
+
+// FINISH TEST
+
+async function finishDifficultyTest() {
+
+  if (difficultyTestFinished) return;
+  difficultyTestFinished = true;
+
+  clearInterval(difficultyTimer);
+
+  const questions = difficultyQuestions[currentDifficulty];
+
+  const percentage = Math.round(
+    (difficultyScore / questions.length) * 100
+  );
+  // SAVE RESULT TO SUPABASE
+
+const { data: { user }, error: authError } =
+  await supabaseClient.auth.getUser();
+
+if (authError || !user) {
+  console.error("Authentication error:", authError);
+  alert("Please log in to save your result.");
+} else {
+
+  const { error } = await supabaseClient
+    .from("difficulty_test_results")
+    .insert({
+      user_id: user.id,
+      difficulty: currentDifficulty,
+      score: difficultyScore,
+      total_questions: questions.length,
+      percentage: percentage
+    });
+
+  if (error) {
+    console.error("Saving error:", error);
+    alert("Could not save your result.");
+  } else {
+    console.log("Practice test result saved successfully!");
+  }
+}
+  let feedback = "";
+
+  if (percentage >= 80) {
+    feedback = "Excellent performance! 🌟";
+  } else if (percentage >= 50) {
+    feedback = "Good effort! Keep practising. 💪";
+  } else {
+    feedback = "Keep learning and try again! 📚";
+  }
+
+  const area = document.getElementById("difficultyTestArea");
+
+  area.innerHTML = `
+
+    <h2>🎉 Test Completed!</h2>
+
+    <h3>${currentDifficulty} Level</h3>
+
+    <h2>Score: ${difficultyScore}/${questions.length}</h2>
+
+    <h2>Percentage: ${percentage}%</h2>
+
+    <h3>${feedback}</h3>
+
+    <h3>📖 Answer Review</h3>
+
+    ${questions.map((question, index) => {
+
+      const selected = difficultyAnswers[index];
+
+      return `
+        <div class="community-card">
+
+          <p><strong>Q${index + 1}. ${question.question}</strong></p>
+
+          <p>Your Answer:
+            ${selected === undefined
+              ? "Not Attempted"
+              : escapeHTML(question.options[selected])}
+          </p>
+
+          <p>Correct Answer:
+  ${escapeHTML(question.options[question.answer])}
+      </p>
+
+          <p>Explanation: ${question.explanation}</p>
+
+          <p>
+            ${selected === question.answer
+              ? "✅ Correct"
+              : "❌ Incorrect"}
+          </p>
+
+        </div>
+      `;
+
+    }).join("")}
+
+    <button class="primary-btn"
+      onclick="startDifficultyTest(currentDifficulty)">
+      🔄 Try Again
+    </button>
+
+    <button class="secondary-btn"
+      onclick="document.getElementById('difficultyTestArea').hidden = true">
+      Back to Difficulty Levels
+    </button>
+
+  `;
+
+}

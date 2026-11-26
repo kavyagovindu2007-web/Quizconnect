@@ -128,10 +128,50 @@
       View All History
     </button>
   </article>
+  <!-- PERFORMANCE ANALYTICS -->
+<article class="stat-card performance-analytics">
 
+  <h2>📊 Performance Analytics</h2>
+  <p>Understand your learning progress and performance.</p>
+
+  <div class="community-grid">
+
+    <div class="community-card">
+      <h3>📚 Total Quizzes</h3>
+      <h2 id="analyticsTotalQuizzes">0</h2>
+    </div>
+
+    <div class="community-card">
+      <h3>📝 Examinations Completed</h3>
+      <h2 id="analyticsTotalExams">0</h2>
+    </div>
+
+    <div class="community-card">
+      <h3>🎯 Average Score</h3>
+      <h2 id="analyticsAverageScore">0%</h2>
+    </div>
+
+    <div class="community-card">
+      <h3>🏆 Best Subject</h3>
+      <h2 id="analyticsBestSubject">--</h2>
+    </div>
+
+  </div>
+
+  <div class="analytics-subject-performance">
+    <h3>📈 Subject-wise Performance</h3>
+    <div id="subjectPerformanceContainer">
+      <p>Your subject performance will appear here.</p>
+    </div>
+  </div>
+
+</article>
+    </article>
 
 </section>
-    <section class="section">
+<!-- End of Dashboard Stats -->
+
+<section class="section" id="homeQuizSection">
       <div class="section-heading">
         <div>
           <p class="eyebrow">PICK UP A SKILL</p>
@@ -206,7 +246,41 @@
 
       </div>
       
-    </section>
+       </section>
+
+<!-- WEEKLY & MONTHLY LEADERBOARD -->
+<section class="section" id="leaderboardSection">
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">QUIZCONNECT RANKINGS</p>
+      <h2>🏆 Student Leaderboard</h2>
+      <p>Celebrate your progress and compete with fellow students!</p>
+    </div>
+  </div>
+
+  <div class="leaderboard-tabs">
+    <button class="primary-btn" id="weeklyLeaderboardBtn">
+      📅 Weekly
+    </button>
+
+    <button class="secondary-btn" id="monthlyLeaderboardBtn">
+      🗓️ Monthly
+    </button>
+  </div>
+
+  <div id="leaderboardPeriodTitle">
+    <h3>🏆 Weekly Top Performers</h3>
+  </div>
+
+  <div id="leaderboardContainer">
+    <p>Loading leaderboard...</p>
+  </div>
+
+  <div id="myLeaderboardRank"></div>
+
+</section>
+
 <!-- STUDENT COMMUNITY -->
 <section class="section" id="communitySection" hidden>
 
@@ -221,11 +295,58 @@
   <div id="communityMembers" class="community-grid">
     <p>Loading community members...</p>
   </div>
-
+<button class="primary-btn" id="openGroupChatBtn">
+  💬 Explore Group Chats →
+</button>
   <button class="secondary-btn" id="backHomeBtn">
     ← Back to Home
   </button>
-    </section> <!-- End of Student Community -->
+    </section>
+    <!-- STUDENT GROUP CHAT -->
+<section class="section" id="groupChatSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">QUIZCONNECT GROUPS</p>
+      <h2>💬 Student Group Chat</h2>
+      <p>Connect, discuss doubts and learn together!</p>
+    </div>
+  </div>
+
+  <div id="chatGroupsContainer" class="community-grid">
+    <p>Loading discussion groups...</p>
+  </div>
+
+  <div id="groupChatWindow" hidden>
+
+    <h3 id="activeGroupName"></h3>
+
+    <div id="groupMessagesContainer"></div>
+
+    <div class="ai-chat-input">
+      <input
+        type="text"
+        id="groupMessageInput"
+        placeholder="Type your message..."
+      >
+
+      <button type="button" id="sendGroupMessageBtn">
+        Send ↑
+      </button>
+    </div>
+
+  </div>
+
+  <button class="secondary-btn" id="backToGroupsBtn" hidden>
+    ← Back to Groups
+  </button>
+
+  <button class="secondary-btn" id="backFromGroupChatBtn">
+    ← Back to Community
+  </button>
+
+</section>
+ <!-- End of Student Community -->
 
   <section class="section community">
   <p class="eyebrow">GROW TOGETHER</p>
@@ -255,7 +376,125 @@
 <button class="secondary-btn" id="placementHubBtn">
   🚀 Startup & Placement Hub
 </button>
-  <p id="message" class="message"></p>
+
+<!-- CODING PLAYGROUND -->
+<article class="community-card">
+  <h3>💻 Coding Playground</h3>
+  <p>
+    Write, run and practise programs in seven programming
+    languages. Improve your coding skills through hands-on practice!
+  </p>
+  <button class="primary-btn" id="codingPlaygroundBtn">
+    Open Coding Playground →
+  </button>
+</article>
+<!-- PERSONALIZED LEARNING RECOMMENDATIONS -->
+
+<article class="community-card">
+  <h3>🤖 Personalized Learning Recommendations</h3>
+
+  <p>
+    Get smart learning suggestions based on your quiz performance,
+    strengths and areas that need improvement.
+  </p>
+
+  <button class="primary-btn" id="learningRecommendationsBtn">
+    View My Recommendations →
+  </button>
+</article>
+<p id="message" class="message"></p>
+</section>
+<!-- INTERVIEW PREPARATION -->
+<article class="community-card">
+  <h3>🎯 Interview Preparation</h3>
+
+  <p>
+    Prepare for technical and HR interviews with
+    commonly asked questions, answers and mock
+    interview practice.
+  </p>
+
+  <button class="primary-btn" id="interviewPrepBtn">
+    Start Interview Preparation →
+  </button>
+</article>
+<article class="community-card">
+  <h3>🔥 Daily Coding Challenge</h3>
+  <p>
+    Solve a new programming problem every day,
+    practise coding and improve your problem-solving skills.
+  </p>
+  <button class="primary-btn" id="dailyCodingChallengeBtn">
+    Solve Today's Challenge →
+  </button>
+</article>
+<article class="community-card">
+  <h3>❓ Question of the Day</h3>
+  <p>
+    Challenge yourself with a new daily MCQ.
+    Test your knowledge and improve every day!
+  </p>
+  <button class="primary-btn" id="questionOfTheDayBtn">
+    Answer Today's Question →
+  </button>
+</article>
+<!-- PERSONALIZED LEARNING RECOMMENDATIONS -->
+
+<section class="section" id="learningRecommendationsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">SMART LEARNING ASSISTANT</p>
+      <h2>🤖 Your Personalized Recommendations</h2>
+      <p>Suggestions based on your learning performance and progress.</p>
+    </div>
+  </div>
+
+  <div id="learningRecommendationsList" class="community-grid">
+    <p>Analysing your learning progress...</p>
+  </div>
+
+  <button class="secondary-btn" id="backFromRecommendations">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- VTU HUB -->
+
+<section class="section" id="vtuHubSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">VTU STUDENT RESOURCE CENTRE</p>
+      <h2>🎓 VTU Hub</h2>
+      <p>Explore syllabus, notes, question papers and practice tests.</p>
+    </div>
+  </div>
+
+  <div class="community-grid">
+
+    <article class="community-card">
+      <h3>📘 2022 Scheme</h3>
+      <p>Access study resources under the VTU 2022 Scheme.</p>
+      <button class="primary-btn" id="vtu2022Btn">
+        Explore 2022 Scheme →
+      </button>
+    </article>
+
+    <article class="community-card">
+      <h3>📗 2025 Scheme</h3>
+      <p>Access study resources under the VTU 2025 Scheme.</p>
+      <button class="primary-btn" id="vtu2025Btn">
+        Explore 2025 Scheme →
+      </button>
+    </article>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromVtuHub">
+    ← Back to Home
+  </button>
+
 </section>
     <!-- MY ACHIEVEMENTS -->
 
@@ -343,6 +582,588 @@
   </button>
 
 </section>
+<!-- CODING PLAYGROUND -->
+<section class="section" id="codingPlaygroundSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">PRACTICE • EXPERIMENT • LEARN</p>
+      <h2>💻 Coding Playground</h2>
+      <p>Write code, run programs and improve your programming skills!</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+
+    <label for="codingLanguage">Select Programming Language</label>
+
+    <select id="codingLanguage">
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="c">C</option>
+      <option value="cpp">C++</option>
+      <option value="java">Java</option>
+      <option value="html">HTML</option>
+      <option value="css">CSS</option>
+    </select>
+
+    <h3>📝 Code Editor</h3>
+
+    <textarea
+      id="codeEditor"
+      rows="15"
+      placeholder="Write your code here..."
+    ></textarea>
+
+    <div>
+      <button class="primary-btn" id="runCodeBtn">
+        ▶️ Run Code
+      </button>
+
+      <button class="secondary-btn" id="clearCodeBtn">
+        🧹 Clear Code
+      </button>
+    </div>
+
+    <h3>🖥️ Output</h3>
+
+    <pre id="codeOutput">Your output will appear here...</pre>
+
+<iframe
+  id="codingPreview"
+  title="Code Preview"
+  sandbox="allow-scripts"
+  style="width:100%; height:300px; border:1px solid #ccc;
+  border-radius:10px; background:white; margin-top:15px;"
+></iframe>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromCodingPlayground">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- INTERVIEW PREPARATION -->
+<section class="section" id="interviewPrepSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">PREPARE • PRACTICE • SUCCEED</p>
+      <h2>🎯 Interview Preparation</h2>
+      <p>Build confidence and prepare for your dream career!</p>
+    </div>
+  </div>
+
+  <div class="community-grid">
+
+    <article class="community-card">
+      <h3>💻 Technical Interviews</h3>
+      <p>Practise programming, DBMS, DSA, OS and networking questions.</p>
+      <button class="primary-btn" data-interview-category="technical">
+        Explore Technical Questions →
+      </button>
+    </article>
+
+    <article class="community-card">
+      <h3>🤝 HR Interviews</h3>
+      <p>Prepare for personal introductions, strengths, weaknesses and career goals.</p>
+      <button class="primary-btn" data-interview-category="hr">
+        Explore HR Questions →
+      </button>
+    </article>
+
+    <article class="community-card">
+      <h3>🎤 Mock Interviews</h3>
+      <p>Test your knowledge and practise answering interview questions.</p>
+      <button class="primary-btn" data-interview-category="mock">
+        Start Mock Interview →
+      </button>
+    </article>
+
+  </div>
+
+  <div id="interviewQuestionsContainer"></div>
+
+  <button class="secondary-btn" id="backFromInterviewPrep">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- DAILY CODING CHALLENGE -->
+<section class="section" id="dailyCodingChallengeSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">THINK • CODE • IMPROVE</p>
+      <h2>🔥 Daily Coding Challenge</h2>
+      <p>Solve today's problem and improve your programming skills!</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+
+    <h3 id="dailyChallengeTitle">Today's Challenge</h3>
+
+    <p id="dailyChallengeDifficulty">Difficulty: Easy</p>
+
+    <p id="dailyChallengeDescription"></p>
+
+    <h3>💡 Example</h3>
+    <pre id="dailyChallengeExample"></pre>
+
+    <h3>Choose Programming Language</h3>
+
+    <select id="dailyChallengeLanguage">
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="c">C</option>
+      <option value="cpp">C++</option>
+      <option value="java">Java</option>
+    </select>
+
+    <h3>Write Your Solution</h3>
+
+    <textarea
+      id="dailyChallengeCode"
+      rows="12"
+      placeholder="Write your code here..."
+      style="width:100%;"
+    ></textarea>
+
+    <br><br>
+
+    <button class="primary-btn" id="runDailyChallengeBtn">
+      Run Code →
+    </button>
+
+    <button class="secondary-btn" id="showDailyChallengeHint">
+      💡 Show Hint
+    </button>
+
+    <button class="secondary-btn" id="showDailyChallengeSolution">
+      View Solution
+    </button>
+
+    <div id="dailyChallengeHint" hidden></div>
+
+    <div id="dailyChallengeSolution" hidden></div>
+
+    <div id="dailyChallengeOutput"></div>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromDailyChallenge">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- QUESTION OF THE DAY -->
+<section class="section" id="questionOfTheDaySection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">LEARN • THINK • GROW</p>
+      <h2>❓ Question of the Day</h2>
+      <p>Answer one new question every day!</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+
+    <h3 id="dailyQuestionCategory">Today's Topic</h3>
+
+    <h2 id="dailyQuestionText"></h2>
+
+    <div id="dailyQuestionOptions"></div>
+
+    <button class="primary-btn" id="submitDailyAnswer">
+      Submit Answer →
+    </button>
+
+    <div id="dailyQuestionFeedback"></div>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromQuestionOfDay">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- BOOKMARKED QUESTIONS SECTION -->
+
+<section class="section" id="bookmarkedQuestionsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">SAVE • REVISE • IMPROVE</p>
+      <h2>🔖 My Bookmarked Questions</h2>
+      <p>All your saved questions in one place.</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+    <div id="bookmarkedQuestionsList">
+      <p>Loading your bookmarked questions...</p>
+    </div>
+  </div>
+
+  <button class="secondary-btn" id="backFromBookmarks">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- DAILY LEARNING GOALS SECTION -->
+
+<section class="section" id="dailyLearningGoalsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">SET • TRACK • ACHIEVE</p>
+      <h2>🎯 Daily Learning Goals</h2>
+      <p>Build a daily learning habit!</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+
+    <h3>Choose Your Daily Quiz Target</h3>
+
+    <select id="dailyQuizTarget">
+      <option value="1">1 Quiz</option>
+      <option value="3" selected>3 Quizzes</option>
+      <option value="5">5 Quizzes</option>
+      <option value="10">10 Quizzes</option>
+    </select>
+
+    <br><br>
+
+    <button class="primary-btn" id="saveDailyGoalBtn">
+      Save My Goal →
+    </button>
+
+    <hr>
+
+    <h3>📊 Today's Progress</h3>
+
+    <p id="dailyGoalProgress">Loading progress...</p>
+
+    <progress id="dailyGoalBar" value="0" max="3"
+      style="width:100%;"></progress>
+
+    <p id="dailyGoalMessage"></p>
+
+  </div>
+
+  <button class="secondary-btn" id="backFromDailyGoals">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- NOTIFICATIONS SECTION -->
+<section class="section" id="notificationsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">STAY UPDATED</p>
+      <h2>🔔 My Notifications</h2>
+      <p>All your important updates in one place.</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+    <h3>📬 Your Notifications</h3>
+
+    <p id="notificationCount">Loading notifications...</p>
+
+    <div id="notificationsList"></div>
+  </div>
+
+  <button class="secondary-btn" id="backFromNotifications">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- MONTHLY PROGRESS REPORTS SECTION -->
+<section class="section" id="monthlyReportsSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">YOUR LEARNING JOURNEY</p>
+      <h2>📊 Monthly Progress Reports</h2>
+      <p>Review your learning performance month by month.</p>
+    </div>
+  </div>
+
+  <div class="community-card">
+
+    <h3>📅 Select Month</h3>
+
+    <input
+      type="month"
+      id="reportMonth"
+    >
+
+    <button class="primary-btn" id="generateMonthlyReportBtn">
+      Generate Report
+    </button>
+
+  </div>
+
+  <div id="monthlyReportResult" class="community-card">
+    Select a month and generate your report.
+  </div>
+
+  <button class="secondary-btn" id="backFromMonthlyReports">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- RESUME SCORE CHECKER SECTION -->
+<section class="section" id="resumeScoreCheckerSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">CAREER DEVELOPMENT</p>
+      <h2>📄 Resume Score Checker</h2>
+      <p>Check your resume and discover ways to improve it.</p>
+    </div>
+  </div>
+ 
+  <div class="community-card">
+
+    <h3>📤 Upload Your Resume</h3>
+
+    <p>Upload your resume in PDF format.</p>
+
+    <input
+      type="file"
+      id="resumeUpload"
+      accept=".pdf,application/pdf"
+    >
+
+    <button class="primary-btn" id="analyzeResumeBtn">
+      Analyse My Resume →
+    </button>
+
+  </div>
+
+  <div id="resumeAnalysisResult" class="community-card">
+    Your resume analysis will appear here.
+  </div>
+
+  <button class="secondary-btn" id="backFromResumeChecker">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- INTERNSHIP APPLICATION TRACKER SECTION -->
+<section class="section" id="internshipTrackerSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">CAREER DEVELOPMENT</p>
+      <h2>📋 Internship Application Tracker</h2>
+      <p>Manage and track your internship and job applications.</p>
+    </div>
+  </div>
+
+  <!-- APPLICATION STATISTICS -->
+  <div class="community-card">
+    <h3>📊 Application Overview</h3>
+
+    <p>Total Applications: <span id="totalApplications">0</span></p>
+    <p>Applied: <span id="appliedCount">0</span></p>
+    <p>Shortlisted: <span id="shortlistedCount">0</span></p>
+    <p>Interviews: <span id="interviewCount">0</span></p>
+    <p>Selected: <span id="selectedCount">0</span></p>
+    <p>Rejected: <span id="rejectedCount">0</span></p>
+  </div>
+
+  <!-- ADD APPLICATION FORM -->
+  <div class="community-card">
+
+    <h3>➕ Add New Application</h3>
+
+    <input type="text" id="applicationCompany"
+      placeholder="Company Name">
+
+    <input type="text" id="applicationRole"
+      placeholder="Job / Internship Role">
+
+    <select id="applicationType">
+      <option value="Internship">Internship</option>
+      <option value="Job">Full-Time Job</option>
+    </select>
+
+    <label>Application Date</label>
+    <input type="date" id="applicationDate">
+
+    <input type="url" id="applicationLink"
+      placeholder="Application Link (optional)">
+
+    <select id="applicationStatus">
+      <option value="Applied">Applied</option>
+      <option value="Shortlisted">Shortlisted</option>
+      <option value="Interview Scheduled">Interview Scheduled</option>
+      <option value="Selected">Selected</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+
+    <textarea id="applicationNotes"
+      placeholder="Notes (optional)"></textarea>
+
+    <button class="primary-btn" id="saveApplicationBtn">
+      Save Application
+    </button>
+
+  </div>
+
+  <!-- APPLICATION LIST -->
+  <div class="community-card">
+    <h3>📂 My Applications</h3>
+    <div id="applicationsList">
+      Your applications will appear here.
+    </div>
+  </div>
+
+  <button class="secondary-btn" id="backFromInternshipTracker">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- DIFFICULTY BASED PRACTICE TESTS SECTION -->
+<section class="section" id="difficultyPracticeSection" hidden>
+
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">SKILL DEVELOPMENT</p>
+      <h2>🎯 Difficulty-Based Practice Tests</h2>
+      <p>Choose your difficulty and challenge yourself!</p>
+    </div>
+  </div>
+
+  <!-- DIFFICULTY OPTIONS -->
+
+  <div class="community-card">
+    <h3>🟢 Easy Level</h3>
+    <p>Beginner-friendly questions to strengthen your basics.</p>
+    <button class="primary-btn"
+      onclick="startDifficultyTest('Easy')">
+      Start Easy Test →
+    </button>
+  </div>
+
+  <div class="community-card">
+    <h3>🟡 Medium Level</h3>
+    <p>Test your understanding with intermediate questions.</p>
+    <button class="primary-btn"
+      onclick="startDifficultyTest('Medium')">
+      Start Medium Test →
+    </button>
+  </div>
+
+  <div class="community-card">
+    <h3>🔴 Hard Level</h3>
+    <p>Challenge yourself with advanced questions.</p>
+    <button class="primary-btn"
+      onclick="startDifficultyTest('Hard')">
+      Start Hard Test →
+    </button>
+  </div>
+
+  <div id="difficultyTestArea" class="community-card" hidden>
+    Test questions will appear here.
+  </div>
+
+  <button class="secondary-btn" id="backFromDifficultyPractice">
+    ← Back to Home
+  </button>
+
+</section>
+<!-- RESUME SCORE CHECKER CARD -->
+<article class="community-card">
+  <h3>📄 Resume Score Checker</h3>
+  <p>
+    Analyse your resume, identify missing sections,
+    improve your skills and become job-ready!
+  </p>
+  <button class="primary-btn" id="resumeScoreCheckerBtn">
+    Check My Resume →
+  </button>
+</article>
+
+<!-- INTERNSHIP APPLICATION TRACKER CARD -->
+<article class="community-card">
+  <h3>📋 Internship Application Tracker</h3>
+  <p>
+    Track your internship and job applications,
+    monitor interview progress and stay organised!
+  </p>
+  <button class="primary-btn" id="internshipTrackerBtn">
+    Track My Applications →
+  </button>
+</article>
+
+<!-- DIFFICULTY BASED PRACTICE TESTS -->
+<article class="community-card">
+  <h3>🎯 Difficulty-Based Practice Tests</h3>
+  <p>
+    Challenge yourself with Easy, Medium and Hard
+    practice tests. Improve your skills step by step!
+  </p>
+  <button class="primary-btn" id="difficultyPracticeBtn">
+    Explore Practice Tests →
+  </button>
+</article>
+
+<!-- BOOKMARKED QUESTIONS CARD -->
+<article class="community-card">
+  <h3>🔖 My Bookmarked Questions</h3>
+  <p>
+    Save important questions and revisit them anytime
+    for quick revision and practice.
+  </p>
+  <button class="primary-btn" id="bookmarkedQuestionsBtn">
+    View Bookmarks →
+  </button>
+</article>
+<!-- DAILY LEARNING GOALS CARD -->
+
+<article class="community-card">
+  <h3>🎯 Daily Learning Goals</h3>
+
+  <p>
+    Set your daily quiz target, track your progress
+    and become a consistent learner!
+  </p>
+
+  <button class="primary-btn" id="dailyLearningGoalsBtn">
+    Set My Daily Goal →
+  </button>
+</article>
+<!-- NOTIFICATIONS CARD -->
+<article class="community-card">
+  <h3>🔔 Notifications</h3>
+  <p>
+    Stay updated with quiz reminders, exam announcements
+    and important learning updates!
+  </p>
+  <button class="primary-btn" id="notificationsBtn">
+    View Notifications →
+  </button>
+</article>
+<!-- MONTHLY PROGRESS REPORTS CARD -->
+<article class="community-card">
+  <h3>📊 Monthly Progress Reports</h3>
+  <p>
+    Track your monthly quiz performance, average scores,
+    strongest subjects and learning activity!
+  </p>
+  <button class="primary-btn" id="monthlyReportsBtn">
+    View Monthly Report →
+  </button>
+</article>
 <!-- STARTUP COMPANIES -->
 
 <section class="section" id="startupCompaniesSection" hidden>
@@ -404,7 +1225,10 @@
   <h2>💼 Internship Opportunities</h2>
   <p>Explore technical and non-technical internships.</p>
 
-<div class="community-grid" id="internshipsContainer">
+<div class="internship-category-heading"></div>
+  <h3>💰 Stipend-Paid Internships</h3>
+  <p>Explore internships that offer financial compensation.</p>
+</div>
 
   <article class="community-card">
     <h3>🏛️ NICSI – Winter Internship 2026</h3>
@@ -447,6 +1271,10 @@
       Read Official Internship Scheme
     </a>
   </article>
+  <div class="internship-category-heading"></div>
+  <h3>🔄 Internships with Variable Stipends</h3>
+  <p>Stipend depends on the selected role and offer.</p>
+</div>
   <article class="community-card">
   <h3>💻 Spellzee – Remote Internship</h3>
 
@@ -480,6 +1308,10 @@
     <button class="primary-btn">View Internship & Apply</button>
   </a>
 </article>
+<div class="internship-category-heading"></div>
+  <h3>🆓 Free Internships</h3>
+  <p>Explore internship opportunities without a stipend.</p>
+</div>
 <article class="community-card">
   <h3>🤖 KartAI – Remote Internship Opportunities</h3>
 
@@ -1274,7 +2106,7 @@
       <button class="secondary-btn" data-job-course="aiml">
   Explore Course →
 </button>
-      <button class="secondary-btn">Explore Course →</button>
+     
     </article>
 
     <article class="community-card">
@@ -1311,55 +2143,75 @@
     <article class="community-card">
       <h3>💰 Accounting & Finance</h3>
       <p>Accounting basics, financial statements and budgeting.</p>
-      <button class="secondary-btn">Explore Course →</button>
+    <button class="secondary-btn" data-job-course="accounting">
+  Explore Course →
+</button>
+
     </article>
 
     <article class="community-card">
       <h3>📊 Business Management</h3>
       <p>Business operations, planning and management skills.</p>
-      <button class="secondary-btn">Explore Course →</button>
+    <button class="secondary-btn" data-job-course="business">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>📱 Digital Marketing</h3>
       <p>SEO, social media, content and online marketing.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="marketing">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🗣️ Communication Skills</h3>
       <p>Speaking, writing, presentation and workplace communication.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="communication">
+  Explore Course →
+</button>
+
     </article>
 
     <article class="community-card">
       <h3>👥 Leadership & Teamwork</h3>
       <p>Team collaboration, leadership and professional behaviour.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="leadership">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🎨 Graphic Design</h3>
       <p>Visual design, creative thinking and design tools.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="design">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🚀 Entrepreneurship</h3>
       <p>Startup fundamentals, business ideas and innovation.</p>
-      <button class="secondary-btn">Explore Course →</button>
+     <button class="secondary-btn" data-job-course="entrepreneurship">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>🧮 Aptitude & Logical Reasoning</h3>
       <p>Quantitative aptitude, reasoning and placement preparation.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="aptitude">
+  Explore Course →
+</button>
     </article>
 
     <article class="community-card">
       <h3>📈 Analytical & Problem-Solving Skills</h3>
       <p>Critical thinking, decision-making and analytical skills.</p>
-      <button class="secondary-btn">Explore Course →</button>
+      <button class="secondary-btn" data-job-course="analytical">
+  Explore Course →
+</button>
     </article>
 
   </div>
@@ -1367,26 +2219,43 @@
   <button class="secondary-btn" id="backFromCJobReady">
     ← Back
   </button>
-  <!-- COMMON JOB-READY COURSE LEARNING AREA -->
+  <!-- JOB-READY PRACTICE TEST AREA -->
 <div id="jobReadyCourseView" hidden>
 
   <h2 id="jobReadyCourseTitle"></h2>
 
   <p id="jobReadyCourseDescription"></p>
 
-  <h3>📚 Professional Learning Path – 10 Levels</h3>
-
-  <div id="jobReadyLevelsGrid" class="community-grid"></div>
-
-  <div id="jobReadyLevelContent" hidden>
-    <h3 id="jobReadyLevelTitle"></h3>
-    <div id="jobReadyLessons"></div>
-    <div id="jobReadyAssessment"></div>
+  <div id="jobReadyPracticeIntro">
+    <h3>📝 Practice Test</h3>
+    <p>10 Multiple Choice Questions</p>
+    <p>Total Marks: 10</p>
+    <button class="primary-btn" id="startJobReadyTestBtn">
+      Start Practice Test →
+    </button>
   </div>
 
-  <button class="secondary-btn" id="backToJobReadyLevels" hidden>
-    ← Back to Levels
-  </button>
+  <div id="jobReadyTestArea" hidden>
+    <div id="jobReadyQuestionProgress"></div>
+
+    <div id="jobReadyQuestionsContainer"></div>
+
+    <button class="primary-btn" id="submitJobReadyTestBtn">
+      Submit Test
+    </button>
+  </div>
+
+  <div id="jobReadyTestResult" hidden>
+    <h3>🎉 Practice Test Result</h3>
+    <p id="jobReadyTestScore"></p>
+    <p id="jobReadyTestPercentage"></p>
+
+    <div id="jobReadyAnswerReview"></div>
+
+    <button class="primary-btn" id="retakeJobReadyTestBtn">
+      Retake Test
+    </button>
+  </div>
 
   <button class="secondary-btn" id="backToJobReadyCourses">
     ← Back to All Courses
@@ -2014,6 +2883,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
