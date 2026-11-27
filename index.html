@@ -566,6 +566,13 @@
   Explore Jobs
 </button>
     </article>
+    <article class="community-card">
+  <h3>🚀 Startup Job Portal</h3>
+  <p>Explore jobs and internships posted directly by registered startups.</p>
+  <button class="primary-btn" id="exploreStudentOpportunitiesBtn">
+    Explore Startup Opportunities
+  </button>
+</article>
 
     <article class="community-card">
       <h3>🛠️ Required Skills</h3>
@@ -1212,11 +1219,234 @@
 
 </div>
 
-  <button class="secondary-btn" id="backToPlacementHub">
+<!-- STARTUP REGISTRATION -->
+<div class="community-card" id="startupRegistrationPanel" style="margin-top: 30px;">
+
+  <h2>🚀 Are You a Startup Founder?</h2>
+  <p>Register your company on QuizConnect and connect with talented students.</p>
+
+  <form id="startupCompanyForm">
+
+    <input
+      type="text"
+      id="startupCompanyName"
+      placeholder="Company / Startup Name"
+      required
+    >
+
+    <input
+      type="text"
+      id="startupIndustry"
+      placeholder="Industry (e.g. Technology, FinTech)"
+      required
+    >
+
+    <textarea
+      id="startupDescription"
+      placeholder="Describe your company"
+      rows="4"
+      required
+    ></textarea>
+
+    <input
+      type="url"
+      id="startupWebsite"
+      placeholder="Company Website (https://...)"
+    >
+
+    <input
+      type="text"
+      id="startupLocation"
+      placeholder="Company Location"
+      required
+    >
+
+    <button type="submit" class="primary-btn">
+      Register My Startup 🚀
+    </button>
+
+    <p id="startupCompanyMessage"></p>
+
+  </form>
+</div>
+<!-- STARTUP DASHBOARD -->
+<div class="community-card" id="startupDashboardSection" hidden
+     style="margin-top: 30px;">
+
+  <h2>🚀 Startup Recruitment Dashboard</h2>
+
+  <div id="startupDashboardCompanyInfo">
+    <h3 id="dashboardCompanyName"></h3>
+    <p id="dashboardCompanyIndustry"></p>
+    <p id="dashboardCompanyLocation"></p>
+  </div>
+
+  <hr>
+
+  <!-- POST JOB OR INTERNSHIP -->
+  <h3>📢 Post a Job or Internship</h3>
+
+  <form id="startupJobForm">
+
+    <input
+      type="text"
+      id="startupJobTitle"
+      placeholder="Job / Internship Title"
+      required
+    >
+
+    <select id="startupJobType" required>
+      <option value="">Select Opportunity Type</option>
+      <option value="Job">Full-time Job</option>
+      <option value="Internship">Internship</option>
+    </select>
+
+    <textarea
+      id="startupJobDescription"
+      placeholder="Describe the opportunity"
+      rows="4"
+      required
+    ></textarea>
+
+    <input
+      type="text"
+      id="startupJobLocation"
+      placeholder="Job Location"
+    >
+
+    <select id="startupJobWorkMode">
+      <option value="Not specified">Select Work Mode</option>
+      <option value="Remote">Remote</option>
+      <option value="On-site">On-site</option>
+      <option value="Hybrid">Hybrid</option>
+    </select>
+
+    <input
+      type="text"
+      id="startupJobSalary"
+      placeholder="Salary / Stipend"
+    >
+
+    <input
+      type="text"
+      id="startupJobSkills"
+      placeholder="Required Skills"
+    >
+
+    <label for="startupJobDeadline">Application Deadline</label>
+    <input
+      type="date"
+      id="startupJobDeadline"
+    >
+
+    <button type="submit" class="primary-btn">
+      Publish Opportunity 🚀
+    </button>
+
+    <p id="startupJobMessage"></p>
+
+  </form>
+
+  <hr>
+
+  <!-- POSTED OPPORTUNITIES -->
+  <h3>📋 Your Posted Opportunities</h3>
+  <div id="startupPostedJobs"></div>
+
+  <hr>
+
+  <!-- STUDENT APPLICATIONS -->
+  <h3>👨‍🎓 Student Applications</h3>
+  <div id="startupReceivedApplications"></div>
+
+</div>
+
+<button class="secondary-btn" id="backToPlacementHub">
+  ← Back to Placement Hub
+</button>
+   
+
+</section>
+<!-- ================================= -->
+<!-- STUDENT OPPORTUNITIES SECTION -->
+<!-- ================================= -->
+
+<section class="section" id="studentOpportunitiesSection" hidden>
+
+  <p class="eyebrow">BUILD YOUR CAREER</p>
+
+  <h2>🎓 Explore Jobs & Internships</h2>
+
+  <p>Discover opportunities posted by startups on QuizConnect.</p>
+
+  <div id="studentOpportunitiesContainer" class="community-grid">
+    <p>Loading opportunities...</p>
+  </div>
+  <!-- STUDENT APPLICATION FORM -->
+
+<div class="community-card" id="startupApplicationFormSection" hidden>
+
+  <h2>📝 Apply for Opportunity</h2>
+
+  <h3 id="applicationJobTitle"></h3>
+
+  <form id="startupStudentApplicationForm">
+
+    <label for="studentResume">Upload Resume (PDF only)</label>
+    <input
+      type="file"
+      id="studentResume"
+      accept=".pdf,application/pdf"
+      required
+    >
+
+    <label for="studentCoverLetter">Cover Letter</label>
+    <textarea
+      id="studentCoverLetter"
+      rows="5"
+      placeholder="Tell the company why you are suitable for this opportunity..."
+    ></textarea>
+
+    <button type="submit" class="primary-btn">
+      Submit Application 🚀
+    </button>
+
+    <button type="button" class="secondary-btn" id="cancelStartupApplication">
+      Cancel
+    </button>
+
+    <p id="startupApplicationMessage"></p>
+
+  </form>
+
+</div>
+<!-- MY APPLICATIONS TRACKER -->
+
+<div class="community-card" id="myStartupApplicationsSection"
+     style="margin-top: 30px;">
+
+  <h2>📋 My Applications</h2>
+
+  <p>Track the status of your job and internship applications.</p>
+
+  <button
+    type="button"
+    class="primary-btn"
+    id="loadMyStartupApplicationsBtn">
+    View My Applications
+  </button>
+
+  <div id="myStartupApplicationsContainer">
+    <p>Click above to view your applications.</p>
+  </div>
+
+</div>
+  <button class="secondary-btn" id="backToPlacementFromOpportunities">
     ← Back to Placement Hub
   </button>
 
 </section>
+
 <!-- INTERNSHIPS -->
 
 <section class="section" id="internshipsSection" hidden>

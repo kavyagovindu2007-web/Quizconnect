@@ -925,11 +925,77 @@ document.getElementById("placementHubBtn").addEventListener("click", () => {
   });
 
 });
-// Open Startup Companies
-document.getElementById("exploreCompaniesBtn").addEventListener("click", () => {
+// =====================================
+// STARTUP DASHBOARD LOADING
+// =====================================
+let selectedStartupJob = null;
+let currentStartupCompany = null;
+async function loadStartupDashboard() {
+
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const { data: company, error } = await supabaseClient
+    .from("startup_companies")
+    .select("*")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Dashboard loading error:", error);
+    alert("Unable to load your startup dashboard.");
+    return;
+  }
+
+  const registrationPanel =
+    document.getElementById("startupRegistrationPanel");
+
+  const dashboard =
+    document.getElementById("startupDashboardSection");
+
+  if (!company) {
+    registrationPanel.hidden = false;
+    dashboard.hidden = true;
+    return;
+  }
+// Store the currently registered startup
+currentStartupCompany = company;
+  // Display registered company details
+  document.getElementById("dashboardCompanyName").textContent =
+    company.company_name;
+
+  document.getElementById("dashboardCompanyIndustry").textContent =
+    "Industry: " + (company.industry || "Not specified");
+
+  document.getElementById("dashboardCompanyLocation").textContent =
+    "Location: " + (company.location || "Not specified");
+
+  // Show dashboard and hide registration form
+  registrationPanel.hidden = true;
+  dashboard.hidden = false;
+  await loadStartupJobs();
+await loadStartupApplications();
+  console.log("Startup dashboard loaded:", company);
+}
+
+
+// =====================================
+// OPEN STARTUP COMPANIES
+// =====================================
+
+document.getElementById("exploreCompaniesBtn").addEventListener("click", async () => {
 
   document.getElementById("placementHubSection").hidden = true;
   document.getElementById("startupCompaniesSection").hidden = false;
+
+  await loadStartupDashboard();
 
   document.getElementById("startupCompaniesSection").scrollIntoView({
     behavior: "smooth"
@@ -1013,6 +1079,554 @@ document.getElementById("backToPlacementHub").addEventListener("click", () => {
   });
 
 });
+// =====================================
+// STARTUP COMPANY REGISTRATION
+// =====================================
+
+document.getElementById("startupCompanyForm").addEventListener("submit", async (event) => {
+
+  event.preventDefault();
+
+  const message = document.getElementById("startupCompanyMessage");
+
+  message.textContent = "Registering your startup...";
+
+  // Get logged-in user
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    message.textContent = "Please log in before registering.";
+    return;
+  }
+
+  // Collect company details
+  const companyData = {
+    owner_id: user.id,
+    company_name: document.getElementById("startupCompanyName").value.trim(),
+    industry: document.getElementById("startupIndustry").value.trim(),
+    description: document.getElementById("startupDescription").value.trim(),
+    website: document.getElementById("startupWebsite").value.trim() || null,
+    location: document.getElementById("startupLocation").value.trim()
+  };
+
+  // Save to Supabase
+  const { data, error } = await supabaseClient
+    .from("startup_companies")
+    .insert([companyData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Startup registration error:", error);
+    message.textContent = "Registration failed: " + error.message;
+    return;
+  }
+
+  message.textContent = "🎉 Startup registered successfully!";
+
+  document.getElementById("startupCompanyForm").reset();
+
+  console.log("Registered startup:", data);
+
+});
+// =====================================
+// LOAD STARTUP JOBS
+// =====================================
+
+async function loadStartupJobs() {
+
+  if (!currentStartupCompany) return;
+
+  const container = document.getElementById("startupPostedJobs");
+  container.textContent = "Loading opportunities...";
+
+  const { data: jobs, error } = await supabaseClient
+    .from("startup_jobs")
+    .select("*")
+    .eq("company_id", currentStartupCompany.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Jobs loading error:", error);
+    container.textContent = "Unable to load opportunities.";
+    return;
+  }
+
+  container.replaceChildren();
+
+  if (!jobs || jobs.length === 0) {
+    container.textContent = "You haven't posted any opportunities yet.";
+    return;
+  }
+
+  jobs.forEach(job => {
+    const card = document.createElement("div");
+    card.className = "community-card";
+
+    const title = document.createElement("h3");
+    title.textContent = job.title;
+
+    const details = document.createElement("p");
+    details.textContent =
+      `${job.job_type} | ${job.location || "Location not specified"} | ${job.work_mode || "Not specified"}`;
+
+    const status = document.createElement("p");
+    status.textContent = "Status: " + job.status;
+
+    card.append(title, details, status);
+    container.appendChild(card);
+  });
+}
+
+// =====================================
+// LOAD STARTUP APPLICATIONS
+// =====================================
+
+async function loadStartupApplications() {
+
+  if (!currentStartupCompany) return;
+
+  const container = document.getElementById("startupReceivedApplications");
+
+  container.textContent = "Loading student applications...";
+
+  const { data: applications, error } = await supabaseClient
+    .from("startup_applications")
+       .select(`
+      id,
+      job_id,
+      student_id,
+      resume_path,
+      cover_letter,
+      status,
+      applied_at,
+      startup_jobs!inner (
+        title,
+        job_type,
+        company_id
+      )
+    `)
+    .eq("startup_jobs.company_id", currentStartupCompany.id)
+    .order("applied_at", { ascending: false });
+
+  if (error) {
+    console.error("Applications loading error:", error);
+    container.textContent = "Unable to load applications.";
+    return;
+  }
+
+  container.replaceChildren();
+
+  if (!applications || applications.length === 0) {
+    container.textContent = "No student applications received yet.";
+    return;
+  }
+
+  applications.forEach(application => {
+
+    const card = document.createElement("div");
+    card.className = "community-card";
+
+    const title = document.createElement("h3");
+    title.textContent =
+      application.startup_jobs?.title || "Opportunity";
+
+    const student = document.createElement("p");
+    student.textContent = "Student ID: " + application.student_id;
+
+    const type = document.createElement("p");
+    type.textContent =
+      "Type: " + (application.startup_jobs?.job_type || "Not specified");
+
+    const coverLetter = document.createElement("p");
+    coverLetter.textContent =
+      "Cover Letter: " + (application.cover_letter || "Not provided");
+
+    const status = document.createElement("p");
+   status.textContent = "Application Status: " + application.status;
+
+status.classList.add("application-status");
+
+status.classList.add(
+  "status-" + application.status.toLowerCase()
+);
+
+    card.append(title, student, type, coverLetter, status);
+
+    // Secure resume access
+    const resumeButton = document.createElement("button");
+    resumeButton.textContent = "View Resume 📄";
+    resumeButton.className = "primary-btn";
+
+    resumeButton.addEventListener("click", async () => {
+
+      const { data, error } = await supabaseClient.storage
+        .from("resumes")
+        .createSignedUrl(application.resume_path, 600);
+
+      if (error) {
+        alert("Unable to open resume: " + error.message);
+        return;
+      }
+
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    });
+
+    // Update application status
+    const statusSelect = document.createElement("select");
+
+    ["Applied", "Shortlisted", "Rejected", "Selected"].forEach(value => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      statusSelect.appendChild(option);
+    });
+
+    statusSelect.value = application.status;
+
+    const updateButton = document.createElement("button");
+    updateButton.textContent = "Update Status";
+    updateButton.className = "secondary-btn";
+
+    updateButton.addEventListener("click", async () => {
+
+      const { error } = await supabaseClient
+        .from("startup_applications")
+        .update({ status: statusSelect.value })
+        .eq("id", application.id);
+
+      if (error) {
+        console.error("Status update error:", error);
+        alert("Unable to update application status: " + error.message);
+        return;
+      }
+
+      alert("Application status updated successfully! 🎉");
+      await loadStartupApplications();
+    });
+
+    card.append(resumeButton, statusSelect, updateButton);
+    container.appendChild(card);
+
+  });
+}
+// =====================================
+// PUBLISH JOB OR INTERNSHIP
+// =====================================
+
+document.getElementById("startupJobForm").addEventListener("submit", async (event) => {
+
+  event.preventDefault();
+
+  const message = document.getElementById("startupJobMessage");
+
+  if (!currentStartupCompany) {
+    message.textContent = "Please open your startup dashboard first.";
+    return;
+  }
+
+  message.textContent = "Publishing opportunity...";
+
+  const jobData = {
+    company_id: currentStartupCompany.id,
+    title: document.getElementById("startupJobTitle").value.trim(),
+    description: document.getElementById("startupJobDescription").value.trim(),
+    job_type: document.getElementById("startupJobType").value,
+    location: document.getElementById("startupJobLocation").value.trim() || null,
+    work_mode: document.getElementById("startupJobWorkMode").value,
+    salary: document.getElementById("startupJobSalary").value.trim() || null,
+    skills_required: document.getElementById("startupJobSkills").value.trim() || null,
+    application_deadline: document.getElementById("startupJobDeadline").value || null,
+    status: "Open"
+  };
+
+  const { data, error } = await supabaseClient
+    .from("startup_jobs")
+    .insert([jobData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Job publishing error:", error);
+    message.textContent = "Publishing failed: " + error.message;
+    return;
+  }
+
+  message.textContent = "🎉 Opportunity published successfully!";
+  document.getElementById("startupJobForm").reset();
+
+  await loadStartupJobs();
+
+  console.log("Published opportunity:", data);
+});
+// =====================================
+// OPEN STUDENT APPLICATION FORM
+// =====================================
+
+function openStartupApplicationForm(job) {
+
+  selectedStartupJob = job;
+
+  document.getElementById("applicationJobTitle").textContent =
+    job.title;
+
+  document.getElementById("studentOpportunitiesContainer").hidden = true;
+
+  document.getElementById("startupApplicationFormSection").hidden = false;
+
+  document.getElementById("startupApplicationFormSection")
+    .scrollIntoView({ behavior: "smooth" });
+}
+
+
+// =====================================
+// CANCEL APPLICATION
+// =====================================
+
+document.getElementById("cancelStartupApplication")
+  .addEventListener("click", () => {
+
+    document.getElementById("startupApplicationFormSection").hidden = true;
+
+    document.getElementById("studentOpportunitiesContainer").hidden = false;
+
+    document.getElementById("startupStudentApplicationForm").reset();
+
+    selectedStartupJob = null;
+  });
+  // =====================================
+// SUBMIT STUDENT APPLICATION
+// =====================================
+
+document.getElementById("startupStudentApplicationForm")
+  .addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const message = document.getElementById("startupApplicationMessage");
+    const resumeFile = document.getElementById("studentResume").files[0];
+
+    if (!selectedStartupJob) {
+      message.textContent = "Please select an opportunity first.";
+      return;
+    }
+
+    if (!resumeFile) {
+      message.textContent = "Please upload your PDF resume.";
+      return;
+    }
+
+    // Validate PDF filename and size (maximum 5 MB)
+    if (!resumeFile.name.toLowerCase().endsWith(".pdf") ||
+        resumeFile.size > 5 * 1024 * 1024 ||
+        resumeFile.size === 0) {
+
+      message.textContent = "Please upload a valid PDF under 5 MB.";
+      return;
+    }
+
+    // Check PDF file signature
+    const header = await resumeFile.slice(0, 5).text();
+
+    if (header !== "%PDF-") {
+      message.textContent = "The uploaded file is not a valid PDF.";
+      return;
+    }
+
+    const { data: { user }, error: userError } =
+      await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      message.textContent = "Please log in before applying.";
+      return;
+    }
+
+    message.textContent = "Uploading resume and submitting application...";
+
+    const filePath =
+      `${user.id}/${selectedStartupJob.id}/${crypto.randomUUID()}.pdf`;
+
+    // Upload resume to private storage
+    const { error: uploadError } = await supabaseClient.storage
+      .from("resumes")
+      .upload(filePath, resumeFile, {
+        contentType: "application/pdf",
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error("Resume upload error:", uploadError);
+      message.textContent = "Resume upload failed: " + uploadError.message;
+      return;
+    }
+
+    const applicationData = {
+      job_id: selectedStartupJob.id,
+      student_id: user.id,
+      resume_path: filePath,
+      cover_letter: document.getElementById("studentCoverLetter").value.trim() || null,
+      status: "Applied"
+    };
+
+    // Save application in Supabase
+    const { error: applicationError } = await supabaseClient
+      .from("startup_applications")
+      .insert([applicationData]);
+
+    if (applicationError) {
+
+      console.error("Application submission error:", applicationError);
+
+      // Remove uploaded resume if application saving fails
+      await supabaseClient.storage
+        .from("resumes")
+        .remove([filePath]);
+
+      if (applicationError.code === "23505") {
+        message.textContent = "You have already applied for this opportunity.";
+      } else {
+        message.textContent =
+          "Application submission failed: " + applicationError.message;
+      }
+
+      return;
+    }
+
+    message.textContent = "🎉 Application submitted successfully!";
+
+    document.getElementById("startupStudentApplicationForm").reset();
+
+    selectedStartupJob = null;
+
+  });
+// =====================================
+// STUDENT OPPORTUNITIES
+// =====================================
+
+async function loadStudentOpportunities() {
+
+  const container = document.getElementById("studentOpportunitiesContainer");
+
+  container.textContent = "Loading opportunities...";
+
+  const { data: jobs, error } = await supabaseClient
+    .from("startup_jobs")
+    .select(`
+      id,
+      title,
+      description,
+      job_type,
+      location,
+      work_mode,
+      salary,
+      skills_required,
+      application_deadline,
+      status,
+      company_id,
+      startup_companies(company_name, industry)
+    `)
+    .eq("status", "Open")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Student opportunities error:", error);
+    container.textContent = "Unable to load opportunities.";
+    return;
+  }
+
+  container.replaceChildren();
+
+  if (!jobs || jobs.length === 0) {
+    container.textContent = "No opportunities available right now.";
+    return;
+  }
+
+  jobs.forEach(job => {
+
+    const card = document.createElement("article");
+    card.className = "community-card";
+
+    const title = document.createElement("h3");
+    title.textContent = job.title;
+
+    const company = document.createElement("p");
+    company.textContent =
+      "Company: " + (job.startup_companies?.company_name || "Startup");
+
+    const type = document.createElement("p");
+    type.textContent = "Type: " + job.job_type;
+
+    const location = document.createElement("p");
+    location.textContent = "Location: " + (job.location || "Not specified");
+
+    const mode = document.createElement("p");
+    mode.textContent = "Work Mode: " + (job.work_mode || "Not specified");
+
+    const description = document.createElement("p");
+    description.textContent = job.description;
+
+    const skills = document.createElement("p");
+    skills.textContent =
+      "Required Skills: " + (job.skills_required || "Not specified");
+
+    const salary = document.createElement("p");
+    salary.textContent =
+      "Salary / Stipend: " + (job.salary || "Not specified");
+// APPLY NOW BUTTON
+const applyButton = document.createElement("button");
+
+applyButton.type = "button";
+applyButton.textContent = "Apply Now 🚀";
+applyButton.className = "primary-btn";
+
+applyButton.addEventListener("click", () => {
+  openStartupApplicationForm(job);
+});
+
+card.append(
+  title, company, type, location,
+  mode, description, skills, salary,
+  applyButton
+);
+
+container.appendChild(card);
+  });
+}
+
+
+// =====================================
+// OPEN STUDENT OPPORTUNITIES
+// =====================================
+
+document.getElementById("exploreStudentOpportunitiesBtn")
+  .addEventListener("click", async () => {
+
+    document.getElementById("placementHubSection").hidden = true;
+
+    document.getElementById("studentOpportunitiesSection").hidden = false;
+
+    await loadStudentOpportunities();
+
+    document.getElementById("studentOpportunitiesSection")
+      .scrollIntoView({ behavior: "smooth" });
+  });
+
+
+// =====================================
+// BACK TO PLACEMENT HUB
+// =====================================
+
+document.getElementById("backToPlacementFromOpportunities")
+  .addEventListener("click", () => {
+
+    document.getElementById("studentOpportunitiesSection").hidden = true;
+
+    document.getElementById("placementHubSection").hidden = false;
+
+    document.getElementById("placementHubSection")
+      .scrollIntoView({ behavior: "smooth" });
+  });
 // Open Online Examination
 document.getElementById("examinationBtn").addEventListener("click", () => {
 
@@ -17996,3 +18610,86 @@ if (authError || !user) {
   `;
 
 }
+// ==========================================
+// STUDENT: MY APPLICATIONS TRACKER
+// ==========================================
+
+async function loadMyStartupApplications() {
+  const container = document.getElementById("myStartupApplicationsContainer");
+
+  container.textContent = "Loading your applications...";
+
+  try {
+    const { data: { user }, error: authError } =
+      await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+      container.textContent = "Please log in to view your applications.";
+      return;
+    }
+
+    const { data: applications, error } = await supabaseClient
+      .from("startup_applications")
+      .select(`
+        id,
+        status,
+        applied_at,
+        startup_jobs!inner (
+          title,
+          job_type,
+          startup_companies (
+            company_name
+          )
+        )
+      `)
+      .eq("student_id", user.id)
+      .order("applied_at", { ascending: false });
+
+    if (error) throw error;
+
+    container.replaceChildren();
+
+    if (!applications || applications.length === 0) {
+      container.textContent = "You haven't applied for any opportunities yet.";
+      return;
+    }
+
+    applications.forEach(application => {
+      const job = application.startup_jobs;
+      const company = job?.startup_companies;
+
+      const card = document.createElement("div");
+      card.className = "community-card";
+      card.style.marginTop = "15px";
+
+      const title = document.createElement("h3");
+      title.textContent = job?.title || "Opportunity";
+
+      const companyName = document.createElement("p");
+      companyName.textContent =
+        "Company: " + (company?.company_name || "Not available");
+
+      const jobType = document.createElement("p");
+      jobType.textContent = "Type: " + (job?.job_type || "Not specified");
+
+      const appliedDate = document.createElement("p");
+      appliedDate.textContent =
+        "Applied on: " + new Date(application.applied_at).toLocaleDateString("en-IN");
+
+      const status = document.createElement("p");
+      status.textContent = "Application Status: " + application.status;
+
+      card.append(title, companyName, jobType, appliedDate, status);
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Error loading student applications:", error);
+    container.textContent = "Unable to load applications. Please try again.";
+  }
+}
+
+// View My Applications button
+document
+  .getElementById("loadMyStartupApplicationsBtn")
+  ?.addEventListener("click", loadMyStartupApplications);
