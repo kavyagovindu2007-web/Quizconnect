@@ -1243,17 +1243,9 @@ async function loadStartupApplications() {
     coverLetter.textContent =
       "Cover Letter: " + (application.cover_letter || "Not provided");
 
-    const status = document.createElement("p");
-   status.textContent = "Application Status: " + application.status;
-
-status.classList.add("application-status");
-
-status.classList.add(
-  "status-" + application.status.toLowerCase()
-);
-
-    card.append(title, student, type, coverLetter, status);
-
+ const status = document.createElement("p");
+status.textContent = "Status: " + application.status;
+card.append(title, student, type, coverLetter, status);
     // Secure resume access
     const resumeButton = document.createElement("button");
     resumeButton.textContent = "View Resume 📄";
@@ -18676,8 +18668,30 @@ async function loadMyStartupApplications() {
       appliedDate.textContent =
         "Applied on: " + new Date(application.applied_at).toLocaleDateString("en-IN");
 
-      const status = document.createElement("p");
-      status.textContent = "Application Status: " + application.status;
+     const status = document.createElement("span");
+
+status.textContent = application.status;
+
+status.style.display = "inline-block";
+status.style.padding = "8px 18px";
+status.style.borderRadius = "25px";
+status.style.fontWeight = "700";
+status.style.fontSize = "14px";
+status.style.marginTop = "10px";
+
+const applicationBadgeColors = {
+  Applied: ["#e5e7eb", "#374151"],
+  Shortlisted: ["#dbeafe", "#1d4ed8"],
+  Rejected: ["#fee2e2", "#b91c1c"],
+  Selected: ["#dcfce7", "#15803d"]
+};
+
+const badgeColors =
+  applicationBadgeColors[application.status] ||
+  applicationBadgeColors.Applied;
+
+status.style.backgroundColor = badgeColors[0];
+status.style.color = badgeColors[1];
 
       card.append(title, companyName, jobType, appliedDate, status);
       container.appendChild(card);
