@@ -6361,15 +6361,15 @@ async function loadPersonalizedRecommendations() {
   }
 }
 // =====================================
-// PERFORMANCE ANALYTICS DASHBOARD
+// ADVANCED PERFORMANCE ANALYTICS
 // =====================================
 
 async function loadPerformanceAnalytics() {
 
-  const { data: { user } } =
+  const { data: { user }, error: userError } =
     await supabaseClient.auth.getUser();
 
-  if (!user) return;
+  if (userError || !user) return;
 
   const { data, error } = await supabaseClient
     .from("quiz_results")
@@ -6383,98 +6383,209 @@ async function loadPerformanceAnalytics() {
 
   const results = data || [];
 
-  // Separate quizzes and examinations
+  // SEPARATE QUIZZES AND EXAMINATIONS
+
   const examinations = results.filter(result =>
-    result.quiz_name.toLowerCase().includes("examination")
+    String(result.quiz_name || "")
+      .toLowerCase()
+      .includes("examination")
   );
 
   const quizzes = results.filter(result =>
-    !result.quiz_name.toLowerCase().includes("examination")
+    !String(result.quiz_name || "")
+      .toLowerCase()
+      .includes("examination")
   );
 
-  // Total counts
   document.getElementById("analyticsTotalQuizzes").textContent =
     quizzes.length;
 
   document.getElementById("analyticsTotalExams").textContent =
     examinations.length;
 
-  // Overall average percentage
-const averageScore = results.length
-  ? results.reduce((sum, result) =>
-      sum + Number(result.percentage || 0), 0) / results.length
-  : 0;
+  // OVERALL AVERAGE SCORE
 
-document.getElementById("analyticsAverageScore").textContent =
-  Math.round(averageScore) + "%";
+  const averageScore = results.length
+    ? results.reduce((sum, result) =>
+        sum + Number(result.percentage || 0), 0) / results.length
+    : 0;
 
-// Subject-wise performance
-const subjectScores = {};
+  document.getElementById("analyticsAverageScore").textContent =
+    Math.round(averageScore) + "%";
 
-results.forEach(result => {
+  // SUBJECT-WISE PERFORMANCE
 
-  let subject = result.quiz_name
-    .replace(/\s*Learning Path\s*-\s*Level\s*\d+/i, "")
-    .replace(/\s*Examination$/i, "")
-    .replace(/\s*Basics$/i, "")
-    .trim();
+  const subjectScores = {};
 
-  const subjectNames = {
-    "Python Programming": "Python",
-    "C": "C Programming"
-  };
+  results.forEach(result => {
 
-  subject = subjectNames[subject] || subject;
+    let subject = String(result.quiz_name || "Other")
+      .replace(/\s*Learning Path\s*-\s*Level\s*\d+/i, "")
+      .replace(/\s*Examination$/i, "")
+      .replace(/\s*Basics$/i, "")
+      .trim();
 
-  if (!subjectScores[subject]) {
-    subjectScores[subject] = [];
-  }
+    const subjectNames = {
+      "Python Programming": "Python",
+      "C": "C Programming"
+    };
 
-  subjectScores[subject].push(
-    Number(result.percentage || 0)
-  );
+    subject = subjectNames[subject] || subject;
 
-});
+    if (!subjectScores[subject]) {
+      subjectScores[subject] = {
+        total: 0,
+        attempts: 0
+      };
+    }
 
-let bestSubject = "--";
-let highestAverage = -1;
+    subjectScores[subject].total +=
+      Number(result.percentage || 0);
 
-const subjectContainer =
-  document.getElementById("subjectPerformanceContainer");
+    subjectScores[subject].attempts++;
+
+  });
+
+  const subjectContainer =
+    document.getElementById("subjectPerformanceContainer");
+
+if (!subjectContainer) {
+    console.error("Subject Performance container not found in HTML!");
+    return;
+}
 
 subjectContainer.innerHTML = "";
 
-Object.entries(subjectScores).forEach(([subject, scores]) => {
+  const subjectStats = Object.entries(subjectScores)
+    .map(([subject, stats]) => ({
+      subject,
+      attempts: stats.attempts,
+      average: stats.total / stats.attempts
+    }))
+    .sort((a, b) => b.average - a.average);
 
-  const average =
-    scores.reduce((sum, value) => sum + value, 0) / scores.length;
+  // BEST AND WEAKEST SUBJECT
 
-  if (average > highestAverage) {
-    highestAverage = average;
-    bestSubject = subject;
+  let bestSubject = "--";
+  let weakestSubject = "--";
+
+  if (subjectStats.length > 0) {
+
+    bestSubject = subjectStats[0].subject;
+
+    weakestSubject =
+      subjectStats[subjectStats.length - 1].subject;
+
   }
 
-  const subjectCard = document.createElement("div");
-  subjectCard.className = "history-item";
+  document.getElementById("analyticsBestSubject").textContent =
+    bestSubject;
 
-  subjectCard.innerHTML = `
-    <h4>${subject}</h4>
-    <p>Attempts: ${scores.length}</p>
-    <p>Average Score: ${Math.round(average)}%</p>
-  `;
+  // DISPLAY SUBJECT PERFORMANCE CHARTS
 
-  subjectContainer.appendChild(subjectCard);
+  subjectStats.forEach(item => {
 
-});
+    const card = document.createElement("div");
+    card.className = "history-item";
 
-document.getElementById("analyticsBestSubject").textContent =
-  bestSubject;
+    const heading = document.createElement("h3");
+    heading.textContent = item.subject;
+
+    const attempts = document.createElement("p");
+    attempts.textContent =
+      `Total Attempts: ${item.attempts}`;
+
+    const percentage = document.createElement("p");
+    percentage.textContent =
+      `Average Performance: ${Math.round(item.average)}%`;
+
+    const progressBar = document.createElement("div");
+
+    progressBar.style.width = "100%";
+    progressBar.style.height = "14px";
+    progressBar.style.background = "#e5e7eb";
+    progressBar.style.borderRadius = "20px";
+    progressBar.style.overflow = "hidden";
+    progressBar.style.marginTop = "10px";
+
+    const progress = document.createElement("div");
+
+    progress.style.width =
+      Math.max(0, Math.min(100, item.average)) + "%";
+
+    progress.style.height = "100%";
+    progress.style.background =
+      item.average >= 75 ? "#16a34a" :
+      item.average >= 50 ? "#eab308" :
+      "#ef4444";
+
+    progress.style.borderRadius = "20px";
+
+    progressBar.appendChild(progress);
+
+    card.append(
+      heading,
+      attempts,
+      percentage,
+      progressBar
+    );
+
+    subjectContainer.appendChild(card);
+
+  });
+
+  // PERSONALIZED LEARNING INSIGHTS
+
+  const insightCard = document.createElement("div");
+  insightCard.className = "history-item";
+
+  const insightHeading = document.createElement("h3");
+  insightHeading.textContent = "💡 Your Learning Insights";
+
+  const bestInsight = document.createElement("p");
+  bestInsight.textContent = subjectStats.length
+    ? `🏆 Your strongest subject is ${bestSubject} with an average of ${Math.round(subjectStats[0].average)}%.`
+    : "Complete some quizzes to discover your strongest subject.";
+
+  const weakestInsight = document.createElement("p");
+
+  weakestInsight.textContent = subjectStats.length
+    ? `📚 ${weakestSubject} is your lowest-performing subject. Give it some extra practice.`
+    : "Your improvement recommendations will appear here.";
+
+  const recommendation = document.createElement("p");
+
+  if (subjectStats.length) {
+
+    const weakestAverage =
+      subjectStats[subjectStats.length - 1].average;
+
+    recommendation.textContent =
+      weakestAverage < 50
+        ? "🎯 Recommendation: Revise the fundamentals and practise beginner-level questions."
+        : weakestAverage < 75
+        ? "🎯 Recommendation: Practise more questions to improve your accuracy."
+        : "🌟 Excellent progress! Challenge yourself with advanced questions.";
+
+  }
+
+  insightCard.append(
+    insightHeading,
+    bestInsight,
+    weakestInsight,
+    recommendation
+  );
+
+  subjectContainer.appendChild(insightCard);
 
 }
 
-loadPerformanceAnalytics();
-
-
+// Load analytics after the HTML is ready
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadPerformanceAnalytics);
+} else {
+    loadPerformanceAnalytics();
+}
 // Load total quizzes attended from Supabase
 async function loadTotalQuizzes() {
   const { data: { user } } = await supabaseClient.auth.getUser();

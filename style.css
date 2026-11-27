@@ -1439,3 +1439,69 @@ footer {
   background: #dcfce7;
   color: #15803d;
 }
+/* PERFORMANCE ANALYTICS CARDS */
+
+.analytics-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    width: 100%;
+    margin: 30px 0;
+}
+
+.analytics-summary-grid .analytics-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 25px 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    min-width: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.analytics-summary-grid .analytics-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.analytics-summary-grid .analytics-card h3 {
+    font-size: 15px;
+    color: #64748b;
+    margin-bottom: 15px;
+}
+
+.analytics-summary-grid .analytics-card h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #2563eb;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    .analytics-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+    .analytics-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.analytics-summary-grid .analytics-card h3 {
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+    text-align: center;
+    max-width: 100%;
+}
+
+.analytics-summary-grid .analytics-card {
+    box-sizing: border-box;
+    min-width: 0;
+    overflow: hidden;
+}
